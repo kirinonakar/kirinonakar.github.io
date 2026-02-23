@@ -1,51 +1,85 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Pages Test Page</title>
-    <meta name="description" content="GitHub Pages 테스트를 위한 멋진 웹사이트입니다.">
+    <title>kirinonakar의 작업실</title>
+    <meta name="description" content="kirinonakar의 작업실">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@500;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="background-gradient"></div>
-    
+
     <main class="container">
         <header class="hero" id="home">
-            <h1 class="glow-text">GitHub Pages</h1>
-            <p class="subtitle">이것은 테스트 웹 페이지입니다. 프리미엄 디자인과 함께 완벽하게 동작합니다.</p>
+            <h1 class="glow-text">kirinonakar의 작업실</h1>
+            <p class="subtitle">C#, Kotlin, Rust 등 다양한 언어로 실용적인 도구를 만드는 개발자의 공간입니다. 일상의 불편함을 코드로 해결하는 즐거움을 기록합니다.</p>
             <div class="cta-group">
-                <a href="#" class="btn btn-primary" id="btn-explore">둘러보기</a>
-                <a href="https://github.com" class="btn btn-secondary" target="_blank">GitHub 바로가기</a>
+                <a href="#" class="btn btn-primary" id="btn-explore">프로젝트 보기</a>
+                <a href="https://github.com/kirinonakar" class="btn btn-secondary" target="_blank">GitHub 프로필</a>
             </div>
         </header>
 
-        <section class="features" id="features">
-            <div class="card" id="card-1">
-                <div class="icon">✨</div>
-                <h3>모던 디자인</h3>
-                <p>유리질감(Glassmorphism)과 부드러운 그래디언트를 사용했습니다.</p>
-            </div>
-            <div class="card" id="card-2">
-                <div class="icon">🚀</div>
-                <h3>빠른 속도</h3>
-                <p>경량화된 코드로 최적의 성능을 발휘합니다.</p>
-            </div>
-            <div class="card" id="card-3">
-                <div class="icon">📱</div>
-                <h3>반응형 웹</h3>
-                <p>어떤 기기에서도 아름답게 보여집니다.</p>
+        <section class="repos" id="repos">
+            <h2 class="section-title">Featured Repositories</h2>
+            <div class="repo-grid">
+                <a href="https://github.com/kirinonakar/Uviewer" class="repo-card" target="_blank">
+                    <div class="repo-header">
+                        <span class="repo-lang">C#</span>
+                    </div>
+                    <h3>Uviewer</h3>
+                    <p>이미지 및 텍스트를 위한 강력한 데스크톱 뷰어 프로그램입니다.</p>
+                </a>
+                <a href="https://github.com/kirinonakar/Uviewer_android" class="repo-card" target="_blank">
+                    <div class="repo-header">
+                        <span class="repo-lang">Kotlin</span>
+                    </div>
+                    <h3>Uviewer Android</h3>
+                    <p>Uviewer의 모바일 버전으로, 안드로이드 최적화 뷰어 경험을 제공합니다.</p>
+                </a>
+                <a href="https://github.com/kirinonakar/rust_bmp" class="repo-card" target="_blank">
+                    <div class="repo-header">
+                        <span class="repo-lang">Rust</span>
+                    </div>
+                    <h3>rust_bmp</h3>
+                    <p>삼국지 시리즈 신무장용 알파 채널 BMP 자동 생성 도구입니다.</p>
+                </a>
+                <a href="https://github.com/kirinonakar/python_llm_translator" class="repo-card" target="_blank">
+                    <div class="repo-header">
+                        <span class="repo-lang">Python</span>
+                    </div>
+                    <h3>LLM Translator</h3>
+                    <p>LLM 인공지능을 활용한 지능형 파이썬 번역 유틸리티입니다.</p>
+                </a>
+                <a href="https://github.com/kirinonakar/EncodingConverter" class="repo-card" target="_blank">
+                    <div class="repo-header">
+                        <span class="repo-lang">C#</span>
+                    </div>
+                    <h3>Encoding Converter</h3>
+                    <p>다양한 텍스트 파일의 인코딩을 자동으로 인식하여 UTF-8로 변환해주는 유틸리티입니다.</p>
+                </a>
+                <a href="https://github.com/kirinonakar/JasoFixer" class="repo-card" target="_blank">
+                    <div class="repo-header">
+                        <span class="repo-lang">C#</span>
+                    </div>
+                    <h3>JasoFixer</h3>
+                    <p>맥(Mac)에서 윈도우(Windows)로 파일을 옮겼을 때 한글 파일명이 자소가 분리되는 현상을 해결해주는 유틸리티입니다.</p>
+                </a>
             </div>
         </section>
 
         <footer class="footer">
-            <p>&copy; 2026 GitHub Pages Test. All rights reserved.</p>
+            <p>&copy; 2026 kirinonakar. All rights reserved.</p>
         </footer>
     </main>
 
     <script src="script.js"></script>
 </body>
+
 </html>
