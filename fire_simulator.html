@@ -197,7 +197,13 @@
                                             </div>
                                             <div>
                                                 <label className="text-xs font-bold text-slate-400 block mb-1">현재 총 자산: {formatKRW(initialAssets/10000)}</label>
-                                                <input type="range" min="0" max="100000" step="500" value={initialAssets/10000} onChange={(e)=>setInitialAssets(Number(e.target.value)*10000)} className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                                                {/* 자산 최대치를 30억(300,000만 원)으로 변경 */}
+                                                <input type="range" min="0" max="300000" step="1000" value={initialAssets/10000} onChange={(e)=>setInitialAssets(Number(e.target.value)*10000)} className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                                                <div className="flex justify-between mt-1 px-1">
+                                                    <span className="text-[10px] text-slate-400">0원</span>
+                                                    <span className="text-[10px] text-slate-400">15억</span>
+                                                    <span className="text-[10px] text-slate-400">30억</span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -274,7 +280,7 @@
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm text-center">
-                                        <p className="text-xs font-bold text-slate-400 uppercase mb-1">은퇴 시점 자산 (Peak)</p>
+                                        <p className="text-xs font-bold text-slate-400 uppercase mb-1">은퇴 시점 자산</p>
                                         <p className="text-xl font-bold text-indigo-600">{formatKRW(retireBalance)}</p>
                                     </div>
                                     <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm text-center">
