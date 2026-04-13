@@ -53,6 +53,12 @@ body {
     animation: fadeInDown 1s ease-out;
 }
 
+.title-link {
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
 .glow-text {
     font-family: var(--font-heading);
     font-size: 5rem;

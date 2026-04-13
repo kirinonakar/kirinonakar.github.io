@@ -10,7 +10,9 @@
     <link rel="shortcut icon" href="git_profile.ico" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
 
     <style>
         :root {
@@ -37,9 +39,17 @@
             --font-mono: 'DM Mono', monospace;
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             background: var(--bg);
@@ -72,7 +82,9 @@
         /* ── NAV ── */
         nav {
             position: fixed;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
             border-bottom: 1px solid var(--border);
             background: rgba(12, 12, 11, 0.85);
@@ -110,7 +122,9 @@
             transition: color 0.2s;
         }
 
-        .nav-links a:hover { color: var(--text); }
+        .nav-links a:hover {
+            color: var(--text);
+        }
 
         /* ── HERO ── */
         .hero {
@@ -148,7 +162,9 @@
             margin-bottom: 24px;
         }
 
-        .hero h1 .accent { color: var(--accent); }
+        .hero h1 .accent {
+            color: var(--accent);
+        }
 
         .hero-sub {
             font-size: 16px;
@@ -175,12 +191,35 @@
             background: var(--bg-2);
         }
 
-        .lang-tag.rust   { border-color: var(--rust);   color: var(--rust); }
-        .lang-tag.kotlin { border-color: var(--kotlin); color: var(--kotlin); }
-        .lang-tag.csharp { border-color: var(--csharp); color: var(--csharp); }
-        .lang-tag.python { border-color: var(--python); color: var(--python); }
-        .lang-tag.cpp    { border-color: var(--cpp);    color: var(--cpp); }
-        .lang-tag.react  { border-color: var(--react);  color: var(--react); }
+        .lang-tag.rust {
+            border-color: var(--rust);
+            color: var(--rust);
+        }
+
+        .lang-tag.kotlin {
+            border-color: var(--kotlin);
+            color: var(--kotlin);
+        }
+
+        .lang-tag.csharp {
+            border-color: var(--csharp);
+            color: var(--csharp);
+        }
+
+        .lang-tag.python {
+            border-color: var(--python);
+            color: var(--python);
+        }
+
+        .lang-tag.cpp {
+            border-color: var(--cpp);
+            color: var(--cpp);
+        }
+
+        .lang-tag.react {
+            border-color: var(--react);
+            color: var(--react);
+        }
 
         .cta-group {
             display: flex;
@@ -203,14 +242,22 @@
             background: var(--accent);
             color: #0c0c0b;
         }
-        .btn-primary:hover { background: #e0b84e; transform: translateY(-1px); }
+
+        .btn-primary:hover {
+            background: #e0b84e;
+            transform: translateY(-1px);
+        }
 
         .btn-secondary {
             border: 1px solid var(--border-light);
             color: var(--text-muted);
             background: transparent;
         }
-        .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text);
+        }
 
         /* ── ABOUT ── */
         .about {
@@ -311,7 +358,9 @@
             transition: border-color 0.2s;
         }
 
-        .flagship-card:hover { border-color: var(--accent-dim); }
+        .flagship-card:hover {
+            border-color: var(--accent-dim);
+        }
 
         .flagship-inner {
             padding: 36px 40px;
@@ -427,7 +476,9 @@
             margin-top: 8px;
         }
 
-        .flagship-link:hover { text-decoration: underline; }
+        .flagship-link:hover {
+            text-decoration: underline;
+        }
 
         .flagship-divider {
             border: none;
@@ -479,15 +530,23 @@
         .app-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 2px;
             background: linear-gradient(90deg, var(--accent), transparent);
             opacity: 0;
             transition: opacity 0.2s;
         }
 
-        .app-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
-        .app-card:hover::before { opacity: 1; }
+        .app-card:hover {
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+        }
+
+        .app-card:hover::before {
+            opacity: 1;
+        }
 
         .app-card-header {
             display: flex;
@@ -578,7 +637,9 @@
             transition: border-color 0.2s;
         }
 
-        .repo-card:hover { border-color: var(--border-light); }
+        .repo-card:hover {
+            border-color: var(--border-light);
+        }
 
         .repo-header {
             display: flex;
@@ -593,12 +654,30 @@
             border-radius: 50%;
             display: inline-block;
         }
-        .dot-rust   { background: var(--rust); }
-        .dot-kotlin { background: var(--kotlin); }
-        .dot-csharp { background: var(--csharp); }
-        .dot-python { background: var(--python); }
-        .dot-cpp    { background: var(--cpp); }
-        .dot-react  { background: var(--react); }
+
+        .dot-rust {
+            background: var(--rust);
+        }
+
+        .dot-kotlin {
+            background: var(--kotlin);
+        }
+
+        .dot-csharp {
+            background: var(--csharp);
+        }
+
+        .dot-python {
+            background: var(--python);
+        }
+
+        .dot-cpp {
+            background: var(--cpp);
+        }
+
+        .dot-react {
+            background: var(--react);
+        }
 
         .repo-lang-label {
             font-family: var(--font-mono);
@@ -685,20 +764,52 @@
 
         /* ── RESPONSIVE ── */
         @media (max-width: 720px) {
-            .about-grid { grid-template-columns: 1fr; gap: 32px; }
-            .about-stats { flex-direction: row; }
-            .app-grid { grid-template-columns: 1fr; }
-            .repo-grid { grid-template-columns: 1fr 1fr; }
-            .flagship-inner { grid-template-columns: 1fr; }
-            .flagship-side { text-align: left; }
-            .flagship-link { justify-content: flex-start; }
-            nav .nav-links { display: none; }
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .about-stats {
+                flex-direction: row;
+            }
+
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .repo-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .flagship-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .flagship-side {
+                text-align: left;
+            }
+
+            .flagship-link {
+                justify-content: flex-start;
+            }
+
+            nav .nav-links {
+                display: none;
+            }
         }
 
         @media (max-width: 480px) {
-            .repo-grid { grid-template-columns: 1fr; }
-            .flagship-inner { padding: 24px; }
-            .contact-inner { padding: 32px 24px; }
+            .repo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flagship-inner {
+                padding: 24px;
+            }
+
+            .contact-inner {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
@@ -780,13 +891,14 @@
             <h2 class="section-title">주요 프로젝트</h2>
 
             <!-- Uviewer Desktop -->
-            <a href="https://github.com/kirinonakar/Uviewer" class="flagship-card" target="_blank" style="margin-bottom: 16px; display: block;">
+            <a href="https://github.com/kirinonakar/Uviewer" class="flagship-card" target="_blank"
+                style="margin-bottom: 16px; display: block;">
                 <div class="flagship-inner">
                     <div>
                         <div class="flagship-badge">★ Flagship</div>
                         <h3 class="flagship-title">Uviewer</h3>
                         <p class="flagship-desc">
-                            이미지·PDF·텍스트(소설 포함)를 하나의 앱에서 처리하는 WinUI 3 데스크톱 뷰어.
+                            이미지·PDF·EPUB·텍스트(소설 포함)를 하나의 앱에서 처리하는 WinUI 3 데스크톱 뷰어.
                             Win2D 캔버스 렌더링을 기반으로 커스텀 페이지네이션과 스크롤 엔진을 직접 구현했습니다.
                         </p>
                         <div class="flagship-tech">
@@ -798,9 +910,9 @@
                             <span class="tech-pill">세마포어 기반 프리로드</span>
                         </div>
                         <ul class="flagship-points">
-                            <li>세마포어를 current-page / background 두 티어로 분리해 PDF 스크롤 성능 최적화</li>
-                            <li>수평 페이지 모드(아오조라)와 세로쓰기 모드 각각의 스크롤 물리 구현</li>
-                            <li>마우스 휠 스로틀링 및 방향 반전 버그 수정 포함</li>
+                            <li>가상화 기술 구현으로 대용량 텍스트 파일도 끊김없이 쾌적하게</li>
+                            <li>Directwrite로 Aozora 가로쓰기 및 세로쓰기 렌더링 구현</li>
+                            <li>이미지 캐싱 최적화 및 빠른 탐색 기능으로 쾌적한 뷰어 경험 제공</li>
                         </ul>
                     </div>
                     <div class="flagship-side">
@@ -1023,7 +1135,7 @@
     <script>
         // Smooth scroll for nav links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
+            anchor.addEventListener('click', function (e) {
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
                     e.preventDefault();
@@ -1048,4 +1160,5 @@
     </script>
 
 </body>
+
 </html>
