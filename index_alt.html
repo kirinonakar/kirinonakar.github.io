@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kirinonakar의 작업실</title>
+    <meta name="description" content="C#, Kotlin, Rust, Python으로 실용적인 도구를 만드는 개발자 kirinonakar의 포트폴리오">
+    <link rel="icon" href="git_profile.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="git_profile.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0c0c0b;
+            --bg-2: #141412;
+            --bg-3: #1c1c19;
+            --border: #2a2a26;
+            --border-light: #333330;
+            --text: #e8e6df;
+            --text-muted: #8a8880;
+            --text-faint: #555550;
+            --accent: #d4a843;
+            --accent-dim: #8a6e2a;
+            --accent-glow: rgba(212, 168, 67, 0.15);
+            --rust: #c0684a;
+            --kotlin: #7b68d4;
+            --csharp: #3a9d6e;
+            --python: #4a8fc0;
+            --cpp: #a0a8c0;
+            --react: #4ab8d4;
+
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 15px;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            background: rgba(12, 12, 11, 0.85);
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-inner {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 140px 0 80px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(42px, 7vw, 72px);
+            font-weight: 800;
+            line-height: 1.0;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 24px;
+        }
+
+        .hero h1 .accent { color: var(--accent); }
+
+        .hero-sub {
+            font-size: 16px;
+            color: var(--text-muted);
+            max-width: 520px;
+            line-height: 1.75;
+            margin-bottom: 36px;
+        }
+
+        .lang-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 36px;
+        }
+
+        .lang-tag {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 3px;
+            border: 1px solid var(--border-light);
+            color: var(--text-muted);
+            background: var(--bg-2);
+        }
+
+        .lang-tag.rust   { border-color: var(--rust);   color: var(--rust); }
+        .lang-tag.kotlin { border-color: var(--kotlin); color: var(--kotlin); }
+        .lang-tag.csharp { border-color: var(--csharp); color: var(--csharp); }
+        .lang-tag.python { border-color: var(--python); color: var(--python); }
+        .lang-tag.cpp    { border-color: var(--cpp);    color: var(--cpp); }
+        .lang-tag.react  { border-color: var(--react);  color: var(--react); }
+
+        .cta-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 22px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #0c0c0b;
+        }
+        .btn-primary:hover { background: #e0b84e; transform: translateY(-1px); }
+
+        .btn-secondary {
+            border: 1px solid var(--border-light);
+            color: var(--text-muted);
+            background: transparent;
+        }
+        .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+
+        /* ── ABOUT ── */
+        .about {
+            padding: 72px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-faint);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 28px;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: start;
+        }
+
+        .about-text h2 {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .about-text p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        .about-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stat-item {
+            padding: 18px 20px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── FLAGSHIP ── */
+        .flagship {
+            padding: 72px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .flagship-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+            transition: border-color 0.2s;
+        }
+
+        .flagship-card:hover { border-color: var(--accent-dim); }
+
+        .flagship-inner {
+            padding: 36px 40px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .flagship-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--accent);
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 14px;
+        }
+
+        .flagship-title {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .flagship-desc {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            max-width: 480px;
+        }
+
+        .flagship-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tech-pill {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 3px 10px;
+            background: var(--bg-3);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            color: var(--text-muted);
+        }
+
+        .flagship-points {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flagship-points li {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .flagship-points li::before {
+            content: '→';
+            color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .flagship-side {
+            text-align: right;
+            min-width: 120px;
+        }
+
+        .lang-badge-large {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .lang-badge-large.csharp {
+            background: rgba(58, 157, 110, 0.12);
+            border: 1px solid rgba(58, 157, 110, 0.4);
+            color: var(--csharp);
+        }
+
+        .lang-badge-large.kotlin {
+            background: rgba(123, 104, 212, 0.12);
+            border: 1px solid rgba(123, 104, 212, 0.4);
+            color: var(--kotlin);
+        }
+
+        .flagship-link {
+            font-size: 13px;
+            color: var(--accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .flagship-link:hover { text-decoration: underline; }
+
+        .flagship-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0;
+        }
+
+        .flagship-footer {
+            padding: 16px 40px;
+            display: flex;
+            gap: 24px;
+        }
+
+        .flagship-footer-item {
+            font-size: 12px;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+        }
+
+        .flagship-footer-item span {
+            color: var(--text-muted);
+            margin-left: 6px;
+        }
+
+        /* ── WEB APPS ── */
+        .apps-section {
+            padding: 72px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .app-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 28px;
+            text-decoration: none;
+            display: block;
+            transition: border-color 0.2s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .app-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+        .app-card:hover::before { opacity: 1; }
+
+        .app-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .app-badge {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+
+        .badge-featured {
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .badge-new {
+            background: rgba(74, 184, 212, 0.1);
+            border: 1px solid rgba(74, 184, 212, 0.3);
+            color: var(--react);
+        }
+
+        .app-card h3 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .app-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .app-link {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── REPOS ── */
+        .repos-section {
+            padding: 72px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .repo-category {
+            margin-bottom: 40px;
+        }
+
+        .repo-category-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-faint);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .repo-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            text-decoration: none;
+            display: block;
+            transition: border-color 0.2s;
+        }
+
+        .repo-card:hover { border-color: var(--border-light); }
+
+        .repo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .repo-lang-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-rust   { background: var(--rust); }
+        .dot-kotlin { background: var(--kotlin); }
+        .dot-csharp { background: var(--csharp); }
+        .dot-python { background: var(--python); }
+        .dot-cpp    { background: var(--cpp); }
+        .dot-react  { background: var(--react); }
+
+        .repo-lang-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-faint);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .repo-card h3 {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .repo-card p {
+            font-size: 12px;
+            color: var(--text-faint);
+            line-height: 1.55;
+        }
+
+        /* ── CONTACT ── */
+        .contact {
+            padding: 72px 0;
+        }
+
+        .contact-inner {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 48px;
+            text-align: center;
+        }
+
+        .contact-inner h2 {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .contact-inner p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 28px;
+        }
+
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 24px 0;
+            text-align: center;
+        }
+
+        footer p {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-faint);
+        }
+
+        /* ── ANIMATIONS ── */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 720px) {
+            .about-grid { grid-template-columns: 1fr; gap: 32px; }
+            .about-stats { flex-direction: row; }
+            .app-grid { grid-template-columns: 1fr; }
+            .repo-grid { grid-template-columns: 1fr 1fr; }
+            .flagship-inner { grid-template-columns: 1fr; }
+            .flagship-side { text-align: left; }
+            .flagship-link { justify-content: flex-start; }
+            nav .nav-links { display: none; }
+        }
+
+        @media (max-width: 480px) {
+            .repo-grid { grid-template-columns: 1fr; }
+            .flagship-inner { padding: 24px; }
+            .contact-inner { padding: 32px 24px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a href="#home" class="nav-logo">~/kirinonakar</a>
+            <ul class="nav-links">
+                <li><a href="#about">소개</a></li>
+                <li><a href="#flagship">주요 프로젝트</a></li>
+                <li><a href="#apps">웹 앱</a></li>
+                <li><a href="#repos">저장소</a></li>
+                <li><a href="#contact">연락</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+
+        <!-- HERO -->
+        <header class="hero fade-up" id="home">
+            <p class="hero-eyebrow">개발자의 작업실</p>
+            <h1>kirinonakar<br>의 <span class="accent">작업실</span></h1>
+            <p class="hero-sub">
+                불편함을 발견하면 직접 도구를 만듭니다.<br>
+                GUI부터 AI 파이프라인까지, 끝까지 완성하는 것을 즐깁니다.
+            </p>
+            <div class="lang-tags">
+                <span class="lang-tag csharp">C# / WinUI</span>
+                <span class="lang-tag kotlin">Kotlin / Android</span>
+                <span class="lang-tag rust">Rust / Slint</span>
+                <span class="lang-tag python">Python / ML</span>
+                <span class="lang-tag cpp">C++</span>
+                <span class="lang-tag react">React</span>
+            </div>
+            <div class="cta-group">
+                <a href="#flagship" class="btn btn-primary">주요 프로젝트 보기</a>
+                <a href="https://github.com/kirinonakar" class="btn btn-secondary" target="_blank">GitHub 프로필 →</a>
+            </div>
+        </header>
+
+        <!-- ABOUT -->
+        <section class="about fade-up" id="about">
+            <p class="section-label">// about</p>
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>필요한 것은<br>직접 만든다</h2>
+                    <p>
+                        복잡한 렌더링, 파일 처리, AI 추론까지 — 특정 분야에 국한되지 않고
+                        문제를 해결하기 위해 가장 적합한 언어와 기술을 선택합니다.
+                    </p>
+                    <p>
+                        C#으로 WinUI 데스크톱 뷰어를, Kotlin으로 안드로이드 e-reader를,
+                        Rust로 ONNX 기반 이미지 처리 파이프라인을 직접 구현하는 방식으로
+                        아이디어를 끝까지 완성된 제품으로 가져갑니다.
+                    </p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">15+</div>
+                        <div class="stat-label">공개 프로젝트</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">사용 언어 / 플랫폼</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">∞</div>
+                        <div class="stat-label">해결하고 싶은 불편함들</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FLAGSHIP PROJECTS -->
+        <section class="flagship fade-up" id="flagship">
+            <h2 class="section-title">주요 프로젝트</h2>
+
+            <!-- Uviewer Desktop -->
+            <a href="https://github.com/kirinonakar/Uviewer" class="flagship-card" target="_blank" style="margin-bottom: 16px; display: block;">
+                <div class="flagship-inner">
+                    <div>
+                        <div class="flagship-badge">★ Flagship</div>
+                        <h3 class="flagship-title">Uviewer</h3>
+                        <p class="flagship-desc">
+                            이미지·PDF·텍스트(소설 포함)를 하나의 앱에서 처리하는 WinUI 3 데스크톱 뷰어.
+                            Win2D 캔버스 렌더링을 기반으로 커스텀 페이지네이션과 스크롤 엔진을 직접 구현했습니다.
+                        </p>
+                        <div class="flagship-tech">
+                            <span class="tech-pill">WinUI 3</span>
+                            <span class="tech-pill">Win2D</span>
+                            <span class="tech-pill">C#</span>
+                            <span class="tech-pill">PDF 렌더링</span>
+                            <span class="tech-pill">아오조라 포맷</span>
+                            <span class="tech-pill">세마포어 기반 프리로드</span>
+                        </div>
+                        <ul class="flagship-points">
+                            <li>세마포어를 current-page / background 두 티어로 분리해 PDF 스크롤 성능 최적화</li>
+                            <li>수평 페이지 모드(아오조라)와 세로쓰기 모드 각각의 스크롤 물리 구현</li>
+                            <li>마우스 휠 스로틀링 및 방향 반전 버그 수정 포함</li>
+                        </ul>
+                    </div>
+                    <div class="flagship-side">
+                        <span class="lang-badge-large csharp">C#</span>
+                        <div class="flagship-link">GitHub →</div>
+                    </div>
+                </div>
+                <hr class="flagship-divider">
+                <div class="flagship-footer">
+                    <span class="flagship-footer-item">플랫폼<span>Windows</span></span>
+                    <span class="flagship-footer-item">프레임워크<span>WinUI 3</span></span>
+                    <span class="flagship-footer-item">렌더링<span>Win2D</span></span>
+                </div>
+            </a>
+
+            <!-- Uviewer Android -->
+            <a href="https://github.com/kirinonakar/Uviewer_android" class="flagship-card" target="_blank">
+                <div class="flagship-inner">
+                    <div>
+                        <div class="flagship-badge">★ Flagship</div>
+                        <h3 class="flagship-title">Uviewer Android</h3>
+                        <p class="flagship-desc">
+                            Uviewer의 안드로이드 버전. WebView + JavaScript 주입 방식으로
+                            epub/소설 e-reader 기능을 구현, CSS multi-column 기반 페이지네이션 엔진을 직접 작성했습니다.
+                        </p>
+                        <div class="flagship-tech">
+                            <span class="tech-pill">Kotlin</span>
+                            <span class="tech-pill">Jetpack Compose</span>
+                            <span class="tech-pill">WebView</span>
+                            <span class="tech-pill">JS 페이지네이션</span>
+                            <span class="tech-pill">CSS 세로쓰기</span>
+                            <span class="tech-pill">RAR5 추출</span>
+                        </div>
+                        <ul class="flagship-points">
+                            <li>Range.getClientRects()를 활용한 시각적 라인 기반 정밀 페이지네이션</li>
+                            <li>수직 모드(writing-mode: vertical-rl) 스크롤 델타 공식 및 마스킹 수정</li>
+                            <li>sevenzipjbinding으로 RAR5 아카이브 추출 지원 추가</li>
+                        </ul>
+                    </div>
+                    <div class="flagship-side">
+                        <span class="lang-badge-large kotlin">Kotlin</span>
+                        <div class="flagship-link">GitHub →</div>
+                    </div>
+                </div>
+                <hr class="flagship-divider">
+                <div class="flagship-footer">
+                    <span class="flagship-footer-item">플랫폼<span>Android</span></span>
+                    <span class="flagship-footer-item">언어<span>Kotlin</span></span>
+                    <span class="flagship-footer-item">UI<span>Jetpack Compose</span></span>
+                </div>
+            </a>
+        </section>
+
+        <!-- WEB APPS -->
+        <section class="apps-section fade-up" id="apps">
+            <h2 class="section-title">Web Applications</h2>
+            <div class="app-grid">
+                <a href="https://react-portfolio-7td.pages.dev/" class="app-card" target="_blank">
+                    <div class="app-card-header">
+                        <span class="app-badge badge-featured">Featured</span>
+                        <span class="repo-lang-label"><span class="repo-lang-dot dot-react"></span>React</span>
+                    </div>
+                    <h3>Global Economic Dashboard</h3>
+                    <p>React, Recharts, TailwindCSS로 글로벌 경제 지표와 주식 시장 데이터를 시각화하는 대시보드.</p>
+                    <div class="app-link">Launch App →</div>
+                </a>
+                <a href="fire_simulator.html" class="app-card">
+                    <div class="app-card-header">
+                        <span class="app-badge badge-new">New</span>
+                        <span class="repo-lang-label"><span class="repo-lang-dot dot-react"></span>React</span>
+                    </div>
+                    <h3>FIRE Simulator</h3>
+                    <p>자산 축적과 인출률을 기반으로 조기 은퇴 재정 현황을 시뮬레이션하는 웹 도구.</p>
+                    <div class="app-link">Launch App →</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- REPOS -->
+        <section class="repos-section fade-up" id="repos">
+            <h2 class="section-title">저장소</h2>
+
+            <!-- Image Processing -->
+            <div class="repo-category">
+                <p class="repo-category-label">이미지 처리 파이프라인</p>
+                <div class="repo-grid">
+                    <a href="https://github.com/kirinonakar/rust_rmbg" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-rust"></span>Rust</span>
+                        </div>
+                        <h3>Image Background Removal</h3>
+                        <p>Slint GUI · ONNX · DirectML 하드웨어 가속</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/rust_upscaler" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-rust"></span>Rust</span>
+                        </div>
+                        <h3>Rust Image Upscaler</h3>
+                        <p>ONNX Runtime · DirectML GPU 가속 업스케일링</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/Python_upscaler" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-python"></span>Python</span>
+                        </div>
+                        <h3>Python AI Image Upscaler</h3>
+                        <p>ESRGAN, HAT 모델 지원 · 데스크톱 & 웹 UI</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/Python_onnx" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-python"></span>Python</span>
+                        </div>
+                        <h3>ONNX Model Converter</h3>
+                        <p>PyTorch 업스케일 모델 → ONNX 변환 & 최적화</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/rust_bmp" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-rust"></span>Rust</span>
+                        </div>
+                        <h3>Alpha PNG → 32-bit BMP</h3>
+                        <p>삼국지 시리즈 신무장용 알파 채널 BMP 변환기</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Translation / AI -->
+            <div class="repo-category">
+                <p class="repo-category-label">번역 & AI 도구</p>
+                <div class="repo-grid">
+                    <a href="https://github.com/kirinonakar/ocr_trans" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-rust"></span>Rust</span>
+                        </div>
+                        <h3>OCR Translator</h3>
+                        <p>실시간 화면 OCR + 번역 · Gemini / 로컬 LLM API</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/python_llm_translator" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-python"></span>Python</span>
+                        </div>
+                        <h3>LLM Translator</h3>
+                        <p>LLM 기반 지능형 번역 유틸리티</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/Python_novel" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-python"></span>Python</span>
+                        </div>
+                        <h3>AI Novel Generator</h3>
+                        <p>LLM + Gradio · 챕터별 소설 자동 생성</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Finance -->
+            <div class="repo-category">
+                <p class="repo-category-label">금융 분석</p>
+                <div class="repo-grid">
+                    <a href="https://github.com/kirinonakar/Python_PPA" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-python"></span>Python</span>
+                        </div>
+                        <h3>Pro Portfolio Analyzer</h3>
+                        <p>백테스팅 · 최적화 · 다중 포트폴리오 비교</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- System Utilities -->
+            <div class="repo-category">
+                <p class="repo-category-label">시스템 유틸리티</p>
+                <div class="repo-grid">
+                    <a href="https://github.com/kirinonakar/VideoEncoder" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-rust"></span>Rust</span>
+                        </div>
+                        <h3>Video Encoder</h3>
+                        <p>FFmpeg + Slint GUI · 드래그&드롭 일괄 인코딩</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/GPUtray" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-cpp"></span>C++</span>
+                        </div>
+                        <h3>GPUtray</h3>
+                        <p>트레이 상주 · GPU/CPU 실시간 그래프 모니터링</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/EncodingConverter" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-cpp"></span>C++</span>
+                        </div>
+                        <h3>Encoding Converter</h3>
+                        <p>텍스트 파일 인코딩 자동 감지 → UTF-8 변환</p>
+                    </a>
+                    <a href="https://github.com/kirinonakar/JasoFixer" class="repo-card" target="_blank">
+                        <div class="repo-header">
+                            <span class="repo-lang-label"><span class="repo-lang-dot dot-cpp"></span>C++</span>
+                        </div>
+                        <h3>JasoFixer</h3>
+                        <p>맥→윈도 한글 파일명 자소 분리 현상 해결</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section class="contact fade-up" id="contact">
+            <div class="contact-inner">
+                <h2>함께 만들어요</h2>
+                <p>프로젝트 협업, 기술적 논의, 또는 단순한 인사도 환영합니다.</p>
+                <div class="contact-links">
+                    <a href="https://github.com/kirinonakar" class="btn btn-primary" target="_blank">GitHub 프로필</a>
+                    <!-- <a href="mailto:your@email.com" class="btn btn-secondary">이메일 보내기</a> -->
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2026 kirinonakar. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <script>
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Fade-up on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.08 });
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        // Hero is visible immediately
+        document.querySelector('.hero').classList.add('visible');
+    </script>
+
+</body>
+</html>
