@@ -49,7 +49,7 @@ body {
 
 .hero {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     animation: fadeInDown 1s ease-out;
 }
 
@@ -106,6 +106,110 @@ body {
     box-shadow: 0 10px 20px rgba(88, 166, 255, 0.2);
 }
 
+/* Featured Apps Section */
+.featured-apps {
+    width: 100%;
+    margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.app-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2.5rem;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 280px;
+    backdrop-filter: blur(20px);
+}
+
+.app-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(188, 140, 255, 0.1));
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.app-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--accent-color);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(88, 166, 255, 0.1);
+}
+
+.app-card:hover::before {
+    opacity: 1;
+}
+
+.app-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: linear-gradient(135deg, var(--accent-color), var(--secondary-accent));
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 2;
+}
+
+.app-content {
+    position: relative;
+    z-index: 1;
+}
+
+.app-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    margin-bottom: 0.8rem;
+    background: linear-gradient(to right, #fff, #8b949e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.app-card p {
+    font-size: 1rem;
+    color: #8b949e;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.app-link {
+    font-weight: 700;
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: gap 0.3s ease;
+}
+
+.app-card:hover .app-link {
+    gap: 0.8rem;
+}
+
+.app-link .arrow {
+    font-size: 1.2rem;
+}
+
 /* Repositories Section */
 .repos {
     width: 100%;
@@ -117,7 +221,7 @@ body {
     font-family: var(--font-heading);
     font-size: 2.5rem;
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     background: linear-gradient(135deg, #fff, #8b949e);
     -webkit-background-clip: text;
     background-clip: text;

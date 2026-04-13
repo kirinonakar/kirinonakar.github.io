@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('GitHub Pages Test Site Loaded Successfully!');
 
     const bgGradient = document.querySelector('.background-gradient');
-    const reposSection = document.querySelector('.repos');
+    const appsSection = document.getElementById('apps');
     const exploreBtn = document.getElementById('btn-explore');
 
     // Mouse movement background effect
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Explore button scroll effect
     exploreBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        reposSection.scrollIntoView({
+        appsSection.scrollIntoView({
             behavior: 'smooth'
         });
     });
