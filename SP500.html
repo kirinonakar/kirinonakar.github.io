@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>미국 증시 투자전략 리서치 대시보드 | S&P 500</title>
+  <style>
+    :root {
+      --bg:#07111f; --panel:#0d1b2d; --panel2:#10233b; --line:#29415f;
+      --text:#f4f7fb; --muted:#a9b8c8; --gold:#d8b25c; --blue:#3c8cff;
+      --green:#43d08a; --red:#ff6b72; --silver:#d6dde8; --gray:#7e8fa3;
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:
+      radial-gradient(circle at 20% 0%,rgba(60,140,255,.18),transparent 32%),
+      radial-gradient(circle at 80% 5%,rgba(216,178,92,.16),transparent 28%),
+      linear-gradient(180deg,#07111f,#091728 46%,#07111f);
+      color:var(--text);font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;line-height:1.55;}
+    a{color:#96c6ff;text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{width:min(1280px,calc(100% - 34px));margin:0 auto}
+    header.hero{padding:54px 0 28px;position:relative;overflow:hidden}
+    .eyebrow{color:var(--gold);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:.78rem}
+    h1{font-size:clamp(2.1rem,5vw,4.9rem);line-height:1.02;margin:.45rem 0 .8rem;letter-spacing:-.055em}
+    h2{font-size:clamp(1.55rem,3vw,2.3rem);margin:0 0 18px;letter-spacing:-.03em}
+    h3{margin:0 0 10px;font-size:1.05rem}
+    p{margin:0 0 12px;color:var(--muted)}
+    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:stretch}
+    .hero-card,.card,.section{background:linear-gradient(180deg,rgba(16,35,59,.92),rgba(9,23,40,.94));border:1px solid rgba(214,221,232,.12);border-radius:28px;box-shadow:var(--shadow)}
+    .hero-card{padding:28px;position:relative;overflow:hidden}
+    .hero-card::after{content:"";position:absolute;right:-120px;top:-120px;width:260px;height:260px;border-radius:50%;background:rgba(216,178,92,.12);filter:blur(8px)}
+    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+    .kpi{padding:16px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}
+    .kpi small{display:block;color:var(--muted);font-size:.74rem;margin-bottom:5px}
+    .kpi strong{font-size:1.35rem;letter-spacing:-.03em}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.055);color:var(--silver);font-size:.82rem;font-weight:700}
+    .pill.good{color:#9ff0c7;border-color:rgba(67,208,138,.3);background:rgba(67,208,138,.08)}
+    .pill.bad{color:#ffb1b5;border-color:rgba(255,107,114,.3);background:rgba(255,107,114,.08)}
+    .pill.gold{color:#ffe0a1;border-color:rgba(216,178,92,.3);background:rgba(216,178,92,.09)}
+    nav{position:sticky;top:0;z-index:10;background:rgba(7,17,31,.82);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)}
+    nav .wrap{display:flex;gap:10px;overflow:auto;padding:10px 0}
+    nav a{white-space:nowrap;padding:9px 12px;border-radius:999px;color:var(--muted);font-size:.88rem}
+    nav a:hover{background:rgba(255,255,255,.08);color:var(--text);text-decoration:none}
+    main{padding:24px 0 80px}
+    .section{padding:26px;margin:18px 0}
+    .grid{display:grid;gap:16px}
+    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+    .card{padding:20px;border-radius:22px}
+    .card.highlight{border-color:rgba(216,178,92,.35);background:linear-gradient(180deg,rgba(216,178,92,.12),rgba(16,35,59,.9))}
+    .muted{color:var(--muted)} .gold{color:var(--gold)} .green{color:var(--green)} .red{color:var(--red)}
+    .big-num{font-size:2.15rem;font-weight:900;letter-spacing:-.055em}
+    .subtle{font-size:.84rem;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:16px;font-size:.9rem}
+    th,td{padding:12px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top}
+    th{color:#e9eef8;background:rgba(255,255,255,.06);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+    tr:hover td{background:rgba(255,255,255,.035)}
+    .bar-row{display:grid;grid-template-columns:190px 1fr 64px;gap:12px;align-items:center;margin:10px 0}
+    .bar-bg{height:13px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+    .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--gold));width:0;transition:width 1.2s ease}
+    .bar.greenbar{background:linear-gradient(90deg,#1f8f5b,var(--green))}
+    .bar.redbar{background:linear-gradient(90deg,#7e2330,var(--red))}
+    .scenario{position:relative;overflow:hidden}
+    .scenario::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 45%);pointer-events:none}
+    .scenario.good{border-color:rgba(67,208,138,.25)}
+    .scenario.bad{border-color:rgba(255,107,114,.25)}
+    .calc{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px;color:#e7edf7;overflow:auto}
+    .risk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .risk{display:grid;grid-template-columns:1.2fr .8fr .8fr 1.4fr;gap:12px;align-items:center;padding:13px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}
+    .level{height:9px;border-radius:999px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
+    .level span{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--red))}
+    .callout{border-left:4px solid var(--gold);padding:16px 18px;background:rgba(216,178,92,.09);border-radius:16px}
+    .footnotes{font-size:.82rem;color:var(--muted)}
+    canvas{width:100%;height:280px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.08);border-radius:18px}
+    .two-col{columns:2;column-gap:28px}
+    .source-list li{margin:8px 0;color:var(--muted)}
+    .tagrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+    .mini{font-size:.78rem}
+    @media(max-width:1000px){
+      .hero-grid,.grid.cols-2,.grid.cols-3,.grid.cols-4,.risk-grid{grid-template-columns:1fr}
+      .kpi-grid{grid-template-columns:repeat(2,1fr)}
+      .risk{grid-template-columns:1fr}
+      .two-col{columns:1}
+      .bar-row{grid-template-columns:1fr}
+    }
+    @media(max-width:640px){.kpi-grid{grid-template-columns:1fr}.section,.hero-card{padding:18px}th,td{font-size:.82rem;padding:9px 7px}}
+  </style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap hero-grid">
+    <section class="hero-card">
+      <div class="eyebrow">US Equity Strategy · S&P 500 Base</div>
+      <h1>미국 증시 투자전략 리서치 대시보드</h1>
+      <p>데이터 기준일: <strong>2026-05-11</strong> · 시장 가격은 최신 확인 가능한 2026-05-08 종가 중심. 지수 목표는 투자 권유가 아닌 <strong>시나리오 기반 후보값</strong>입니다.</p>
+      <div class="tagrow">
+        <span class="pill gold">국면: 확장 후반 / 고평가</span>
+        <span class="pill good">이익 모멘텀: 긍정</span>
+        <span class="pill bad">밸류에이션: 부담</span>
+        <span class="pill">AI 사이클 주도</span>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><small>S&P 500 현재 지수</small><strong>7,398.93</strong><div class="subtle">2026-05-08 종가</div></div>
+        <div class="kpi"><small>전체 시가총액</small><strong>$64.5T</strong><div class="subtle">S&P, 2026-04-30</div></div>
+        <div class="kpi"><small>12M Forward P/E</small><strong>21.0x</strong><div class="subtle">FactSet, 2026-05-08</div></div>
+        <div class="kpi"><small>12M Forward EPS</small><strong>$352.3</strong><div class="subtle">지수÷Forward P/E 역산</div></div>
+        <div class="kpi"><small>P/B</small><strong>5.33x</strong><div class="subtle">S&P 공식, 2025-12-31</div></div>
+        <div class="kpi"><small>ROE Proxy</small><strong>18.7%</strong><div class="subtle">P/B ÷ Trailing P/E</div></div>
+        <div class="kpi"><small>배당수익률</small><strong>1.25%</strong><div class="subtle">S&P, 2026-03-31</div></div>
+        <div class="kpi"><small>미국 10년물 금리</small><strong>4.41%</strong><div class="subtle">FRED, 2026-05-07</div></div>
+        <div class="kpi"><small>확률가중 목표 지수</small><strong>7,533</strong><div class="subtle">기대수익률 1.8%</div></div>
+      </div>
+    </section>
+    <aside class="hero-card">
+      <h2>한 줄 결론</h2>
+      <p class="big-num gold">“이익은 강하지만, 멀티플은 이미 많은 낙관을 반영.”</p>
+      <p>AI 인프라와 빅테크 이익이 S&P 500의 상단을 열어두지만, Forward P/E 21배와 4%대 중반의 10년물 금리는 밸류에이션 재평가 여지를 제한합니다.</p>
+      <div class="callout">
+        <strong>핵심 판단:</strong> Base Case는 현재 지수 부근에서 완만한 추가 상승을 가정합니다. 리스크 관리는 “EPS 상향 지속 여부”와 “10년물 금리 4.5% 상회 여부”가 핵심입니다.
+      </div>
+      <div style="margin-top:16px">
+        <canvas id="scenarioCanvas" width="600" height="300"></canvas>
+      </div>
+    </aside>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap">
+    <a href="#overview">개요</a><a href="#macro">매크로</a><a href="#sector">섹터</a><a href="#ai">빅테크·AI</a><a href="#valuation">밸류에이션</a><a href="#scenario">시나리오</a><a href="#institutions">기관 전망</a><a href="#flows">수급</a><a href="#risk">리스크</a><a href="#check">체크포인트</a><a href="#sources">출처</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="overview" class="section">
+  <h2>1. 미국 증시 개요</h2>
+  <div class="grid cols-3">
+    <div class="card">
+      <h3>S&P 500 정의</h3>
+      <p>S&P 500은 미국 대형주 500여 개를 대상으로 하는 <strong>유동주식 시가총액 가중</strong> 지수입니다. S&P Dow Jones Indices는 이 지수가 미국 대형주 시장의 대표 지표이며, 사용 가능한 시가총액의 약 80%를 포괄한다고 설명합니다.</p>
+    </div>
+    <div class="card">
+      <h3>대표성과 산출 방식</h3>
+      <p>구성 종목은 미국 기업, 유동성, 재무적 생존 가능성, 섹터 대표성 등을 고려합니다. 실시간 산출되며 분기별로 리밸런싱됩니다.</p>
+    </div>
+    <div class="card">
+      <h3>핵심 구조</h3>
+      <p>상위 10개 종목 비중이 <strong>38.5%</strong>, 최대 종목 비중이 <strong>7.9%</strong>입니다. 즉, 지수 전체의 방향성은 AI·빅테크 이익과 멀티플에 크게 민감합니다.</p>
+    </div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h3>주요 지수 비교</h3>
+      <table>
+        <thead><tr><th>지수</th><th>성격</th><th>장점</th><th>약점</th></tr></thead>
+        <tbody>
+          <tr><td>S&P 500</td><td>미국 대형주 대표</td><td>섹터 균형·가장 널리 쓰이는 벤치마크</td><td>빅테크 집중도 상승</td></tr>
+          <tr><td>Nasdaq 100</td><td>비금융 성장주 중심</td><td>AI·소프트웨어·반도체 민감도 높음</td><td>금리 상승과 멀티플 압축에 취약</td></tr>
+          <tr><td>Dow Jones</td><td>30개 우량주 가격가중</td><td>전통 우량주 분위기 파악</td><td>시장 대표성 제한</td></tr>
+          <tr><td>Russell 2000</td><td>미국 소형주</td><td>경기 회복·금리 하락 시 탄력</td><td>부채비용·이익 안정성 취약</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Top 10 Constituents</h3>
+      <p class="subtle">S&P 공식 factsheet, 2026-04-30 기준</p>
+      <div class="two-col">
+        <p>1. Nvidia · Information Technology</p>
+        <p>2. Apple · Information Technology</p>
+        <p>3. Microsoft · Information Technology</p>
+        <p>4. Amazon · Consumer Discretionary</p>
+        <p>5. Alphabet A · Communication Services</p>
+        <p>6. Broadcom · Information Technology</p>
+        <p>7. Alphabet C · Communication Services</p>
+        <p>8. Meta · Communication Services</p>
+        <p>9. Tesla · Consumer Discretionary</p>
+        <p>10. Berkshire Hathaway B · Financials</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="macro" class="section">
+  <h2>2. 매크로 대시보드</h2>
+  <div class="grid cols-3">
+    <div class="card"><span class="pill gold">중립+</span><h3 style="margin-top:12px">GDP 성장</h3><p><strong>Q1 2026 실질 GDP +2.0% SAAR</strong></p><p>투자·수출·소비가 방어. OECD는 2026년 미국 성장률 2.0% 전망.</p></div><div class="card"><span class="pill gold">중립-</span><h3 style="margin-top:12px">기준금리</h3><p><strong>Fed Funds 3.50–3.75%</strong></p><p>인플레 재상승으로 인하 기대가 후퇴. 주식 멀티플에 부담.</p></div><div class="card"><span class="pill gold">중립-</span><h3 style="margin-top:12px">10년물 금리</h3><p><strong>4.41% (2026-05-07)</strong></p><p>4.25% 이상에서는 성장주 할인율 부담이 재부각될 수 있음.</p></div><div class="card"><span class="pill bad">부정</span><h3 style="margin-top:12px">인플레이션</h3><p><strong>CPI 3.3%, PCE 3.5%, Core PCE 3.2%</strong></p><p>에너지·관세·공급 충격이 연준의 완화 여지를 제한.</p></div><div class="card"><span class="pill gold">중립+</span><h3 style="margin-top:12px">고용</h3><p><strong>실업률 4.3%, NFP +115k</strong></p><p>급격한 침체는 아니지만 고용 증가는 낮아진 균형에 가까움.</p></div><div class="card"><span class="pill good">긍정</span><h3 style="margin-top:12px">소비</h3><p><strong>3월 소매판매 +1.7% MoM, +4.0% YoY</strong></p><p>서비스와 온라인 소비가 견조하나 실질 구매력 압박은 체크 필요.</p></div><div class="card"><span class="pill gold">중립</span><h3 style="margin-top:12px">달러</h3><p><strong>DXY 약 97.9</strong></p><p>전쟁 프리미엄은 일부 되돌림. 강달러 재개 시 해외 매출·유동성에 부담.</p></div><div class="card"><span class="pill good">긍정</span><h3 style="margin-top:12px">기업이익</h3><p><strong>CY2026 EPS 성장 +21.0% 예상</strong></p><p>FactSet 기준 이익 전망은 상향. 다만 밸류에이션이 선반영.</p></div><div class="card"><span class="pill good">긍정/주의</span><h3 style="margin-top:12px">AI 투자</h3><p><strong>S&P 500 CAPEX +33% 전망</strong></p><p>AI 인프라가 성장 동력이지만, 자사주 매입 둔화와 현금흐름 압박이 동시에 발생.</p></div>
+  </div>
+  <div class="callout" style="margin-top:18px">
+    <strong>긍정 요인:</strong> 견조한 소비, AI 설비투자, 이익 전망 상향, 낮은 신용스프레드.
+    <br><strong>부정 요인:</strong> 3%대 물가 재상승, 4%대 중반 10년물 금리, 중동발 유가 충격, 높은 밸류에이션과 지수 집중도.
+  </div>
+</section>
+
+<section id="sector" class="section">
+  <h2>3. 섹터 대시보드</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>S&P 500 섹터 비중</h3>
+      <div id="sectorBars">
+        <div class="bar-row"><div>정보기술<br><span class="subtle">Information Technology</span></div><div class="bar-bg"><div class="bar" data-width="35.0"></div></div><strong>35.0%</strong></div><div class="bar-row"><div>금융<br><span class="subtle">Financials</span></div><div class="bar-bg"><div class="bar" data-width="12.0"></div></div><strong>12.0%</strong></div><div class="bar-row"><div>커뮤니케이션서비스<br><span class="subtle">Communication Services</span></div><div class="bar-bg"><div class="bar" data-width="11.0"></div></div><strong>11.0%</strong></div><div class="bar-row"><div>경기소비재<br><span class="subtle">Consumer Discretionary</span></div><div class="bar-bg"><div class="bar" data-width="10.0"></div></div><strong>10.0%</strong></div><div class="bar-row"><div>산업재<br><span class="subtle">Industrials</span></div><div class="bar-bg"><div class="bar" data-width="8.8"></div></div><strong>8.8%</strong></div><div class="bar-row"><div>헬스케어<br><span class="subtle">Health Care</span></div><div class="bar-bg"><div class="bar" data-width="8.5"></div></div><strong>8.5%</strong></div><div class="bar-row"><div>필수소비재<br><span class="subtle">Consumer Staples</span></div><div class="bar-bg"><div class="bar" data-width="4.9"></div></div><strong>4.9%</strong></div><div class="bar-row"><div>에너지<br><span class="subtle">Energy</span></div><div class="bar-bg"><div class="bar" data-width="3.5"></div></div><strong>3.5%</strong></div><div class="bar-row"><div>유틸리티<br><span class="subtle">Utilities</span></div><div class="bar-bg"><div class="bar" data-width="2.3"></div></div><strong>2.3%</strong></div><div class="bar-row"><div>소재<br><span class="subtle">Materials</span></div><div class="bar-bg"><div class="bar" data-width="1.9"></div></div><strong>1.9%</strong></div><div class="bar-row"><div>부동산<br><span class="subtle">Real Estate</span></div><div class="bar-bg"><div class="bar" data-width="1.9"></div></div><strong>1.9%</strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>섹터별 투자 포인트</h3>
+      <table>
+        <thead><tr><th>섹터</th><th>상태</th><th>요약</th></tr></thead>
+        <tbody>
+          <tr><td>정보기술</td><td><span class="pill mini good">긍정</span></td><td>AI·반도체·소프트웨어 이익 모멘텀 최강. 단, 멀티플 부담과 CAPEX 회수 논쟁이 핵심 리스크.</td></tr><tr><td>금융</td><td><span class="pill mini gold">중립+</span></td><td>금리 레벨은 순이자마진에 우호적이나 신용 스프레드와 소비 연체가 리스크.</td></tr><tr><td>커뮤니케이션서비스</td><td><span class="pill mini good">긍정</span></td><td>광고·클라우드·AI 서비스 수익화가 긍정적. 규제와 플랫폼 투자비 부담은 상존.</td></tr><tr><td>경기소비재</td><td><span class="pill mini gold">중립</span></td><td>Amazon·Tesla 영향이 크며 소비 둔화와 고금리 할부 부담이 상방을 제한.</td></tr><tr><td>산업재</td><td><span class="pill mini gold">중립+</span></td><td>리쇼어링·인프라·방산 수요가 견조하나 에너지 비용과 임금 상승이 부담.</td></tr><tr><td>헬스케어</td><td><span class="pill mini gold">중립-</span></td><td>방어력은 있으나 정책·약가·실적 하향 이슈로 최근 수급이 약함.</td></tr><tr><td>필수소비재</td><td><span class="pill mini gold">중립</span></td><td>방어 섹터. 가격전가 둔화로 마진 모멘텀은 제한적.</td></tr><tr><td>에너지</td><td><span class="pill mini gold">중립+</span></td><td>유가 상승은 이익에 긍정적이나 지정학 리스크와 수요 둔화가 동시에 작용.</td></tr><tr><td>유틸리티</td><td><span class="pill mini gold">중립+</span></td><td>데이터센터 전력 수요 기대. 금리 상승 시 배당주 매력 약화.</td></tr><tr><td>소재</td><td><span class="pill mini gold">중립</span></td><td>글로벌 제조 회복과 중국 수요가 변수. 달러 강세는 부담.</td></tr><tr><td>부동산</td><td><span class="pill mini bad">부정</span></td><td>금리와 차환 비용 부담. 일부 데이터센터·물류 REIT는 차별화 가능.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="ai" class="section">
+  <h2>4. 빅테크 및 AI 사이클</h2>
+  <div class="grid cols-4">
+    <div class="card highlight"><h3>지수 기여도</h3><p class="big-num">38.5%</p><p>Top 10 종목 비중. AI·빅테크가 지수 EPS와 PER의 방향성을 좌우합니다.</p></div>
+    <div class="card"><h3>AI CAPEX</h3><p class="big-num gold">+33%</p><p>Goldman 계열 보도 기준 2026년 S&P 500 CAPEX 성장 전망. 하이퍼스케일러 CAPEX는 더 빠르게 증가.</p></div>
+    <div class="card"><h3>자사주 매입</h3><p class="big-num red">+3%</p><p>AI 투자비가 주주환원 여력을 일부 잠식. CAPEX가 이익 성장으로 연결되는지가 관건.</p></div>
+    <div class="card"><h3>동일가중과 차이</h3><p class="big-num">쏠림</p><p>시가총액가중 S&P 500은 AI 리더에 민감. 동일가중 지수와 괴리가 커질수록 시장 폭 지표 확인 필요.</p></div>
+  </div>
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h3>주요 기업 모멘텀</h3>
+      <table>
+        <thead><tr><th>기업</th><th>지수 역할</th><th>관찰 포인트</th></tr></thead>
+        <tbody>
+          <tr><td>Nvidia</td><td>AI 반도체 핵심</td><td>데이터센터 GPU 수요, 메모리·패키징 공급, 마진</td></tr>
+          <tr><td>Microsoft</td><td>클라우드·AI 플랫폼</td><td>Azure AI 성장, CAPEX 대비 매출화 속도</td></tr>
+          <tr><td>Amazon</td><td>AWS·소비</td><td>AWS 성장률, 물류 효율, 소비 둔화 여부</td></tr>
+          <tr><td>Alphabet</td><td>검색·광고·클라우드</td><td>AI 검색 전환, 광고 회복, 클라우드 수익성</td></tr>
+          <tr><td>Meta</td><td>광고·AI 추천</td><td>광고 효율, AI 인프라 투자와 비용 통제</td></tr>
+          <tr><td>Apple</td><td>소비·서비스</td><td>교체 수요, AI 디바이스 전략, 중국 수요</td></tr>
+          <tr><td>Tesla</td><td>EV·자율주행 옵션</td><td>마진, 인도량, 로보택시/AI 옵션 현실화</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>AI가 EPS와 PER에 미치는 영향</h3>
+      <p><strong>EPS 측면:</strong> 반도체·클라우드·광고 효율·데이터센터 전력 수요가 이익 전망 상향을 주도합니다.</p>
+      <p><strong>PER 측면:</strong> 투자자들은 AI를 장기 생산성 향상으로 해석할 때 프리미엄을 부여합니다. 반대로 CAPEX 회수 기간이 길어지거나 매출화가 지연되면 멀티플 압축이 발생할 수 있습니다.</p>
+      <p><strong>핵심 질문:</strong> “AI CAPEX가 비용인가, 미래 매출의 선투자인가?”에 대한 시장의 답이 지수 상단을 결정합니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="valuation" class="section">
+  <h2>5. 이익 및 밸류에이션</h2>
+  <div class="grid cols-3">
+    <div class="card"><h3>Forward EPS</h3><p class="big-num">$352.3</p><p>현재 지수 7,398.93 ÷ Forward P/E 21.0x로 역산한 12개월 선행 EPS입니다.</p></div>
+    <div class="card"><h3>Forward P/E</h3><p class="big-num">21.0x</p><p>FactSet 기준 5년 평균 19.9x, 10년 평균 18.9x보다 높아 프리미엄 구간입니다.</p></div>
+    <div class="card"><h3>Equity Risk Premium</h3><p class="big-num red">낮음</p><p>Fed Financial Stability Report는 주식 위험 프리미엄이 역사적 평균을 크게 밑돈다고 평가했습니다.</p></div>
+  </div>
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h3>목표 지수 계산 구조</h3>
+      <div class="calc">
+        목표 지수 = Forward EPS × 적용 PER<br>
+        Base Case = $360 × 21.0x = 7,560<br>
+        확률가중 목표 = 5,940×20% + 7,560×50% + 8,550×30% = 7,533<br>
+        기대수익률 = 7,533 / 7,398.93 - 1 = 1.8%
+      </div>
+      <p class="subtle" style="margin-top:12px">계산상 목표는 배당을 제외한 가격지수 후보입니다. 배당수익률은 별도 고려가 필요합니다.</p>
+    </div>
+    <div class="card">
+      <h3>글로벌 Peer Valuation</h3>
+      <div id="peerBars">
+        <div class="bar-row"><div>S&P 500<br><span class="subtle">Forward P/E, FactSet</span></div><div class="bar-bg"><div class="bar greenbar" data-width="70.0"></div></div><strong>21.00x</strong></div><div class="bar-row"><div>Nasdaq 100<br><span class="subtle">Forward P/E, MacroMicro</span></div><div class="bar-bg"><div class="bar greenbar" data-width="79.2"></div></div><strong>23.77x</strong></div><div class="bar-row"><div>Dow Jones<br><span class="subtle">Trailing P/E proxy, WorldPERatio/DIA</span></div><div class="bar-bg"><div class="bar greenbar" data-width="79.0"></div></div><strong>23.71x</strong></div><div class="bar-row"><div>Russell 2000<br><span class="subtle">P/E proxy, WorldPERatio/IWM</span></div><div class="bar-bg"><div class="bar greenbar" data-width="63.8"></div></div><strong>19.13x</strong></div><div class="bar-row"><div>MSCI World<br><span class="subtle">P/E, MSCI official</span></div><div class="bar-bg"><div class="bar greenbar" data-width="81.3"></div></div><strong>24.39x</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:18px">
+    <strong>해석:</strong> S&P 500은 높은 ROE와 AI 성장 프리미엄으로 글로벌 지수 대비 프리미엄을 정당화해 왔습니다. 다만 10년물 금리가 4%대 중반에서 머물면 ERP가 낮아져 PER 확장에는 제약이 커집니다.
+  </div>
+</section>
+
+<section id="scenario" class="section">
+  <h2>6. 1년 후 S&P 500 목표 지수 후보 3가지</h2>
+  <div class="grid cols-3">
+    <div class="card scenario bad">
+      <span class="pill bad">인플레 재상승·금리 부담</span>
+      <h3 style="margin-top:14px">Bear Case</h3>
+      <p class="big-num">5,940</p>
+      <table>
+        <tr><td>예상 Forward EPS</td><td>$330</td></tr>
+        <tr><td>적용 PER</td><td>18.0x</td></tr>
+        <tr><td>발생 확률</td><td>20%</td></tr>
+      </table>
+      <p class="subtle" style="margin-top:10px">유가·인플레이션 재상승, 연준 인하 지연, 경기 둔화와 이익 하향, 빅테크 밸류에이션 디레이팅</p>
+    </div><div class="card scenario base">
+      <span class="pill gold">연착륙·이익 컨센서스 달성</span>
+      <h3 style="margin-top:14px">Base Case</h3>
+      <p class="big-num">7,560</p>
+      <table>
+        <tr><td>예상 Forward EPS</td><td>$360</td></tr>
+        <tr><td>적용 PER</td><td>21.0x</td></tr>
+        <tr><td>발생 확률</td><td>50%</td></tr>
+      </table>
+      <p class="subtle" style="margin-top:10px">완만한 경기 둔화, 인플레 완화 재개, AI·소비가 이익을 방어, 현재와 유사한 멀티플 유지</p>
+    </div><div class="card scenario good">
+      <span class="pill good">AI 생산성·금리 하락</span>
+      <h3 style="margin-top:14px">Bull Case</h3>
+      <p class="big-num">8,550</p>
+      <table>
+        <tr><td>예상 Forward EPS</td><td>$380</td></tr>
+        <tr><td>적용 PER</td><td>22.5x</td></tr>
+        <tr><td>발생 확률</td><td>30%</td></tr>
+      </table>
+      <p class="subtle" style="margin-top:10px">AI 투자 사이클 강화, 빅테크·반도체 이익 상향, 10년물 금리 하락, 글로벌 위험선호 확대</p>
+    </div>
+  </div>
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h3>확률 분포</h3>
+      <div class="bar-row"><div>Bear Case</div><div class="bar-bg"><div class="bar redbar" data-width="20"></div></div><strong>20%</strong></div><div class="bar-row"><div>Base Case</div><div class="bar-bg"><div class="bar " data-width="50"></div></div><strong>50%</strong></div><div class="bar-row"><div>Bull Case</div><div class="bar-bg"><div class="bar greenbar" data-width="30"></div></div><strong>30%</strong></div>
+    </div>
+    <div class="card highlight">
+      <h3>확률가중 결론</h3>
+      <p class="big-num gold">7,533</p>
+      <p>현재 지수 대비 <strong>1.8%</strong>의 가격지수 기대수익률 후보입니다. Base/Bull 가능성은 열려 있으나, Bear Case의 하방 폭이 크기 때문에 기대값은 현재 지수에서 크게 벗어나지 않습니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="institutions" class="section">
+  <h2>7. 국내외 기관 전망 비교</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>기관</th><th>발간일</th><th>대상</th><th>목표/범위</th><th>핵심 논리</th><th>이익 관점</th><th>밸류에이션</th><th>금리/인플레/달러</th><th>리스크</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>RBC Capital Markets</td><td>2026-05-08</td><td>12개월 S&amp;P 500 목표</td><td>7,900</td><td>AI 낙관론과 강한 이익 성장</td><td>AI 관련 섹터 이익 상향</td><td>프리미엄 유지</td><td>금리·인플레·지정학 경계</td><td>5~10% 조정 가능성</td></tr><tr><td>Goldman Sachs</td><td>2026-04-29</td><td>2026년 말 S&amp;P 500</td><td>7,600</td><td>2026 EPS +12%, 2027 +10%, P/E 약 21배</td><td>빅테크·이익 성장 지속</td><td>5년 평균 근처이나 높은 수준</td><td>성장·금리 완화 기대</td><td>성장 둔화 또는 매파 Fed</td></tr><tr><td>J.P. Morgan</td><td>2026-04-21</td><td>2026년 말 S&amp;P 500</td><td>7,600 / Blue-sky 8,000</td><td>AI·테크 주도 이익 전망 상향</td><td>2026 EPS $330 언급</td><td>상승 여력은 이익에 의존</td><td>중동 긴장 완화 시 심리 개선</td><td>지정학·유가 변동성</td></tr><tr><td>Barclays</td><td>2026-03-24</td><td>2026년 말 S&amp;P 500</td><td>7,650</td><td>기술주 이익과 회복력 있는 성장</td><td>강한 이익 성장</td><td>리스크 감안해도 멀티플 유지</td><td>중동·인플레 리스크</td><td>AI 혼란·private credit</td></tr><tr><td>Deutsche Bank</td><td>2025-11-24</td><td>2026년 말 S&amp;P 500</td><td>8,000</td><td>AI 투자와 강한 EPS</td><td>2026 EPS $320</td><td>월가 상단권</td><td>금리 인하 기대</td><td>버블 논쟁·멀티플</td></tr><tr><td>Morgan Stanley</td><td>2025-11-24</td><td>2026년 S&amp;P 500</td><td>7,800</td><td>미국 주식 글로벌 상대 우위</td><td>2027 EPS 중요성 강조</td><td>성장주 프리미엄</td><td>금리 인하 지연 가능성</td><td>정책·유가</td></tr><tr><td>FactSet Bottom-up</td><td>2026-05-08</td><td>애널리스트 목표가 집계</td><td>8,521.40</td><td>개별 종목 목표가 누적 방식</td><td>CY2026 EPS 성장 +21.0%</td><td>Forward P/E 21.0</td><td>금리 민감</td><td>종목 목표가 낙관 편향 가능</td></tr><tr><td>한국투자증권</td><td>2026-01-28</td><td>S&amp;P 500 전망</td><td>7,000 ± 500</td><td>3년 연속 두 자릿수 상승 후 숨 고르기</td><td>EPS·P/E 빌드업 보수적</td><td>ERP 관점 부담</td><td>금리·원자재 변수</td><td>조정·횡보 가능성</td></tr><tr><td>삼성증권</td><td>2025-12-03</td><td>2026 미국 증시 전략</td><td>정성 전망</td><td>AI 외 이익 성장 확산</td><td>S&amp;P 500 EPS 가속 성장 자료 제시</td><td>밸류에이션보다 이익 확산 초점</td><td>금리 변곡점</td><td>빅테크 쏠림</td></tr><tr><td>미래에셋증권</td><td>2026-05-08</td><td>Week Ahead Snapshot</td><td>정성 전망</td><td>미국 12MF EPS 1개월 +2.2%</td><td>S&amp;P 500 1Q26·2026 EPS 상향</td><td>이익 모멘텀에 초점</td><td>달러·금리 체크</td><td>업종별 이익 차별화</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid cols-3" style="margin-top:16px">
+    <div class="card"><h3>가장 보수적</h3><p class="big-num">7,000±500</p><p>한국투자증권. ERP·P/E 부담과 3년 연속 강세 후 조정 가능성에 초점.</p></div>
+    <div class="card"><h3>중립적 컨센서스</h3><p class="big-num">7,600~7,650</p><p>Goldman, JPM, Barclays의 전략가 목표가 모여 있는 구간.</p></div>
+    <div class="card"><h3>낙관적 전망</h3><p class="big-num green">7,900~8,000+</p><p>RBC·Deutsche Bank·JPM Blue-sky. AI 이익 상향과 프리미엄 유지가 전제.</p></div>
+  </div>
+</section>
+
+<section id="flows" class="section">
+  <h2>8. 수급 및 자금 흐름</h2>
+  <div class="grid cols-3">
+    <div class="card"><h3>미국 주식형 펀드</h3><p class="big-num">$0.9B</p><p>2026-04-29 주간 미국 주식형 펀드 순유입은 6주 최저 수준. 랠리 중에도 일부 투자자는 유가·Fed 불확실성에 신중합니다.</p></div>
+    <div class="card"><h3>기술 섹터 펀드</h3><p class="big-num green">$1.43B</p><p>동기간 기술 섹터 펀드는 4주 연속 유입. AI·반도체 모멘텀이 수급을 견인했습니다.</p></div>
+    <div class="card"><h3>자사주 매입</h3><p class="big-num gold">$1.02T</p><p>S&P 500의 2025년 9월 말 12개월 buyback은 기록적인 $1.020T. 다만 2026년은 AI CAPEX로 성장률 둔화 가능성.</p></div>
+  </div>
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h3>달러와 글로벌 자금 흐름</h3>
+      <p>DXY가 98 부근에서 안정되면 해외 투자자의 환헤지 부담은 낮아질 수 있습니다. 반대로 지정학 리스크로 달러가 재강세를 보이면 미국 외 지역 자금 흐름에는 부담이 되고, 미국 대형주의 해외 매출 환산에도 부정적입니다.</p>
+    </div>
+    <div class="card">
+      <h3>위험자산 선호도</h3>
+      <p>VIX 17대와 HY OAS 2.79%는 공포가 극단적이지 않다는 신호입니다. 다만 Fed 보고서가 지적한 낮은 ERP와 높은 주가/이익 비율은 “조그마한 실망에도 변동성 확대”를 만들 수 있습니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="risk" class="section">
+  <h2>9. 리스크 매트릭스</h2>
+  <div class="risk-grid">
+    <div class="risk"><strong>인플레이션 재상승</strong><div>가능성<div class="level"><span style="width:70%"></span></div></div><div>영향도<div class="level"><span style="width:85%"></span></div></div><div class="subtle">CPI, PCE, 유가, 기대인플레</div></div><div class="risk"><strong>금리 재상승</strong><div>가능성<div class="level"><span style="width:60%"></span></div></div><div>영향도<div class="level"><span style="width:80%"></span></div></div><div class="subtle">10년물 4.5~4.75%, 실질금리</div></div><div class="risk"><strong>경기침체</strong><div>가능성<div class="level"><span style="width:35%"></span></div></div><div>영향도<div class="level"><span style="width:90%"></span></div></div><div class="subtle">실업률, ISM, 소비 둔화</div></div><div class="risk"><strong>기업이익 하향</strong><div>가능성<div class="level"><span style="width:45%"></span></div></div><div>영향도<div class="level"><span style="width:85%"></span></div></div><div class="subtle">EPS revision, 마진, 가이던스</div></div><div class="risk"><strong>AI 투자 과열</strong><div>가능성<div class="level"><span style="width:55%"></span></div></div><div>영향도<div class="level"><span style="width:75%"></span></div></div><div class="subtle">CAPEX/매출 전환율, GPU 재고</div></div><div class="risk"><strong>빅테크 규제</strong><div>가능성<div class="level"><span style="width:40%"></span></div></div><div>영향도<div class="level"><span style="width:65%"></span></div></div><div class="subtle">반독점, 데이터/AI 규제</div></div><div class="risk"><strong>지정학 리스크</strong><div>가능성<div class="level"><span style="width:65%"></span></div></div><div>영향도<div class="level"><span style="width:80%"></span></div></div><div class="subtle">유가, 달러, 방산·운송 차질</div></div><div class="risk"><strong>달러 강세</strong><div>가능성<div class="level"><span style="width:45%"></span></div></div><div>영향도<div class="level"><span style="width:55%"></span></div></div><div class="subtle">DXY 100 상회 여부</div></div><div class="risk"><strong>신용 스프레드 확대</strong><div>가능성<div class="level"><span style="width:35%"></span></div></div><div>영향도<div class="level"><span style="width:85%"></span></div></div><div class="subtle">HY OAS 3.5% 이상</div></div><div class="risk"><strong>밸류에이션 부담</strong><div>가능성<div class="level"><span style="width:75%"></span></div></div><div>영향도<div class="level"><span style="width:80%"></span></div></div><div class="subtle">Forward P/E 21x 이상 지속</div></div>
+  </div>
+</section>
+
+<section id="check" class="section">
+  <h2>10. 앞으로 관찰할 체크포인트</h2>
+  <div class="grid cols-4">
+    <div class="card"><h3>다음 FOMC</h3><p>기준금리 동결/인하 시그널과 dissent 수</p></div><div class="card"><h3>CPI/PCE/Core PCE</h3><p>에너지 가격 전가와 서비스 물가 둔화 여부</p></div><div class="card"><h3>고용보고서</h3><p>실업률 4.5% 상회 여부와 임금상승률</p></div><div class="card"><h3>10년물 금리</h3><p>4.5% 이상 지속 시 PER 압박</p></div><div class="card"><h3>달러 인덱스</h3><p>DXY 100 재돌파 여부</p></div><div class="card"><h3>EPS 컨센서스</h3><p>12M Forward EPS 상향 지속 여부</p></div><div class="card"><h3>빅테크 실적</h3><p>AI 매출화와 CAPEX 가이던스</p></div><div class="card"><h3>Nvidia/AI 반도체</h3><p>수요 코멘트, 공급 병목, HBM 가격</p></div><div class="card"><h3>자사주 매입</h3><p>CAPEX 증가와 주주환원 둔화 여부</p></div><div class="card"><h3>신용 스프레드</h3><p>HY OAS 3%대 후반 진입 여부</p></div><div class="card"><h3>VIX</h3><p>20 상회 지속 시 헤지 수요 확대</p></div><div class="card"><h3>ETF 자금 흐름</h3><p>대형성장·테크 유입이 broadening 되는지</p></div>
+  </div>
+</section>
+
+<section id="sources" class="section">
+  <h2>11. 출처와 검증 메모</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>수치 검증 메모</h3>
+      <ul class="source-list">
+        <li>S&P 500 현재 지수는 2026-05-08 종가 7,398.93을 사용했습니다. S&P factsheet의 2026-04-30 Price Return Index 7,209.01보다 최신 시장가격입니다.</li>
+        <li>전체 시가총액, 구성 종목, 섹터 비중, P/B, 배당수익률은 S&P Dow Jones Indices factsheet를 우선했습니다. 단, P/B·배당수익률의 기준일은 지수 가격 기준일보다 늦거나 빠를 수 있어 표시했습니다.</li>
+        <li>Forward P/E는 FactSet의 2026-05-08 업데이트 21.0x를 사용했고, Forward EPS는 현재 지수 ÷ Forward P/E로 역산했습니다.</li>
+        <li>ROE는 S&P factsheet의 P/B와 trailing P/E로 단순 역산한 proxy입니다. 회계 기준의 공식 ROE와 다를 수 있습니다.</li>
+        <li>기관 전망은 기사·리서치 공개 요약에서 확인 가능한 최신 수치만 표기하고, 목표 지수가 확인되지 않는 국내 자료는 정성 전망으로 분리했습니다.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>주요 출처</h3>
+      <ol class="source-list">
+        <li><strong>S&amp;P Dow Jones Indices</strong> — S&amp;P 500 factsheet, as of 2026-04-30 · <a href="https://www.spglobal.com/spdji/en/indices/equity/sp-500/" target="_blank" rel="noopener">source</a></li><li><strong>FactSet</strong> — Earnings Insight / S&amp;P 500 Earnings Season Update, 2026-05-08 · <a href="https://insight.factset.com/sp-500-earnings-season-update-may-8-2026" target="_blank" rel="noopener">source</a></li><li><strong>AP News</strong> — How major US stock indexes fared Friday 5/8/2026 · <a href="https://apnews.com/article/b7ff696f0770489a60427121a6931ada" target="_blank" rel="noopener">source</a></li><li><strong>FRED</strong> — DGS10 10-Year Treasury yield, 2026-05-07 · <a href="https://fred.stlouisfed.org/series/DGS10" target="_blank" rel="noopener">source</a></li><li><strong>BEA</strong> — GDP Advance Estimate Q1 2026; Personal Income and Outlays March 2026 · <a href="https://www.bea.gov/" target="_blank" rel="noopener">source</a></li><li><strong>BLS</strong> — CPI March 2026; Employment Situation April 2026 · <a href="https://www.bls.gov/" target="_blank" rel="noopener">source</a></li><li><strong>Reuters</strong> — RBC, J.P. Morgan, Barclays S&amp;P 500 target updates · <a href="https://www.reuters.com/" target="_blank" rel="noopener">source</a></li><li><strong>Federal Reserve</strong> — Financial Stability Report May 2026 · <a href="https://www.federalreserve.gov/publications/financial-stability-report.htm" target="_blank" rel="noopener">source</a></li><li><strong>Cboe</strong> — VIX spot price, as of 2026-05-08 · <a href="https://www.cboe.com/tradable-products/vix/" target="_blank" rel="noopener">source</a></li><li><strong>Morningstar / Reuters / Goldman summaries</strong> — ETF flows, buybacks and AI capex commentary · <a href="https://www.morningstar.com/" target="_blank" rel="noopener">source</a></li>
+      </ol>
+    </div>
+  </div>
+  <p class="footnotes" style="margin-top:18px">본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</p>
+</section>
+
+</main>
+
+<script>
+const scenarios = [{"name": "Bear Case", "tag": "인플레 재상승·금리 부담", "eps": 330, "per": 18.0, "target": 5940, "prob": 20, "tone": "bad", "assumption": "유가·인플레이션 재상승, 연준 인하 지연, 경기 둔화와 이익 하향, 빅테크 밸류에이션 디레이팅"}, {"name": "Base Case", "tag": "연착륙·이익 컨센서스 달성", "eps": 360, "per": 21.0, "target": 7560, "prob": 50, "tone": "base", "assumption": "완만한 경기 둔화, 인플레 완화 재개, AI·소비가 이익을 방어, 현재와 유사한 멀티플 유지"}, {"name": "Bull Case", "tag": "AI 생산성·금리 하락", "eps": 380, "per": 22.5, "target": 8550, "prob": 30, "tone": "good", "assumption": "AI 투자 사이클 강화, 빅테크·반도체 이익 상향, 10년물 금리 하락, 글로벌 위험선호 확대"}];
+const current = 7398.93;
+const weighted = 7533;
+
+function animateBars(){
+  document.querySelectorAll('.bar').forEach(el=>{
+    const w = parseFloat(el.dataset.width || 0);
+    setTimeout(()=>{el.style.width = Math.min(w,100)+'%'}, 160);
+  });
+}
+function drawScenario(){
+  const canvas = document.getElementById('scenarioCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad = 52;
+  const min = 5400, max = 8800;
+  ctx.strokeStyle = 'rgba(255,255,255,.16)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad,H-52); ctx.lineTo(W-pad,H-52); ctx.stroke();
+  [6000,7000,8000].forEach(v=>{
+    const x = pad + (v-min)/(max-min)*(W-2*pad);
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.beginPath(); ctx.moveTo(x,50); ctx.lineTo(x,H-52); ctx.stroke();
+    ctx.fillStyle = '#a9b8c8'; ctx.font='12px system-ui'; ctx.fillText(v.toLocaleString(), x-18, H-28);
+  });
+  const colors = {'bad':'#ff6b72','base':'#d8b25c','good':'#43d08a'};
+  scenarios.forEach((s,i)=>{
+    const y = 76 + i*58;
+    const x = pad + (s.target-min)/(max-min)*(W-2*pad);
+    ctx.fillStyle = colors[s.tone] || '#3c8cff';
+    ctx.beginPath(); ctx.arc(x,y, 10 + s.prob/8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#f4f7fb'; ctx.font='bold 14px system-ui'; ctx.fillText(s.name + ' ' + s.target.toLocaleString(), x+18, y+5);
+    ctx.fillStyle = '#a9b8c8'; ctx.font='12px system-ui'; ctx.fillText('확률 '+s.prob+'%', x+18, y+22);
+  });
+  const cx = pad + (current-min)/(max-min)*(W-2*pad);
+  ctx.strokeStyle = '#3c8cff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx,42); ctx.lineTo(cx,H-52); ctx.stroke();
+  ctx.fillStyle='#96c6ff'; ctx.font='bold 12px system-ui'; ctx.fillText('현재 '+current.toLocaleString(), cx-38, 32);
+  const wx = pad + (weighted-min)/(max-min)*(W-2*pad);
+  ctx.strokeStyle = '#d8b25c'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wx,42); ctx.lineTo(wx,H-52); ctx.stroke();
+  ctx.fillStyle='#ffe0a1'; ctx.fillText('확률가중 '+weighted.toLocaleString(), wx-44, 48);
+}
+window.addEventListener('load',()=>{animateBars(); drawScenario();});
+</script>
+</body>
+</html>

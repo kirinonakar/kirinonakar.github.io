@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>코스피 투자전략 리서치 대시보드 | 2026-05-11</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg2: #0c1b31;
+      --card: rgba(16, 31, 55, .78);
+      --card2: rgba(12, 25, 46, .92);
+      --stroke: rgba(141, 189, 255, .18);
+      --stroke2: rgba(255, 255, 255, .08);
+      --text: #edf6ff;
+      --muted: #9eb0c7;
+      --dim: #71829a;
+      --cyan: #60e7ff;
+      --blue: #7fb0ff;
+      --navy: #0b1b34;
+      --gold: #f2c166;
+      --red: #ff6b77;
+      --soft-red: #f0a282;
+      --green: #7ce5b5;
+      --gray: #a5b4c7;
+      --shadow: 0 24px 70px rgba(0,0,0,.35);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+      background:
+        radial-gradient(circle at 20% -10%, rgba(42,125,255,.35), transparent 32rem),
+        radial-gradient(circle at 92% 8%, rgba(96,231,255,.22), transparent 28rem),
+        radial-gradient(circle at 70% 80%, rgba(242,193,102,.10), transparent 25rem),
+        linear-gradient(135deg, #050b14 0%, #07111f 48%, #0a1527 100%);
+      min-height: 100vh;
+      line-height: 1.55;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: min(1440px, calc(100% - 36px)); margin: 0 auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(5, 11, 20, .74);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--stroke2);
+    }
+    .topbar-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+      gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: -.02em; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: linear-gradient(135deg, #1a4eff, #60e7ff 55%, #f2c166);
+      box-shadow: 0 0 30px rgba(96,231,255,.28);
+    }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    nav a {
+      color: #cfe3ff; font-size: 13px; padding: 8px 10px; border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    nav a:hover { border-color: var(--stroke); background: rgba(255,255,255,.05); text-decoration: none; }
+    .hero {
+      padding: 44px 0 26px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr);
+      gap: 22px; align-items: stretch;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(19,41,73,.82), rgba(8,20,39,.84));
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .panel::before {
+      content: "";
+      position: absolute; inset: 0 0 auto 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(96,231,255,.8), transparent);
+      opacity: .7;
+    }
+    .hero-main { padding: 32px; }
+    .eyebrow {
+      display: inline-flex; gap: 8px; align-items: center;
+      color: var(--cyan); font-size: 13px; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+    .pulse {
+      width: 8px; height: 8px; border-radius: 99px; background: var(--cyan);
+      box-shadow: 0 0 0 0 rgba(96,231,255,.7);
+      animation: pulse 2.4s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(96,231,255,.45); }
+      70% { box-shadow: 0 0 0 12px rgba(96,231,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(96,231,255,0); }
+    }
+    h1 { margin: 0; font-size: clamp(34px, 5vw, 68px); line-height: .98; letter-spacing: -.055em; }
+    .subtitle { color: #b7c8de; max-width: 880px; font-size: 17px; margin: 18px 0 0; }
+    .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .tag {
+      border: 1px solid var(--stroke); color: #d7eaff;
+      background: rgba(96,231,255,.07);
+      border-radius: 999px; padding: 8px 11px; font-size: 13px;
+    }
+    .hero-side { padding: 24px; display: grid; gap: 14px; }
+    .target-box {
+      border-radius: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(96,231,255,.13), rgba(242,193,102,.12));
+      border: 1px solid rgba(96,231,255,.25);
+    }
+    .big-number { font-size: clamp(36px, 5vw, 58px); font-weight: 950; letter-spacing: -.045em; line-height: 1; }
+    .upside { color: var(--gold); font-weight: 900; }
+    .meta-row { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .grid-kpi {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin: 22px 0 0;
+    }
+    .kpi {
+      background: rgba(255,255,255,.045);
+      border: 1px solid var(--stroke2);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 116px;
+    }
+    .kpi .label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .kpi .value { font-size: 25px; font-weight: 900; letter-spacing: -.03em; margin-top: 8px; }
+    .kpi .note { color: var(--dim); font-size: 12px; margin-top: 7px; }
+    section { margin: 26px 0; }
+    .section-head {
+      display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+      margin: 42px 0 16px;
+    }
+    h2 { margin: 0; font-size: clamp(24px, 3vw, 36px); letter-spacing: -.035em; }
+    .section-head p { margin: 4px 0 0; color: var(--muted); max-width: 760px; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .cards-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .cards-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.18);
+      position: relative;
+      overflow: hidden;
+    }
+    .card.soft { background: rgba(255,255,255,.035); }
+    .card h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -.02em; }
+    .card p { color: #b8c8dc; margin: 0; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 9px; border-radius: 999px;
+      border: 1px solid var(--stroke);
+      font-size: 12px; font-weight: 800;
+      color: var(--cyan); background: rgba(96,231,255,.08);
+    }
+    .badge.gold { color: var(--gold); background: rgba(242,193,102,.09); border-color: rgba(242,193,102,.28); }
+    .badge.red { color: var(--red); background: rgba(255,107,119,.09); border-color: rgba(255,107,119,.30); }
+    .badge.blue { color: var(--blue); background: rgba(127,176,255,.10); border-color: rgba(127,176,255,.28); }
+    .badge.gray { color: var(--gray); background: rgba(165,180,199,.09); border-color: rgba(165,180,199,.22); }
+    ul.clean { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+    ul.clean li { color: #c8d7ea; display: flex; gap: 9px; align-items: flex-start; }
+    ul.clean li::before {
+      content: ""; flex: 0 0 7px; width: 7px; height: 7px; margin-top: .58em;
+      border-radius: 99px; background: var(--cyan);
+      box-shadow: 0 0 14px rgba(96,231,255,.5);
+    }
+    .negative li::before { background: var(--blue); box-shadow: 0 0 14px rgba(127,176,255,.4); }
+    .metrics-list { display: grid; gap: 10px; }
+    .metric-line { display: grid; grid-template-columns: 150px 1fr auto; gap: 12px; align-items: center; }
+    .metric-line span:first-child { color: var(--muted); font-weight: 700; font-size: 13px; }
+    .bar {
+      height: 9px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .bar > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue), var(--cyan), var(--gold)); }
+    .metric-line b { font-size: 13px; }
+    table {
+      width: 100%; border-collapse: collapse;
+      background: rgba(9, 20, 36, .72);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    th, td { padding: 13px 14px; border-bottom: 1px solid var(--stroke2); vertical-align: top; text-align: left; }
+    th {
+      background: rgba(96,231,255,.08);
+      color: #dff7ff; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+    }
+    td { color: #c5d4e8; font-size: 14px; }
+    tr:last-child td { border-bottom: 0; }
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: 0 12px 38px rgba(0,0,0,.2); }
+    .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .scenario {
+      padding: 22px;
+      border-radius: 24px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+      position: relative; overflow: hidden;
+    }
+    .scenario::after {
+      content: ""; position: absolute; inset: auto -30% -65% -30%; height: 150px;
+      background: radial-gradient(circle, rgba(96,231,255,.22), transparent 60%);
+    }
+    .scenario h3 { margin: 0; font-size: 22px; }
+    .scenario .target { font-size: 42px; font-weight: 950; letter-spacing: -.05em; margin: 12px 0 6px; }
+    .scenario small { color: var(--muted); }
+    .formula {
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      padding: 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      color: #dff7ff;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    .prob-chart {
+      margin-top: 18px; background: rgba(255,255,255,.06);
+      border-radius: 999px; height: 34px; overflow: hidden; display: flex;
+      border: 1px solid var(--stroke2);
+    }
+    .prob-chart div { display: grid; place-items: center; font-size: 12px; font-weight: 900; color: #06111d; }
+    .prob-bear { background: linear-gradient(90deg, #7fb0ff, #93a9c3); width: 25%; }
+    .prob-base { background: linear-gradient(90deg, #60e7ff, #8ef2ff); width: 50%; }
+    .prob-bull { background: linear-gradient(90deg, #f2c166, #ffdf8d); width: 25%; }
+    .mini-chart { display: grid; gap: 10px; margin-top: 14px; }
+    .mini-row { display: grid; grid-template-columns: 90px 1fr 80px; gap: 10px; align-items: center; }
+    .mini-row span { color: var(--muted); font-size: 13px; }
+    .pill-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .pill {
+      border: 1px solid var(--stroke2); border-radius: 999px; padding: 6px 9px;
+      color: #cad8ea; background: rgba(255,255,255,.05); font-size: 12px;
+    }
+    .risk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .risk {
+      background: rgba(255,255,255,.035); border: 1px solid var(--stroke2); border-radius: 18px; padding: 16px;
+    }
+    .risk .scores { display: flex; gap: 8px; margin: 10px 0; }
+    .score {
+      padding: 5px 8px; border-radius: 999px; background: rgba(127,176,255,.1);
+      color: #d7e8ff; border: 1px solid rgba(127,176,255,.18); font-size: 12px; font-weight: 800;
+    }
+    .source-note {
+      color: var(--dim); font-size: 12px; margin-top: 10px;
+    }
+    .foot {
+      margin: 44px 0 34px;
+      padding: 24px;
+      border: 1px solid var(--stroke);
+      border-radius: 24px;
+      background: rgba(255,255,255,.04);
+      color: #b8c9dd;
+    }
+    .disclaimer {
+      margin-top: 16px;
+      color: #e8f5ff;
+      border-top: 1px solid var(--stroke2);
+      padding-top: 16px;
+      font-weight: 800;
+    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .status { font-weight: 900; }
+    .status.pos { color: var(--gold); }
+    .status.neu { color: var(--cyan); }
+    .status.neg { color: var(--blue); }
+    .caption { color: var(--muted); font-size: 12px; margin-top: 8px; }
+    .heat {
+      display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-top: 12px;
+    }
+    .heat div {
+      padding: 12px; border-radius: 16px;
+      background: rgba(255,255,255,.045); border: 1px solid var(--stroke2);
+    }
+    .heat b { display:block; font-size: 20px; color: var(--cyan); }
+    .timeline { display: grid; gap: 10px; }
+    .timeline .item {
+      display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,.12);
+    }
+    .timeline .item:last-child { border-bottom: 0; }
+    .timeline time { color: var(--cyan); font-weight: 900; }
+    .small { font-size: 12px; color: var(--dim); }
+    @media (max-width: 1100px) {
+      .hero-grid, .cards, .cards-2, .cards-4, .scenario-grid, .risk-grid, .two-col { grid-template-columns: 1fr; }
+      .grid-kpi { grid-template-columns: repeat(2, 1fr); }
+      .metric-line { grid-template-columns: 110px 1fr 58px; }
+    }
+    @media (max-width: 680px) {
+      .wrap { width: min(100% - 22px, 1440px); }
+      nav { display: none; }
+      .hero-main { padding: 22px; }
+      .hero-side { padding: 18px; }
+      .grid-kpi { grid-template-columns: 1fr; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+      th, td { padding: 10px; font-size: 12px; }
+      .metric-line, .mini-row, .timeline .item { grid-template-columns: 1fr; gap: 5px; }
+      .heat { grid-template-columns: 1fr 1fr; }
+    }
+    @media print {
+      body { background: #07111f; }
+      .topbar { position: static; }
+      .panel, .card, table { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand"><span class="brand-mark"></span><span>KOSPI Strategy Dashboard</span></div>
+      <nav aria-label="페이지 내비게이션">
+        <a href="#summary">요약</a>
+        <a href="#macro">매크로</a>
+        <a href="#sectors">업종</a>
+        <a href="#valuation">밸류에이션</a>
+        <a href="#scenario">시나리오</a>
+        <a href="#institutions">기관전망</a>
+        <a href="#flows">수급</a>
+        <a href="#risks">리스크</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" id="top">
+      <div class="hero-grid">
+        <div class="panel hero-main">
+          <div class="eyebrow"><span class="pulse"></span> Data cut: 2026-05-11 intraday</div>
+          <h1>코스피 투자전략<br/>리서치 대시보드</h1>
+          <p class="subtitle">
+            AI 반도체 사이클, 원화·금리·수출 흐름, 이익 추정치와 글로벌 밸류에이션을 결합해
+            1년 후 코스피 지수의 가정 기반 목표 지수 후보를 시각화했습니다.
+          </p>
+          <div class="tags">
+            <span class="tag">분석 대상: KOSPI Index</span>
+            <span class="tag">기준 지수: 보통주 시장 전체</span>
+            <span class="tag">시나리오 기반 추정</span>
+            <span class="tag">투자 참고용</span>
+          </div>
+          <div class="grid-kpi" aria-label="핵심 KPI">
+            <div class="kpi"><div class="label">현재 코스피</div><div class="value">7,830.09</div><div class="note">Investing.com KS11 장중</div></div>
+            <div class="kpi"><div class="label">KOSPI 시가총액</div><div class="value">6,367조 원</div><div class="note">KRX, 2026-05-11 10:08 기준</div></div>
+            <div class="kpi"><div class="label">12M Forward EPS</div><div class="value">966.2p</div><div class="note">대신증권, 2026-05-04/06</div></div>
+            <div class="kpi"><div class="label">Forward PER</div><div class="value">8.10x</div><div class="note">장중 지수 ÷ EPS 단순 재계산</div></div>
+            <div class="kpi"><div class="label">PBR</div><div class="value">2.26x*</div><div class="note">KRX/KOFIA 공개 최신치, 기준일 시차</div></div>
+            <div class="kpi"><div class="label">ROE</div><div class="value">27.9%*</div><div class="note">PBR/PER로 산출한 implied ROE</div></div>
+            <div class="kpi"><div class="label">배당수익률</div><div class="value">0.85%*</div><div class="note">KRX/KOFIA 공개 최신치, 확인 필요</div></div>
+            <div class="kpi"><div class="label">상승/하락 여력</div><div class="value upside">16.2%</div><div class="note">확률가중 목표 대비</div></div>
+          </div>
+          <p class="source-note">* PBR·배당수익률·ROE는 실시간 지수와 기준일이 다를 수 있습니다. ROE는 공식 KOSPI ROE가 아니라 PBR/PER 산식으로 계산한 참고값입니다.</p>
+        </div>
+
+        <aside class="panel hero-side">
+          <div class="target-box">
+            <div class="badge gold">확률가중 목표 지수 후보</div>
+            <div class="big-number">9,095</div>
+            <div class="meta-row"><span>현재 지수 대비</span><strong class="upside">+16.2%</strong></div>
+            <div class="prob-chart" aria-label="시나리오 확률 분포">
+              <div class="prob-bear">Bear 25%</div>
+              <div class="prob-base">Base 50%</div>
+              <div class="prob-bull">Bull 25%</div>
+            </div>
+          </div>
+          <div class="card soft">
+            <span class="badge">현재 국면</span>
+            <h3 style="margin-top:10px">실적 장세 / 확장 진입, 단기 과열 신호 병존</h3>
+            <p>반도체 EPS 레벨업이 지수 상승의 중심입니다. 다만 시가총액 집중도와 단기 급등, 환율·유가·금리 리스크는 변동성을 키울 수 있습니다.</p>
+          </div>
+          <div class="formula">
+            목표 지수 = Forward EPS × 적용 PER<br/>
+            확률가중 목표 = 6,480×25% + 8,976×50% + 11,948×25% = 9,095<br/>
+            기대수익률 = 9,095 / 7,830.09 - 1 = 16.2%
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="summary">
+      <div class="section-head">
+        <div>
+          <h2>투자 요약</h2>
+          <p>핵심 논리는 “이익 레벨업이 밸류에이션 정상화를 얼마나 끌어낼 수 있는가”입니다.</p>
+        </div>
+        <span class="badge gold">한 줄 결론: 실적 모멘텀 우위, 단기 가격 부담 관리 필요</span>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <span class="badge gold">상승 요인</span>
+          <ul class="clean">
+            <li>AI 인프라 투자 확대로 HBM·DRAM·NAND 가격 및 출하 모멘텀 강화</li>
+            <li>4월 수출 +48.0%, 반도체 수출 +173%로 이익 추정치 상향 근거 확대</li>
+            <li>금리 인하 기대와 달러 안정 시 외국인 자금 유입 지속 가능</li>
+            <li>밸류업, 배당 확대, 자사주 소각 등 주주환원 정책이 Korea discount 축소 요인</li>
+            <li>국내외 증권사 목표치 상향이 투자심리와 수급에 긍정적으로 작용</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="badge blue">하락 리스크</span>
+          <ul class="clean negative">
+            <li>삼성전자·SK하이닉스 비중 급등에 따른 지수 집중도와 쏠림 리스크</li>
+            <li>AI CapEx 둔화, 메모리 가격 피크아웃, HBM 경쟁 심화 가능성</li>
+            <li>원/달러 환율 재상승과 유가 충격이 물가·외국인 수급에 부담</li>
+            <li>미국 금리 재상승 또는 위험자산 선호 약화 시 PER 확장 제한</li>
+            <li>실적 컨센서스가 과도하게 빠르게 올라간 경우 하향 조정 민감도 확대</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="badge">체크포인트</span>
+          <p style="margin-top:12px">코스피가 추가 상승하려면 <b>EPS의 추가 상향</b> 또는 <b>PER 정상화</b> 중 하나가 필요합니다. EPS가 유지되더라도 PER이 9배로 회귀하면 8,700~9,000선 후보가 가능하지만, EPS가 꺾이면 지수는 빠르게 밴드 하단으로 회귀할 수 있습니다.</p>
+          <div class="heat">
+            <div><b>+48%</b><span class="small">4월 수출 YoY</span></div>
+            <div><b>+173%</b><span class="small">반도체 수출 YoY</span></div>
+            <div><b>2.50%</b><span class="small">한국 기준금리</span></div>
+            <div><b>7.51x</b><span class="small">MSCI Korea Fwd PER</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="overview">
+      <div class="section-head">
+        <div>
+          <h2>코스피 지수 개요</h2>
+          <p>KOSPI는 한국거래소 유가증권시장 보통주 전체를 포괄하는 한국 대표 주가지수입니다.</p>
+        </div>
+      </div>
+      <div class="cards-2">
+        <div class="card">
+          <h3>정의와 산출 방식</h3>
+          <p>KOSPI는 Korea Composite Stock Price Index의 약자로, 한국거래소 유가증권시장에 상장된 보통주를 대상으로 하는 대표 지수입니다. 산식은 기준시점 대비 현재 시가총액을 비교하는 시가총액 가중 방식이며, 기준일은 1980년 1월 4일, 기준값은 100으로 사용됩니다.</p>
+          <div class="pill-grid">
+            <span class="pill">시가총액 가중</span><span class="pill">대표 지수</span><span class="pill">KRX 유가증권시장</span><span class="pill">Base 1980-01-04 = 100</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>구성·대표성</h3>
+          <p>반도체, 2차전지, 자동차, 금융, 조선·방산, 바이오, 인터넷/플랫폼, 소비재 등 한국 수출·제조업과 내수 대형주가 함께 반영됩니다. 최근 지수 민감도는 삼성전자와 SK하이닉스를 중심으로 한 AI 메모리 사이클에 크게 의존합니다.</p>
+          <div class="pill-grid">
+            <span class="pill">삼성전자</span><span class="pill">SK하이닉스</span><span class="pill">LG에너지솔루션</span><span class="pill">현대차</span><span class="pill">기아</span><span class="pill">삼성바이오로직스</span><span class="pill">셀트리온</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="macro">
+      <div class="section-head">
+        <div>
+          <h2>한국 증시 및 매크로 환경</h2>
+          <p>수출과 반도체는 강하지만, 유가·환율·금리·중국 경기의 변동성은 할인율과 외국인 수급을 흔듭니다.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>최신 관찰치</th><th>상태</th><th>코스피 영향</th><th>관찰 포인트</th></tr></thead>
+          <tbody>
+            <tr><td>한국 GDP</td><td>IMF 2026년 1.9%, OECD 1.7%</td><td class="status neu">중립</td><td>수출은 방어적이나 내수·에너지 비용이 부담</td><td>수출 호조가 내수 둔화를 상쇄하는지</td></tr>
+            <tr><td>수출</td><td>4월 수출 +48.0% YoY, 반도체 +173%</td><td class="status pos">긍정</td><td>이익 컨센서스 상향의 핵심 근거</td><td>월중 1~20일 수출, 반도체 단가</td></tr>
+            <tr><td>한국 기준금리</td><td>한국은행 2.50% 동결</td><td class="status neu">중립</td><td>인하 기대는 우호적이나 물가·유가 충격이 변수</td><td>금통위 인하 시점, 물가 기대</td></tr>
+            <tr><td>미국 금리</td><td>FOMC 3.50~3.75% 범위 유지</td><td class="status neu">중립</td><td>미국 할인율 하락 시 EM·한국 PER 확장 여지</td><td>미 CPI, 장기금리, Fed dot plot</td></tr>
+            <tr><td>환율</td><td>원/달러 약 1,470원대</td><td class="status neg">부정/혼재</td><td>수출주에는 일부 우호적이나 외국인 수급·물가에는 부담</td><td>1,450·1,500·1,520원 구간 반응</td></tr>
+            <tr><td>달러 인덱스</td><td>DXY 약 98선</td><td class="status neu">중립</td><td>달러 안정 시 외국인 순매수 유지에 유리</td><td>DXY 100 상회 여부</td></tr>
+            <tr><td>중국 경기</td><td>대중 수출 회복세</td><td class="status neu">중립</td><td>소재·산업재·소비재 회복 여부가 관건</td><td>중국 PMI, 부동산·소비 부양책</td></tr>
+            <tr><td>정책 요인</td><td>밸류업, 배당 확대, 자사주 소각 논의</td><td class="status pos">긍정</td><td>PBR 할인 완화와 금융·지주사 재평가 가능</td><td>세제·공시·주주환원 후속 조치</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="sectors">
+      <div class="section-head">
+        <div>
+          <h2>업종 대시보드</h2>
+          <p>코스피 전체의 이익 모멘텀은 반도체가 견인하고, 밸류업은 금융·지주, 글로벌 CapEx는 조선·방산·전력기기에 영향을 줍니다.</p>
+        </div>
+      </div>
+      <div class="cards-4">
+        <div class="card"><span class="badge gold">반도체</span><h3>영향도 매우 높음</h3><p>HBM·DRAM·NAND 공급 부족과 가격 상승이 EPS 상향을 주도. 단, 지수 집중도와 사이클 피크아웃 리스크가 가장 큼.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:95%"></i></div><b>강함</b></div></div>
+        <div class="card"><span class="badge">2차전지</span><h3>선별 회복</h3><p>수출 개선 조짐은 있으나 EV 수요·광물 가격·미중 정책 리스크로 종목별 차별화가 큼.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:55%"></i></div><b>중립+</b></div></div>
+        <div class="card"><span class="badge">자동차</span><h3>환율 수혜 vs 수출 둔화</h3><p>원화 약세와 주주환원은 긍정, 중동·미국 수요와 전기차 가격 경쟁은 부담.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:58%"></i></div><b>중립</b></div></div>
+        <div class="card"><span class="badge gold">금융</span><h3>밸류업 핵심</h3><p>배당·자사주 소각·ROE 개선 논리가 PBR 할인 완화로 연결될 수 있음. 경기 둔화 시 충당금은 리스크.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:74%"></i></div><b>긍정</b></div></div>
+        <div class="card"><span class="badge gold">조선·방산</span><h3>수주·환율 우호</h3><p>LNG선, 방산 수출, 글로벌 재무장 수요가 견조. 원가·인력·납기 리스크는 확인 필요.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:76%"></i></div><b>긍정</b></div></div>
+        <div class="card"><span class="badge">바이오</span><h3>중장기 옵션</h3><p>수출·CMO·시밀러 성장성은 긍정이나 규제, 임상, 고밸류 종목 변동성 주의.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:62%"></i></div><b>중립+</b></div></div>
+        <div class="card"><span class="badge blue">인터넷/플랫폼</span><h3>AI 비용 변수</h3><p>광고·커머스 회복과 AI 서비스 확장성이 있으나 경쟁 심화와 CapEx가 마진을 압박.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:48%"></i></div><b>중립</b></div></div>
+        <div class="card"><span class="badge gray">소비재</span><h3>내수 확인 필요</h3><p>환율과 물가가 원가 부담. 중국·관광 회복, 화장품·식품 수출이 선별적 기회.</p><div class="metric-line"><span>모멘텀</span><div class="bar"><i style="width:42%"></i></div><b>혼재</b></div></div>
+      </div>
+    </section>
+
+    <section id="valuation">
+      <div class="section-head">
+        <div>
+          <h2>이익·밸류에이션 구조</h2>
+          <p>현재 지수는 실시간 가격 기준 Forward PER 약 8.10배로 계산되지만, 공식/증권사 데이터의 기준일과 장중 지수 기준일이 다릅니다.</p>
+        </div>
+      </div>
+      <div class="cards-2">
+        <div class="card">
+          <h3>계산 구조</h3>
+          <div class="formula">
+            Forward PER = 현재 지수 / 12M Forward EPS<br/>
+            7,830.09 / 966.2 = 8.10x<br/><br/>
+            PER 8.0x: 7,730p<br/>
+            PER 9.0x: 8,696p<br/>
+            PER 10.0x: 9,662p
+          </div>
+          <p class="caption">대신증권 리포트는 12개월 선행 EPS 966.2p와 선행 PER 7.18배, PER 8배 7,729p·9배 8,695p를 제시했습니다. 본 대시보드는 5월 11일 장중 지수로 PER을 재계산했습니다.</p>
+        </div>
+        <div class="card">
+          <h3>ROE와 PBR 해석</h3>
+          <p>PBR은 장부가 대비 가격, ROE는 장부가가 벌어들이는 수익률입니다. 단순한 Gordon Growth 관점에서는 ROE가 지속적으로 올라가고 자본비용이 내려갈수록 정당화 가능한 PBR이 높아집니다.</p>
+          <div class="mini-chart">
+            <div class="mini-row"><span>이익 상향</span><div class="bar"><i style="width:85%"></i></div><b>PER 부담 완화</b></div>
+            <div class="mini-row"><span>ROE 개선</span><div class="bar"><i style="width:72%"></i></div><b>PBR 재평가</b></div>
+            <div class="mini-row"><span>자본비용</span><div class="bar"><i style="width:45%"></i></div><b>금리·환율 영향</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="section-head" style="margin-top:22px">
+        <div><h3 style="margin:0">글로벌 지수 Peer Comparison</h3><p>동일 기준이 완전히 일치하지 않으므로 Forward/Trailing 여부와 기준일을 분리해 읽어야 합니다.</p></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>지수</th><th>기준</th><th>Forward PER</th><th>PBR</th><th>배당수익률</th><th>해석</th></tr></thead>
+          <tbody>
+            <tr><td>KOSPI</td><td>장중 지수 재계산 + KRX/KOFIA</td><td>8.10x</td><td>2.26x*</td><td>0.85%*</td><td>EPS 상승에 비해 지수 급등으로 PER이 빠르게 정상화 중</td></tr>
+            <tr><td>MSCI Korea</td><td>2026-04-30</td><td>7.51x</td><td>2.62x</td><td>0.89%</td><td>대형·중형주 85% 커버, 반도체 집중도 높음</td></tr>
+            <tr><td>MSCI Emerging Markets</td><td>2026-04-30</td><td>12.05x</td><td>2.42x</td><td>2.07%</td><td>한국은 EM 대비 이익 회복은 강하지만 배당수익률은 낮음</td></tr>
+            <tr><td>MSCI ACWI</td><td>2026-04-30</td><td>18.07x</td><td>3.72x</td><td>1.62%</td><td>글로벌 선진·신흥시장 대비 한국 할인은 여전</td></tr>
+            <tr><td>S&amp;P 500</td><td>FactSet 2026-05-08</td><td>21.0x</td><td>—</td><td>—</td><td>AI·대형 기술주 프리미엄 반영</td></tr>
+            <tr><td>Nikkei 225</td><td>시장 데이터 추정</td><td>약 23.8x</td><td>—</td><td>—</td><td>일본 재평가·엔화·기업지배구조 개선 반영</td></tr>
+            <tr><td>Taiwan / Taiwan 50</td><td>시장 데이터 추정</td><td>약 19.7x</td><td>—</td><td>약 2.1%</td><td>AI 반도체 밸류체인 프리미엄</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="scenario">
+      <div class="section-head">
+        <div>
+          <h2>1년 후 코스피 목표 지수 후보 3가지</h2>
+          <p>아래 값은 투자 권유가 아니라 EPS와 PER 가정에 따른 시나리오 추정치입니다. 확률 합계는 100%입니다.</p>
+        </div>
+      </div>
+      <div class="scenario-grid">
+        <div class="scenario">
+          <span class="badge blue">방어</span>
+          <h3>Bear Case</h3>
+          <div class="target">6,480</div>
+          <small>Forward EPS 900p × PER 7.2x · 확률 25%</small>
+          <ul class="clean negative">
+            <li>글로벌 경기 둔화와 AI CapEx 속도 조절</li><li>반도체 이익 개선 지연 및 EPS 하향</li><li>원/달러 환율 재상승과 외국인 이탈</li><li>한국 증시 할인 지속</li>
+          </ul>
+        </div><div class="scenario">
+          <span class="badge ">기준</span>
+          <h3>Base Case</h3>
+          <div class="target">8,976</div>
+          <small>Forward EPS 1,020p × PER 8.8x · 확률 50%</small>
+          <ul class="clean ">
+            <li>반도체 업황 정상화와 HBM/메모리 가격 상승</li><li>수출 회복과 이익 컨센서스 달성</li><li>금리 인하 기대와 달러 안정</li><li>밸류에이션 평균 회귀</li>
+          </ul>
+        </div><div class="scenario">
+          <span class="badge gold">확장</span>
+          <h3>Bull Case</h3>
+          <div class="target">11,948</div>
+          <small>Forward EPS 1,160p × PER 10.3x · 확률 25%</small>
+          <ul class="clean ">
+            <li>AI 반도체 사이클 강화와 장기 공급 부족</li><li>외국인 순매수·ETF 자금 유입 확대</li><li>밸류업 정책·배당·자사주 효과 가시화</li><li>ROE 개선과 Korea discount 축소</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>확률가중 목표 지수와 기대수익률</h3>
+        <div class="formula">
+          확률가중 목표 지수 = Bear 6,480 × 25% + Base 8,976 × 50% + Bull 11,948 × 25% = 9,095<br/>
+          현재 지수 대비 기대수익률 = 9,095 / 7,830.09 - 1 = 16.2%
+        </div>
+        <div class="mini-chart">
+          <div class="mini-row"><span>Bear</span><div class="bar"><i style="width:54%"></i></div><b>6,480</b></div>
+          <div class="mini-row"><span>Base</span><div class="bar"><i style="width:75%"></i></div><b>8,976</b></div>
+          <div class="mini-row"><span>Bull</span><div class="bar"><i style="width:100%"></i></div><b>11,948</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="institutions">
+      <div class="section-head">
+        <div>
+          <h2>국내외 기관 전망 비교</h2>
+          <p>기관별 전망은 발간일과 지수 레벨에 따라 빠르게 구식이 될 수 있습니다. 특히 2월 전망은 5월 11일 장중 7,800선 돌파 이후에는 보수적 자료로 분류했습니다.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>기관</th><th>발간일</th><th>전망 대상</th><th>목표/범위</th><th>핵심 논리</th><th>이익·밸류</th><th>수급/환율/금리</th><th>리스크</th><th>출처</th></tr></thead>
+          <tbody>
+            <tr><td>대신증권</td><td>2026-05-08</td><td>KOSPI 2026</td><td>8,800</td><td>반도체 업황 개선, 이익 상향, 밸류에이션 정상화</td><td>KOSPI 순이익 추정치 +48%, 반도체 +74%; PER 9배 적용 논리</td><td>위험자산 선호와 외국인 수급 개선</td><td>하반기 변동성, 정책·유가·물가 변수</td><td><a href="https://en.sedaily.com/finance/2026/05/08/daishin-raises-kospi-target-to-8800-sees-continued-uptrend">Seoul Economic Daily</a></td></tr>
+            <tr><td>Goldman Sachs</td><td>2026-05-08</td><td>KOSPI</td><td>9,000</td><td>한국을 아시아 최선호 시장으로 제시, AI·하드웨어 이익 모멘텀</td><td>하드웨어·반도체 이익 성장 기대</td><td>글로벌 자금의 한국 선호 강화</td><td>메모리 사이클 지속성과 급등 후 가격 부담</td><td><a href="https://en.sedaily.com/news/2026/05/08/goldman-sachs-raises-kospi-target-to-9000-sees-rally">Seoul Economic Daily</a></td></tr>
+            <tr><td>NH투자증권</td><td>2026-05-07</td><td>KOSPI 12개월</td><td>9,000</td><td>EPS 전망 상향이 금리·리스크 프리미엄 부담을 상쇄</td><td>EPS 추정치 개선</td><td>핵심 물가 안정과 자금 유입 기대</td><td>할인율 재상승, 이익 상향 둔화</td><td>공개 보도 종합</td></tr>
+            <tr><td>현대차증권</td><td>2026-05-11</td><td>KOSPI 연말</td><td>Base 9,750 / Bull 12,000 / Downside 6,000</td><td>AI 수요와 CAPEX 선순환, 반도체 밸류에이션 정상화</td><td>반도체 12M 선행 순이익 +293%, 섹터 PER 5.17배로 장기평균 대비 낮음</td><td>개인·ETF 자금과 외국인 수급</td><td>AI 후발주 조정, 과열 신호</td><td><a href="https://www.businesskorea.co.kr/news/articleView.html?idxno=269167">BusinessKorea</a></td></tr>
+            <tr><td>JPMorgan</td><td>2026-05-11</td><td>KOSPI Bull Scenario</td><td>상단 10,000</td><td>AI 모멘텀과 메모리 공급 부족 지속</td><td>HBM 장기 계약, 메모리 재고 타이트, 가격 모멘텀</td><td>은행·증권·방산·전력기기 등 확산 기대</td><td>삼성전자 노동 리스크, 반도체 공급 병목</td><td><a href="https://www.asiae.co.kr/en/article/2026051110103013282">Asia Business Daily</a></td></tr>
+            <tr><td>Morgan Stanley</td><td>2026-02-27</td><td>KOSPI 2026</td><td>Bear 5,000 / Base 6,500 / Bull 7,500</td><td>실적 모멘텀, 내수 개선, 개혁 진전</td><td>EPS 성장률 78%, 목표 P/E 10배</td><td>국내 유동성과 개혁 기대</td><td>기술주 집중, 반도체 이익 수정 둔화</td><td><a href="https://www.investing.com/news/stock-market-news/morgan-stanley-lifts-kospi-target-here-are-the-new-2026-forecasts-4531635">Investing.com</a></td></tr>
+            <tr><td>Nomura</td><td>2026-02 전후</td><td>KOSPI</td><td>상단 8,000</td><td>한국 증시 저평가와 이익 회복 기대</td><td>정성 관점 중심</td><td>외국인 수급 개선</td><td>자료 시점이 5월 급등 전이라 참고 제한</td><td>공개 보도 종합</td></tr>
+            <tr><td>KRX·MSCI·IMF·OECD·BOK</td><td>2026-04~05</td><td>데이터/매크로</td><td>지수 목표 없음</td><td>시장 데이터, 글로벌 비교, 성장률·금리 환경 제공</td><td>MSCI Korea Fwd PER 7.51, P/BV 2.62</td><td>성장률·금리·수출·환율 프레임</td><td>데이터 기준일 차이</td><td><a href="#sources">하단 출처</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cards-3 cards" style="margin-top:16px">
+        <div class="card"><span class="badge blue">가장 보수적</span><h3>Morgan Stanley 2월 Base 6,500</h3><p>5월 급등 전 전망이므로 현재는 하단 방어·조정 시나리오에 가까운 기준점입니다.</p></div>
+        <div class="card"><span class="badge">중립적</span><h3>8,800~9,000</h3><p>대신·골드만·NH의 핵심 구간. EPS 상향과 PER 정상화를 동시에 반영합니다.</p></div>
+        <div class="card"><span class="badge gold">낙관적</span><h3>9,750~12,000</h3><p>현대차증권·JPMorgan의 상단 논리. AI 메모리 공급 부족과 재평가가 동시에 진행되는 경우입니다.</p></div>
+      </div>
+    </section>
+
+    <section id="flows">
+      <div class="section-head">
+        <div>
+          <h2>수급 및 자금 흐름</h2>
+          <p>코스피의 단기 방향성은 EPS보다 빠르게 움직이는 외국인·ETF·프로그램 수급에 민감합니다.</p>
+        </div>
+      </div>
+      <div class="cards-2">
+        <div class="card">
+          <h3>수급 구조</h3>
+          <div class="metrics-list">
+            <div class="metric-line"><span>외국인</span><div class="bar"><i style="width:82%"></i></div><b>순매수 우위</b></div>
+            <div class="metric-line"><span>기관</span><div class="bar"><i style="width:56%"></i></div><b>선별 매수</b></div>
+            <div class="metric-line"><span>개인</span><div class="bar"><i style="width:64%"></i></div><b>ETF·레버리지</b></div>
+            <div class="metric-line"><span>프로그램</span><div class="bar"><i style="width:70%"></i></div><b>대형주 민감</b></div>
+          </div>
+          <p class="caption">대신증권 자료는 5월 초 코스피 외국인 순매수가 약 3조 원 규모였고 전기전자 업종 중심이었다고 설명했습니다.</p>
+        </div>
+        <div class="card">
+          <h3>환율과 외국인 수급</h3>
+          <p>원화 약세는 수출주 이익에는 우호적일 수 있지만, 급격한 약세는 외국인 투자자의 환차손 우려를 키웁니다. 따라서 코스피에는 “완만한 원화 안정 + 수출 호조” 조합이 가장 우호적입니다.</p>
+          <ul class="clean">
+            <li>1,450원 이하: 외국인 환차손 부담 완화 가능</li>
+            <li>1,450~1,500원: 수출주 수익성과 수급이 혼재</li>
+            <li>1,500원 상회: 물가·금리·외국인 이탈 리스크 확대</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="risks">
+      <div class="section-head">
+        <div>
+          <h2>리스크 매트릭스</h2>
+          <p>발생 가능성과 지수 영향도를 함께 봐야 합니다. 가장 큰 리스크는 “반도체 이익이 꺾이는 순간 PER도 함께 낮아지는 이중 압박”입니다.</p>
+        </div>
+      </div>
+      <div class="risk-grid">
+        <div class="risk"><h3>미국 금리 재상승</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 높음</span></div><p>관찰: 미 CPI, 10년물 금리, Fed 발언. 대응: PER 확장 가정 보수화.</p></div>
+        <div class="risk"><h3>원화 약세</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 중상</span></div><p>관찰: USD/KRW 1,500원 상회, DXY. 대응: 외국인 수급과 환헤지 비용 점검.</p></div>
+        <div class="risk"><h3>반도체 업황 둔화</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 매우 높음</span></div><p>관찰: DRAM/NAND 현물·계약가격, HBM 수주, 고객 재고. 대응: EPS 하향 시나리오 적용.</p></div>
+        <div class="risk"><h3>중국 경기 부진</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 중</span></div><p>관찰: 중국 PMI, 부동산 지표, 대중 수출. 대응: 소재·소비재 가정 조정.</p></div>
+        <div class="risk"><h3>지정학·유가 충격</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 높음</span></div><p>관찰: 중동 휴전, 브렌트유, 에너지 수입액. 대응: 물가·금리·마진 민감도 점검.</p></div>
+        <div class="risk"><h3>외국인 자금 이탈</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 높음</span></div><p>관찰: 일별 순매수, MSCI Korea ETF 플로우, 프로그램 매매. 대응: 대형주 쏠림 완화 여부 확인.</p></div>
+        <div class="risk"><h3>기업이익 하향</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 매우 높음</span></div><p>관찰: 12M Forward EPS, 2Q 가이던스. 대응: Base EPS를 1,020p에서 950p 이하로 재조정.</p></div>
+        <div class="risk"><h3>밸류업 정책 실망</h3><div class="scores"><span class="score">가능성 중</span><span class="score">영향도 중</span></div><p>관찰: 세제 인센티브, 자사주 소각, 배당 정책. 대응: 금융·지주 PBR 재평가 가정 축소.</p></div>
+        <div class="risk"><h3>지수 집중도</h3><div class="scores"><span class="score">가능성 높음</span><span class="score">영향도 높음</span></div><p>관찰: 삼성전자·SK하이닉스 합산 비중, 상승종목 수. 대응: breadth 악화 시 단기 과열 신호로 해석.</p></div>
+      </div>
+    </section>
+
+    <section id="checkpoints">
+      <div class="section-head">
+        <div>
+          <h2>관찰해야 할 체크포인트</h2>
+          <p>지수 레벨보다 더 중요한 것은 EPS 상향 속도와 수급의 지속성입니다.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="timeline">
+          <div class="item"><time>금통위</time><p>한국은행 기준금리, 물가·유가 판단, 인하 시점 힌트</p></div>
+          <div class="item"><time>FOMC</time><p>미국 정책금리 경로, 달러와 글로벌 위험자산 선호도</p></div>
+          <div class="item"><time>환율</time><p>원/달러 1,450·1,500·1,520원 레벨, 외국인 순매수와 동행성</p></div>
+          <div class="item"><time>수출입</time><p>월중 1~10일·1~20일·월간 수출, 반도체·자동차·2차전지 품목별 흐름</p></div>
+          <div class="item"><time>메모리 가격</time><p>DRAM/NAND 계약가격, HBM 장기계약, 서버·SSD 수요</p></div>
+          <div class="item"><time>실적 시즌</time><p>삼성전자·SK하이닉스 및 대형 코스피 기업 가이던스</p></div>
+          <div class="item"><time>수급</time><p>외국인 순매수, 기관 리밸런싱, 프로그램 매매, 레버리지 ETF 자금</p></div>
+          <div class="item"><time>MSCI</time><p>MSCI Korea 편입·비중 변경과 신흥국 펀드 플로우</p></div>
+          <div class="item"><time>밸류업</time><p>배당 확대, 자사주 소각, 세제·공시 후속 조치</p></div>
+          <div class="item"><time>위험선호</time><p>VIX, DXY, 유가, 미국 빅테크 실적과 AI CapEx 전망</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="section-head">
+        <div>
+          <h2>출처와 검증 메모</h2>
+          <p>실시간 가격, 컨센서스, 지수별 밸류에이션은 출처와 기준일이 다르므로 숫자를 직접 비교할 때 주의가 필요합니다.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>분류</th><th>출처</th><th>사용 수치/내용</th><th>주의점</th></tr></thead>
+          <tbody>
+            <tr><td>현재 지수</td><td><a href="https://www.investing.com/indices/kospi">Investing.com KOSPI KS11</a></td><td>7,830.09 장중</td><td>장중 데이터는 변동 가능</td></tr>
+            <tr><td>시가총액</td><td><a href="https://en.sedaily.com/finance/2026/05/11/breaking-news-korea-stock-market-cap-tops-7000-trillion-won">KRX via Seoul Economic Daily</a></td><td>KOSPI 시총 6,367.0006조 원</td><td>10:08 기준 보도 수치</td></tr>
+            <tr><td>EPS/PER</td><td><a href="https://money2.daishin.com/PDF/Out/intranet_data/Product/ResearchCenter/Report/2026/05/57376_MMB_260506.pdf">대신증권 Strategy PDF</a></td><td>12M Fwd EPS 966.2p, 선행 PER 7.18배, PER 8배 7,729p·9배 8,695p</td><td>PDF 기준일 지수와 5월 11일 장중 지수 시차</td></tr>
+            <tr><td>PBR/배당</td><td><a href="https://www.indexergo.com/series/?frq=D&idxDetail=20206">KRX/KOFIA via Indexergo</a>, <a href="https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd?locale=en">KRX Data Marketplace</a></td><td>KOSPI PBR 2.26, 배당수익률 0.85% 공개 최신치</td><td>로그인/조회 제한과 최신 장중 지수 미반영 가능</td></tr>
+            <tr><td>금리</td><td><a href="https://www.bok.or.kr/eng/bbs/E0000634/view.do?depth=400423&amp;depth2=400417&amp;depth3=400423&amp;menuNo=400423&amp;nttId=10097454&amp;oldMenuNo=400423&amp;pageIndex=1&amp;pageUnit=10&amp;programType=newsDataEng&amp;searchCnd=1&amp;searchKwd=">Bank of Korea</a></td><td>기준금리 2.50% 동결</td><td>차기 금통위에서 변경 가능</td></tr>
+            <tr><td>수출</td><td><a href="https://www.reuters.com/world/asia-pacific/south-korea-april-exports-rise-480-yy-chip-boom-continues-2026-05-01/">Reuters</a></td><td>4월 수출 +48.0%, 반도체 +173%</td><td>잠정치/월간 확정치 차이 가능</td></tr>
+            <tr><td>GDP</td><td><a href="https://en.yna.co.kr/view/AEN20260414007600320">IMF/Yonhap</a>, <a href="https://oecd.mofa.go.kr/oecd-en/brd/m_27606/view.do?seq=211">OECD/MOFA</a></td><td>IMF 1.9%, OECD 1.7%</td><td>전망기관별 가정 차이</td></tr>
+            <tr><td>기관 전망</td><td>대신·Goldman·NH·현대차·JPMorgan·Morgan Stanley 공개 보도</td><td>8,800~12,000 상단 전망 및 2월 보수 전망</td><td>발간일과 장중 지수 레벨 차이 확인 필요</td></tr>
+            <tr><td>글로벌 비교</td><td><a href="https://www.msci.com/indexes/index/941000">MSCI Korea</a>, <a href="https://www.msci.com/indexes/index/891800">MSCI EM</a>, <a href="https://www.msci.com/indexes/index/892400">MSCI ACWI</a>, <a href="https://insight.factset.com/sp-500-earnings-season-update-may-8-2026">FactSet S&amp;P 500</a></td><td>MSCI 및 S&amp;P 500 Forward PER/PBR/배당수익률</td><td>MSCI Korea는 KOSPI 전체가 아닌 대형·중형주 약 85% 커버</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <strong>검증 메모:</strong> 본 대시보드는 2026-05-11 장중 지수와 2026년 4~5월 공개 자료를 결합했습니다. KOSPI 전체, KOSPI200, MSCI Korea는 구성과 산식이 다르므로 같은 “한국 주식” 데이터라도 PER/PBR/배당수익률이 서로 다를 수 있습니다. 컨센서스 데이터는 기관별 산정 범위·발간일·가격 기준일이 달라 직접 비교 시 오차가 발생할 수 있습니다.
+      <div class="disclaimer">본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</div>
+    </footer>
+  </main>
+</body>
+</html>

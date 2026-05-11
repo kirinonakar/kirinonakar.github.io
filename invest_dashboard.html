@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Research Dashboard | kirinonakar</title>
+    <meta name="description" content="글로벌 경제 지표부터 개별 종목 분석까지, kirinonakar의 투자 리서치 대시보드입니다.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@500;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="git_profile.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="git_profile.ico" type="image/x-icon">
+    <style>
+        :root {
+            --research-blue: #58a6ff;
+            --research-gold: #d4a843;
+            --research-bg: #0d1117;
+            --card-bg: rgba(22, 27, 34, 0.7);
+            --card-border: rgba(48, 54, 61, 0.8);
+        }
+
+        body {
+            background-color: var(--research-bg);
+            color: #c9d1d9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            margin-bottom: 5rem;
+            text-align: left;
+            border-left: 4px solid var(--research-blue);
+            padding-left: 2rem;
+            animation: fadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dashboard-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1.1rem;
+            color: #8b949e;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+
+        .category-group {
+            margin-bottom: 5rem;
+            animation: fadeInUp 1s ease-out both;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .category-header::after {
+            content: '';
+            height: 1px;
+            flex: 1;
+            background: linear-gradient(90deg, var(--card-border), transparent);
+        }
+
+        .research-section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--research-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .research-card {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .research-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--research-blue), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .research-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(88, 166, 255, 0.4);
+            background: rgba(33, 38, 45, 0.9);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .research-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-type::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--research-blue);
+        }
+
+        .card-icon {
+            font-size: 2.2rem;
+            background: rgba(88, 166, 255, 0.1);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-info h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-info p {
+            font-size: 0.95rem;
+            color: #8b949e;
+            line-height: 1.6;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: var(--research-blue);
+            font-size: 0.9rem;
+            gap: 0.5rem;
+            transition: gap 0.3s ease;
+        }
+
+        .research-card:hover .card-footer {
+            gap: 0.8rem;
+        }
+
+        .back-nav {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #8b949e;
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #fff;
+            border-color: var(--research-blue);
+            transform: translateX(-5px);
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 6rem 1.5rem 2rem;
+            }
+            .dashboard-header {
+                margin-bottom: 3rem;
+            }
+            .back-nav {
+                top: 1.5rem;
+                left: 1.5rem;
+            }
+            .research-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+
+    <nav class="back-nav">
+        <a href="index.html" class="back-link">
+            <span>←</span> BACK_TO_HOME
+        </a>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <span class="research-section-label">Terminal / Investment_Research</span>
+            <h1 class="dashboard-title">Investment Research</h1>
+            <p class="dashboard-subtitle">글로벌 거시 경제 데이터부터 실시간 시장 지표, 그리고 개별 기업 분석까지 아우르는 투자 통합 연구 플랫폼입니다.</p>
+        </header>
+
+        <!-- Category 1: Web App -->
+        <section class="category-group" style="animation-delay: 0.1s;">
+            <div class="category-header">
+                <h2>Web Apps</h2>
+            </div>
+            <div class="research-grid">
+                <a href="https://react-portfolio-7td.pages.dev/" class="research-card" target="_blank">
+                    <div class="card-type">Macro Data</div>
+                    <div class="card-icon">🌍</div>
+                    <div class="card-info">
+                        <h3>Global Economic Dashboard</h3>
+                        <p>전 세계 주요국들의 금리, 물가, GDP 성장률 등 핵심 매크로 지표를 실시간 시각화합니다.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>LAUNCH_SYSTEM</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <a href="https://react-backtester.pages.dev/" class="research-card" target="_blank">
+                    <div class="card-type">Analysis Tool</div>
+                    <div class="card-icon">📊</div>
+                    <div class="card-info">
+                        <h3>Pro Portfolio Backtester</h3>
+                        <p>정교한 데이터 엔진을 통해 과거 시점의 자산 배분 전략과 수익률을 시뮬레이션합니다.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>LAUNCH_SYSTEM</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <a href="fire_simulator.html" class="research-card">
+                    <div class="card-type">Simulation</div>
+                    <div class="card-icon">🔥</div>
+                    <div class="card-info">
+                        <h3>FIRE Simulator</h3>
+                        <p>조기 은퇴와 경제적 자유를 위한 자산 축적 및 인출 경로를 정밀하게 분석합니다.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>OPEN_MODULE</span>
+                        <span>→</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Category 2: Market Index -->
+        <section class="category-group" style="animation-delay: 0.2s;">
+            <div class="category-header">
+                <h2>Market Index</h2>
+            </div>
+            <div class="research-grid">
+                <a href="SP500.html" class="research-card">
+                    <div class="card-type">Market Index</div>
+                    <div class="card-icon">🇺🇸</div>
+                    <div class="card-info">
+                        <h3>S&P 500 Index</h3>
+                        <p>미국 시장의 척도인 S&P 500 지수의 주요 구성 종목과 흐름을 실시간으로 추적합니다.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>VIEW_DASHBOARD</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <a href="KOSPI.html" class="research-card">
+                    <div class="card-type">Market Index</div>
+                    <div class="card-icon">🇰🇷</div>
+                    <div class="card-info">
+                        <h3>KOSPI Index</h3>
+                        <p>대한민국 주식 시장의 흐름과 주요 지표를 한눈에 파악할 수 있는 통합 대시보드입니다.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>VIEW_DASHBOARD</span>
+                        <span>→</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Category 3: Equity Analysis -->
+        <section class="category-group" style="animation-delay: 0.3s;">
+            <div class="category-header">
+                <h2>Equity Analysis</h2>
+            </div>
+            <div class="research-grid">
+                <a href="Samsung.html" class="research-card">
+                    <div class="card-type">Equity Analysis</div>
+                    <div class="card-icon">📱</div>
+                    <div class="card-info">
+                        <h3>Samsung Electronics</h3>
+                        <p>글로벌 IT 리더 삼성전자의 주가 흐름과 사업 부문별 실적 데이터를 심층 분석합니다.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>ANALYZE_STOCK</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <a href="SKhynix.html" class="research-card">
+                    <div class="card-type">Equity Analysis</div>
+                    <div class="card-icon">💾</div>
+                    <div class="card-info">
+                        <h3>SK hynix</h3>
+                        <p>메모리 반도체 시장의 강자 SK하이닉스의 성과와 글로벌 반도체 사이클을 추적합니다.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>ANALYZE_STOCK</span>
+                        <span>→</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <footer class="footer" style="text-align: center; margin-top: 6rem; border-top: 1px solid var(--card-border); padding-top: 2rem;">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #484f58;">&copy; 2026 kirinonakar Investment Research. Access Authorized.</p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
