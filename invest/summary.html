@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글로벌 자산배분 리서치 대시보드 | 2026-05-12</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#08111f; --bg2:#0b1628; --panel:#101c31; --panel2:#13213a; --line:#243653;
+      --text:#e5edf7; --muted:#91a4bd; --accent:#6ee7b7; --accent2:#93c5fd; --warn:#fbbf24; --danger:#fb7185;
+      --voo:#60a5fa; --qqq:#a78bfa; --schd:#34d399; --smh:#f59e0b; --kospi:#fb7185; --gold:#facc15; --btc:#f97316; --cash:#cbd5e1;
+      --shadow: 0 18px 45px rgba(0,0,0,.28);
+      --radius: 22px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; color:var(--text); background:
+      radial-gradient(circle at 20% -10%, rgba(96,165,250,.25), transparent 38%),
+      radial-gradient(circle at 90% 0%, rgba(245,158,11,.18), transparent 30%),
+      linear-gradient(180deg,#07101d 0%, #0b1323 45%, #090f1a 100%); line-height:1.62;}
+    a{color:#93c5fd; text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:1280px; margin:0 auto; padding:24px}
+    header.hero{position:relative; overflow:hidden; border:1px solid rgba(147,197,253,.2); border-radius:32px; padding:36px; background:
+      linear-gradient(135deg, rgba(16,28,49,.95), rgba(15,23,42,.72)),
+      radial-gradient(circle at 80% 10%, rgba(110,231,183,.18), transparent 38%); box-shadow:var(--shadow);}
+    .kicker{display:flex; flex-wrap:wrap; gap:10px; align-items:center; color:var(--muted); font-size:14px; margin-bottom:12px}
+    .badge{display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); padding:6px 10px; border-radius:999px; color:#dbeafe; font-size:12px; font-weight:700}
+    .badge.good{background:rgba(52,211,153,.12); border-color:rgba(52,211,153,.35); color:#bbf7d0}
+    .badge.warn{background:rgba(251,191,36,.12); border-color:rgba(251,191,36,.35); color:#fde68a}
+    .badge.risk{background:rgba(251,113,133,.12); border-color:rgba(251,113,133,.35); color:#fecdd3}
+    h1{font-size:clamp(32px,5vw,58px); line-height:1.05; margin:0 0 16px; letter-spacing:-.045em}
+    h2{font-size:clamp(24px,3vw,36px); line-height:1.15; margin:0 0 16px; letter-spacing:-.035em}
+    h3{font-size:20px; margin:0 0 10px; letter-spacing:-.02em}
+    p{margin:0 0 12px}.lead{font-size:18px; max-width:980px; color:#c8d7ea}.muted{color:var(--muted)}
+    .hero-grid{display:grid; grid-template-columns:1.4fr .8fr; gap:24px; margin-top:28px}
+    .panel{background:linear-gradient(180deg, rgba(16,28,49,.96), rgba(12,22,40,.92)); border:1px solid rgba(148,163,184,.18); border-radius:var(--radius); padding:22px; box-shadow:0 12px 30px rgba(0,0,0,.18)}
+    .panel.soft{background:rgba(15,23,42,.55)}
+    .summary-cards{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:22px 0}
+    .metric{border:1px solid rgba(255,255,255,.09); border-radius:18px; padding:16px; background:rgba(255,255,255,.045)}
+    .metric .label{font-size:12px; color:var(--muted); margin-bottom:8px}.metric .value{font-size:24px; font-weight:900; letter-spacing:-.03em}.metric .hint{font-size:12px; color:#9fb1c8; margin-top:4px}
+    .section{margin:34px 0}.section-title{display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:16px}.section-title p{max-width:760px;color:var(--muted)}
+    .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px}.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}.grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+    .chart-box{position:relative; height:310px}.mini-chart{position:relative; height:250px}.chart-box canvas,.mini-chart canvas{width:100%!important;height:100%!important}
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:18px; font-size:14px} th,td{padding:12px 12px; text-align:left; border-bottom:1px solid rgba(148,163,184,.14); vertical-align:top} th{color:#c7d2fe; font-size:12px; text-transform:uppercase; letter-spacing:.06em; background:rgba(96,165,250,.08)} tr:hover td{background:rgba(255,255,255,.025)}
+    .asset-dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:8px; vertical-align:middle}.weight{font-weight:900}.bar{height:9px; background:rgba(148,163,184,.18); border-radius:99px; overflow:hidden; min-width:80px}.bar span{display:block; height:100%; border-radius:99px}.score{display:flex; align-items:center; gap:10px}
+    .scenario-card{position:relative; overflow:hidden}.scenario-card.reco{border-color:rgba(110,231,183,.55); box-shadow:0 0 0 1px rgba(110,231,183,.2), 0 24px 55px rgba(16,185,129,.12)}
+    .scenario-card.reco:before{content:"추천"; position:absolute; top:16px; right:16px; background:linear-gradient(135deg,#34d399,#60a5fa); color:#05111f; font-weight:900; padding:6px 12px; border-radius:999px; font-size:12px}
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0}.pill{font-size:12px; color:#dbeafe; padding:6px 9px; border-radius:999px; background:rgba(96,165,250,.11); border:1px solid rgba(96,165,250,.2)}
+    .timeline{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px}.time-card{padding:12px; border-radius:16px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08)}.time-card strong{display:block; color:#bfdbfe; margin-bottom:4px}
+    .matrix-wrap{overflow:auto}.matrix-table td,.matrix-table th{white-space:nowrap}.rank{font-weight:900; color:#e0f2fe}
+    .heatmap{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}.heat{padding:16px; border-radius:18px; border:1px solid rgba(255,255,255,.1); min-height:120px}.heat.low{background:rgba(52,211,153,.11)}.heat.med{background:rgba(251,191,36,.12)}.heat.high{background:rgba(251,113,133,.14)}.heat.vhigh{background:linear-gradient(135deg,rgba(251,113,133,.24),rgba(245,158,11,.15))}.heat .level{font-size:12px; font-weight:900; letter-spacing:.06em; text-transform:uppercase}.heat.low .level{color:#86efac}.heat.med .level{color:#fde68a}.heat.high .level,.heat.vhigh .level{color:#fecdd3}
+    .guru{display:flex; flex-direction:column; gap:10px}.guru .name{display:flex; justify-content:space-between; align-items:center; gap:8px}.quote-note{font-size:13px; color:#b7c5d9}.callout{padding:22px; border-radius:24px; background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(96,165,250,.11)); border:1px solid rgba(110,231,183,.35)}
+    .rules{counter-reset:item; display:grid; gap:12px}.rule{position:relative; padding:16px 16px 16px 48px; border:1px solid rgba(255,255,255,.09); background:rgba(255,255,255,.045); border-radius:18px}.rule:before{counter-increment:item; content:counter(item); position:absolute; left:16px; top:17px; display:grid; place-items:center; width:22px; height:22px; border-radius:50%; background:rgba(96,165,250,.25); color:#dbeafe; font-size:12px; font-weight:900}
+    .source-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}.source-box{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:16px}.source-box ul{margin:8px 0 0; padding-left:18px}.source-box li{margin:6px 0; color:#b6c6dc; font-size:13px}
+    .foot{font-size:12px; color:#93a4bb; padding:24px 0 10px}.sticky-nav{position:sticky; top:0; z-index:10; backdrop-filter: blur(14px); background:rgba(8,17,31,.76); border-bottom:1px solid rgba(148,163,184,.12)}.sticky-nav .wrap{padding-top:10px;padding-bottom:10px;display:flex;gap:8px;overflow:auto}.sticky-nav a{white-space:nowrap; color:#cbd5e1; border:1px solid rgba(255,255,255,.1); padding:7px 10px; border-radius:999px; font-size:12px; background:rgba(255,255,255,.04)}
+    .small{font-size:13px;color:#aabbd1}.warn-text{color:#fde68a}.danger-text{color:#fecdd3}.good-text{color:#bbf7d0}.nowrap{white-space:nowrap}.mobile-only{display:none}
+    @media (max-width: 980px){.hero-grid,.grid-2,.grid-3,.grid-4,.summary-cards,.source-grid{grid-template-columns:1fr}.heatmap{grid-template-columns:1fr 1fr}.timeline{grid-template-columns:1fr}.wrap{padding:16px}header.hero{padding:24px}.chart-box{height:270px}.mini-chart{height:220px}}
+    @media (max-width: 640px){.heatmap{grid-template-columns:1fr}.section-title{display:block}.metric .value{font-size:21px}.mobile-only{display:inline}.desktop-only{display:none}table{font-size:13px}th,td{padding:10px 9px}}
+    @media print{body{background:#fff;color:#111}.sticky-nav{display:none}.panel,header.hero{box-shadow:none;background:#fff;color:#111;border-color:#ddd}.muted,.small,.foot{color:#444}.badge,.pill{color:#111}.wrap{max-width:100%;padding:10px}}
+  </style>
+</head>
+<body>
+  <nav class="sticky-nav"><div class="wrap">
+    <a href="#summary">요약</a><a href="#macro">매크로</a><a href="#assets">자산별 논리</a><a href="#matrix">매력도 매트릭스</a><a href="#scenarios">3대 시나리오</a><a href="#recommendation">최종 추천</a><a href="#risks">리스크</a><a href="#gurus">투자 대가 관점</a><a href="#rules">리밸런싱</a><a href="#sources">출처</a>
+  </div></nav>
+
+  <main class="wrap">
+    <header class="hero" id="summary">
+      <div class="kicker">
+        <span class="badge good">글로벌 자산배분</span>
+        <span class="badge">ETF · 매크로 · 대체자산</span>
+        <span class="badge warn">데이터 기준일: 2026-05-12</span>
+      </div>
+      <h1>VOO·QQQ·SCHD·SMH·KOSPI·금·BTC·현금 자산배분 대시보드</h1>
+      <p class="lead">현재 시장은 <b>AI·반도체 이익 모멘텀</b>과 <b>밸류에이션·금리·지정학 리스크</b>가 동시에 존재하는 구간이다. 따라서 성장자산을 완전히 피하기보다, VOO 중심의 글로벌 베타에 SCHD·금·현금 완충장치를 결합하고 BTC·SMH는 제한적 위성으로 두는 균형형 접근이 가장 합리적이다.</p>
+      <div class="summary-cards">
+        <div class="metric"><div class="label">추천 시나리오</div><div class="value">균형형</div><div class="hint">성장 67% · 방어/현금 33%</div></div>
+        <div class="metric"><div class="label">예상 연수익률 범위</div><div class="value">8~12%</div><div class="hint">5년 명목 연율 추정</div></div>
+        <div class="metric"><div class="label">예상 변동성</div><div class="value">12~16%</div><div class="hint">주식+대체자산 혼합</div></div>
+        <div class="metric"><div class="label">위험 등급</div><div class="value">중간+</div><div class="hint">AI·BTC 노출 관리 필요</div></div>
+        <div class="metric"><div class="label">리밸런싱 주기</div><div class="value">분기~반기</div><div class="hint">±5%p 이탈 시 점검</div></div>
+      </div>
+      <div class="hero-grid">
+        <div class="panel soft">
+          <h3>한 줄 결론</h3>
+          <p>가장 합리적인 기본안은 <b class="good-text">VOO 30%, QQQ 12%, SCHD 15%, SMH 8%, KOSPI 12%, GOLD 10%, BTC 5%, 현금 8%</b>이다. 미국 성장주와 한국 반도체 랠리를 따라가되, 금·현금·배당 ETF로 “틀렸을 때의 생존성”을 확보한다.</p>
+          <div class="pill-row"><span class="pill">일괄매수보다 3~6개월 분할</span><span class="pill">SMH·KOSPI 급등 후 추격 주의</span><span class="pill">금과 BTC는 서로 다른 헤지</span><span class="pill">현금은 수익률 포기 비용이 아니라 옵션</span></div>
+        </div>
+        <div class="panel soft">
+          <h3>시장 체크포인트</h3>
+          <table>
+            <tr><td>Fed 기준금리</td><td><b>3.50~3.75%</b> 유지</td></tr>
+            <tr><td>미 10년물</td><td><b>4.41%</b> 부근</td></tr>
+            <tr><td>S&P 500 12M Fwd P/E</td><td><b>21.0x</b> · 평균 대비 부담</td></tr>
+            <tr><td>KOSPI</td><td><b>7,800~7,900대</b> · 반도체 주도 급등</td></tr>
+            <tr><td>금</td><td><b>$4,750/oz 부근</b> · 지정학/부채 헤지</td></tr>
+            <tr><td>BTC</td><td><b>$81k 부근</b> · ETF 수급과 규제 변수</td></tr>
+          </table>
+        </div>
+      </div>
+    </header>
+
+    <section class="section" id="macro">
+      <div class="section-title"><div><h2>1. 글로벌 매크로 환경</h2><p>이 대시보드는 특정 방향을 단정하지 않고, 금리·인플레이션·달러·AI 사이클·한국 증시 재평가를 동시에 고려한 시나리오 기반 접근이다.</p></div></div>
+      <div class="grid-4">
+        <div class="panel"><span class="badge warn">금리</span><h3>인하 기대 후퇴</h3><p class="small">Fed는 기준금리를 3.50~3.75%로 유지 중이다. 유가·인플레이션 재상승이 확인되면 성장주 밸류에이션에 압박이 생긴다.</p></div>
+        <div class="panel"><span class="badge risk">인플레이션</span><h3>에너지 충격 감시</h3><p class="small">중동 리스크와 유가 상승은 CPI 재가속의 핵심 변수다. 물가가 다시 높아지면 금·현금은 방어 역할을 하고 QQQ·SMH는 흔들릴 수 있다.</p></div>
+        <div class="panel"><span class="badge good">AI·반도체</span><h3>이익 사이클은 강함</h3><p class="small">AI 인프라 투자, HBM·메모리·파운드리 수요는 SMH와 KOSPI의 핵심 상승 동력이다. 다만 CapEx 과잉과 밸류에이션 과열은 동시에 봐야 한다.</p></div>
+        <div class="panel"><span class="badge">달러·유동성</span><h3>DXY 98 전후</h3><p class="small">달러 약세는 금·비미국 자산에 우호적이지만, 지정학 충격 때는 달러가 다시 안전자산으로 강해질 수 있다.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="assets">
+      <div class="section-title"><div><h2>2. 자산별 투자 논리</h2><p>각 자산은 “수익률 후보”가 아니라 포트폴리오 안에서 맡는 역할이 다르다. 한 자산이 모든 환경에서 이기는 구조를 기대하면 안 된다.</p></div></div>
+      <div class="grid-2">
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--voo)"></span>VOO · 미국 대형주 핵심 베타</h3><p><b>역할:</b> 포트폴리오의 기본 성장 엔진. S&P 500의 글로벌 이익 체력과 낮은 비용을 활용한다.</p><p class="small"><b>상승 요인:</b> 기업 이익 증가, AI 생산성, 미국 소비·서비스 회복. <b>리스크:</b> 21배 전후의 높은 Forward P/E, 빅테크 집중, 금리 재상승.</p></div>
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--qqq)"></span>QQQ · 성장주·AI·빅테크 집중</h3><p><b>역할:</b> 장기 혁신 프리미엄 추구. VOO보다 고성장·고변동성.</p><p class="small"><b>상승 요인:</b> AI 소프트웨어·클라우드·플랫폼 수익화. <b>리스크:</b> 고PER, 금리 민감도, 소수 대형주 집중.</p></div>
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--schd)"></span>SCHD · 배당·가치·방어</h3><p><b>역할:</b> 변동성 완충과 현금흐름. 성장주 과열 구간에서 상대적으로 안정적 중심추.</p><p class="small"><b>상승 요인:</b> 배당성장, 가치주 재평가, 금리 안정. <b>리스크:</b> 기술주 강세장에서는 상대 소외, 경기침체 시 배당주도 하락 가능.</p></div>
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--smh)"></span>SMH · 반도체·AI 인프라 고베타</h3><p><b>역할:</b> AI 인프라 사이클에 대한 고집중 위성 투자.</p><p class="small"><b>상승 요인:</b> GPU·HBM·파운드리·장비 수요. <b>리스크:</b> 공급 병목, CapEx 과잉, 고객사 투자 축소, 특정 종목 집중.</p></div>
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--kospi)"></span>KOSPI · 한국 저평가·반도체·수출 민감</h3><p><b>역할:</b> 미국 외 지역 분산과 AI 메모리 사이클 참여. 원화 투자자에게는 국내 자산 노출도 제공.</p><p class="small"><b>상승 요인:</b> 반도체 이익 상향, 외국인 수급, 코리아 디스카운트 완화. <b>리스크:</b> 단기 급등, 삼성전자·SK하이닉스 집중, 환율·정책·중국 수요.</p></div>
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--gold)"></span>GOLD · 실질금리·달러·위험회피 헤지</h3><p><b>역할:</b> 지정학, 부채, 통화 신뢰 훼손, 실질금리 하락에 대한 방어 자산.</p><p class="small"><b>상승 요인:</b> 중앙은행 매입, 지정학, 재정 우려. <b>리스크:</b> 이미 높은 가격, 실질금리 상승, 달러 강세, 현금흐름 부재.</p></div>
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--btc)"></span>BTC · 디지털 희소자산·고변동성 위험자산</h3><p><b>역할:</b> 장기 통화가치 희석·네트워크 채택에 대한 옵션성 자산. 단, 방어자산이라기보다 고변동성 위험자산에 가깝다.</p><p class="small"><b>상승 요인:</b> ETF 수급, 제도권 채택, 공급 희소성. <b>리스크:</b> 규제, 레버리지 청산, 기술/보관 위험, 유동성 악화.</p></div>
+        <div class="panel"><h3><span class="asset-dot" style="background:var(--cash)"></span>현금 · MMF·예금·단기채·달러 현금</h3><p><b>역할:</b> 변동성 완충, 손실 회피, 급락 시 리밸런싱 탄약.</p><p class="small"><b>상승 요인:</b> 고금리 유지 시 기회비용 축소. <b>리스크:</b> 강한 상승장에서 상대 수익률 저하, 인플레이션에 따른 실질가치 감소.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="matrix">
+      <div class="section-title"><div><h2>3. 자산별 투자 매력도 매트릭스</h2><p>점수는 1~10의 정성·정량 혼합 평가다. “밸류에이션 부담”과 “변동성”은 높을수록 위험 요인이 크다는 뜻이다.</p></div></div>
+      <div class="panel matrix-wrap">
+        <table class="matrix-table">
+          <thead><tr><th>자산</th><th>성장성</th><th>안정성</th><th>밸류에이션 부담</th><th>헤지 효과</th><th>변동성</th><th>현재 매력도</th><th>해석</th></tr></thead>
+          <tbody id="matrixRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="scenarios">
+      <div class="section-title"><div><h2>4. 자산배분 시나리오 3가지</h2><p>수익률·변동성·최대 낙폭은 과거 자산 특성과 현재 시장 전망을 결합한 추정치이며 보장 수익률이 아니다.</p></div></div>
+      <div class="grid-3">
+        <article class="panel scenario-card">
+          <h3>시나리오 1 · 방어형 포트폴리오</h3>
+          <p class="small">목표: 변동성 최소화, 손실 방어, 안정적 현금흐름</p>
+          <div class="mini-chart"><canvas id="chartDefensive"></canvas></div>
+          <table><tbody id="tblDefensive"></tbody></table>
+          <div class="pill-row"><span class="pill">예상 연수익률 5~8%</span><span class="pill">변동성 8~11%</span><span class="pill">MDD -15~-22%</span></div>
+          <p><b>핵심 논리:</b> SCHD·GOLD·현금을 중심으로 고평가 성장주와 암호화폐 충격을 줄인다.</p>
+          <p class="small"><b>상승장 장점:</b> 완만한 참여. <b>하락장 약점:</b> 극단적 유동성 경색 때 금도 동반 매도될 수 있음. <b>실패 시나리오:</b> AI 초강세장 지속 시 큰 폭 언더퍼폼.</p>
+          <p class="small"><b>리밸런싱:</b> 반기 1회, 위험자산이 목표 대비 +5%p 초과하면 SCHD·현금으로 이동.</p>
+          <div class="timeline"><div class="time-card"><strong>1년</strong>하락장 방어 우선</div><div class="time-card"><strong>3년</strong>배당·금·현금 완충</div><div class="time-card"><strong>5년</strong>낮은 복리 대신 낮은 후회</div></div>
+        </article>
+        <article class="panel scenario-card reco">
+          <h3>시나리오 2 · 균형형 포트폴리오</h3>
+          <p class="small">목표: 성장과 방어의 균형 · 장기 기본안</p>
+          <div class="mini-chart"><canvas id="chartBalanced"></canvas></div>
+          <table><tbody id="tblBalanced"></tbody></table>
+          <div class="pill-row"><span class="pill">예상 연수익률 8~12%</span><span class="pill">변동성 12~16%</span><span class="pill">MDD -25~-35%</span></div>
+          <p><b>핵심 논리:</b> VOO를 중심축으로 삼고 QQQ·SMH·KOSPI로 AI 성장에 참여하되, SCHD·GOLD·현금으로 밸류에이션 리스크를 완충한다.</p>
+          <p class="small"><b>상승장 장점:</b> 성장주·반도체·BTC 상승에 참여. <b>하락장 약점:</b> 주식 비중이 충분히 높아 방어형만큼 안전하지 않음. <b>실패 시나리오:</b> 금리 재상승+AI 이익 둔화+BTC 규제가 동시에 발생.</p>
+          <p class="small"><b>리밸런싱:</b> 분기 점검, 반기 실행. VOO/QQQ/SMH/BTC가 목표 대비 +5%p 초과 시 일부 이익실현.</p>
+          <div class="timeline"><div class="time-card"><strong>1년</strong>조정 시 분할매수 여력</div><div class="time-card"><strong>3년</strong>이익 성장과 방어 균형</div><div class="time-card"><strong>5년</strong>위험 대비 복리 중심</div></div>
+        </article>
+        <article class="panel scenario-card">
+          <h3>시나리오 3 · 공격형 포트폴리오</h3>
+          <p class="small">목표: 장기 초과수익 추구 · 변동성 감내</p>
+          <div class="mini-chart"><canvas id="chartAggressive"></canvas></div>
+          <table><tbody id="tblAggressive"></tbody></table>
+          <div class="pill-row"><span class="pill">예상 연수익률 11~18%</span><span class="pill">변동성 20~28%</span><span class="pill">MDD -40~-55%</span></div>
+          <p><b>핵심 논리:</b> QQQ·SMH·BTC 비중을 높여 AI·반도체·디지털 자산 사이클의 상단을 추구한다.</p>
+          <p class="small"><b>상승장 장점:</b> 강한 초과수익 가능. <b>하락장 약점:</b> 성장주·반도체·BTC가 동시에 하락할 수 있음. <b>실패 시나리오:</b> AI CapEx 사이클 둔화와 고금리 장기화.</p>
+          <p class="small"><b>리밸런싱:</b> 월간 점검. SMH+QQQ+BTC 합산 55% 초과 또는 BTC 단독 18% 초과 시 축소.</p>
+          <div class="timeline"><div class="time-card"><strong>1년</strong>급등·급락 모두 가능</div><div class="time-card"><strong>3년</strong>AI 사이클 성공 의존</div><div class="time-card"><strong>5년</strong>고위험 고분산 결과</div></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="recommendation">
+      <div class="section-title"><div><h2>5. 최적 추천 포트폴리오</h2><p>현재 기준 최적안은 균형형이다. 시장 모멘텀이 강하지만 이미 가격에 반영된 기대도 크기 때문에, 성장 참여와 리스크 완충의 균형이 중요하다.</p></div></div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>추천 비중 · 균형형</h3>
+          <div class="chart-box"><canvas id="chartRecommended"></canvas></div>
+        </div>
+        <div class="panel">
+          <h3>왜 지금 균형형인가</h3>
+          <div class="callout">
+            <p><b>핵심:</b> VOO 중심의 시장 베타를 확보하고, QQQ·SMH·KOSPI로 AI·반도체 사이클에 참여한다. 동시에 SCHD·GOLD·현금이 밸류에이션 조정, 지정학 리스크, 금리 충격에 대한 방어선을 만든다.</p>
+          </div>
+          <table style="margin-top:14px"><tbody>
+            <tr><td>맞는 투자자</td><td>5년 이상 장기투자자, 중간 수준 이상의 변동성을 견딜 수 있는 투자자, 성장과 방어를 모두 원하는 투자자</td></tr>
+            <tr><td>맞지 않는 투자자</td><td>1년 내 원금 손실을 거의 견디지 못하는 투자자, BTC·반도체 급락에 심리적으로 취약한 투자자</td></tr>
+            <tr><td>매수 방식</td><td><b>3~6개월 분할매수</b> 권장. 이미 급등한 SMH·KOSPI·금은 조정 시 추가 편입이 유리하다.</td></tr>
+            <tr><td>현금 유지 이유</td><td>고금리 환경에서는 현금 수익률이 완전히 죽지 않으며, 급락 때 기대수익률이 높은 자산으로 이동할 수 있다.</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:18px">
+        <div class="panel"><h3>과열된 자산</h3><p class="small">SMH, QQQ, KOSPI는 AI 기대가 가격에 빠르게 반영된 상태다. 금도 헤지 논리는 유효하지만 절대 가격은 부담 구간이다.</p></div>
+        <div class="panel"><h3>상대적으로 덜 부담스러운 자산</h3><p class="small">SCHD는 성장주 대비 밸류에이션 부담이 낮고, 현금은 높은 금리와 옵션 가치가 있다. KOSPI는 구조적 저평가 논리가 남아 있지만 단기 가격 부담은 별도다.</p></div>
+        <div class="panel"><h3>금과 BTC를 동시에 보유하는 이유</h3><p class="small">금은 실질금리·달러·지정학·부채 리스크 헤지에 가깝고, BTC는 제도권 채택과 디지털 희소성에 대한 고변동성 옵션이다. 둘은 같은 “안전자산”이 아니라 다른 실패 시나리오에 대한 보험이다.</p></div>
+        <div class="panel"><h3>미국 ETF와 KOSPI를 함께 보유하는 이유</h3><p class="small">미국 ETF는 글로벌 이익과 주주환원, KOSPI는 메모리·반도체 레버리지와 저평가 정상화 가능성을 제공한다. 단, 둘 다 AI 사이클에 일부 연결되어 있어 완전한 분산은 아니다.</p></div>
+        <div class="panel"><h3>반도체 비중 과다의 위험</h3><p class="small">SMH·QQQ·KOSPI 안에 반도체 노출이 중복된다. 고객사 CapEx 둔화, AI 버블 논쟁, 공급 병목, 중국/대만 지정학이 동시에 터질 수 있다.</p></div>
+        <div class="panel"><h3>장기투자자의 행동</h3><p class="small">예측보다 규칙이 중요하다. 분할매수, 목표비중, 리밸런싱, 손실 시 행동 규칙을 사전에 정하면 뉴스와 가격 변동에 덜 흔들린다.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="risks">
+      <div class="section-title"><div><h2>6. 리스크 히트맵</h2><p>색이 진할수록 균형형 포트폴리오에 미치는 잠재 영향이 크다.</p></div></div>
+      <div class="heatmap">
+        <div class="heat high"><div class="level">High</div><h3>금리 상승</h3><p class="small">QQQ·SMH·BTC 밸류에이션에 직접 압박. 현금 비중 유지로 대응.</p></div>
+        <div class="heat med"><div class="level">Medium</div><h3>경기침체</h3><p class="small">VOO·KOSPI 이익 하향. SCHD·GOLD·현금은 상대 방어.</p></div>
+        <div class="heat med"><div class="level">Medium</div><h3>달러 강세</h3><p class="small">금·BTC·원화자산에 부담. 달러 현금은 일부 헤지.</p></div>
+        <div class="heat vhigh"><div class="level">Very High</div><h3>AI 버블 붕괴</h3><p class="small">QQQ·SMH·KOSPI 동시 타격 가능. 가장 중요한 포트폴리오 리스크.</p></div>
+        <div class="heat high"><div class="level">High</div><h3>지정학 리스크</h3><p class="small">유가·물가·공급망을 통해 주식에 부정적. 금에는 우호적일 수 있음.</p></div>
+        <div class="heat med"><div class="level">Medium</div><h3>암호화폐 규제</h3><p class="small">BTC 단독 급락 위험. 5% 제한으로 생존성 확보.</p></div>
+        <div class="heat med"><div class="level">Medium</div><h3>한국 증시 부진</h3><p class="small">반도체 이익 둔화·환율·정책 실망이 KOSPI에 부담.</p></div>
+        <div class="heat high"><div class="level">High</div><h3>인플레이션 재상승</h3><p class="small">금리 인하 지연, 성장주 할인율 상승. 금은 방어 가능하나 유동성 경색 때는 예외.</p></div>
+      </div>
+      <div class="panel" style="margin-top:18px"><h3>장기적으로 가장 중요한 리스크 5가지</h3>
+        <ol class="small">
+          <li><b>AI 투자수익률 검증 실패:</b> 데이터센터와 반도체 CapEx가 이익으로 연결되지 않으면 QQQ·SMH·KOSPI가 함께 흔들릴 수 있다.</li>
+          <li><b>금리와 인플레이션의 재상승:</b> 높은 할인율은 성장주·BTC에 불리하며, 현금 선호를 높인다.</li>
+          <li><b>달러·환율 변동:</b> 한국 개인투자자는 USD/KRW에 따라 원화 수익률이 크게 달라진다.</li>
+          <li><b>대체자산 과신:</b> 금과 BTC 모두 완전한 안전자산이 아니며, 유동성 충격 때 동반 하락할 수 있다.</li>
+          <li><b>리밸런싱 실패:</b> 급등 자산을 계속 추격하거나 급락 자산을 공포에 매도하면 포트폴리오 구조가 무너진다.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="gurus">
+      <div class="section-title"><div><h2>7. 투자 대가 관점 적용</h2><p>아래는 특정 발언을 임의로 확대해석하지 않고, 장기 철학을 현재 자산배분에 적용한 요약이다.</p></div></div>
+      <div class="grid-3">
+        <div class="panel guru"><div class="name"><h3>워런 버핏</h3><span class="badge warn">현금·안전마진</span></div><p class="quote-note">Berkshire의 대규모 현금 보유는 “좋은 기회가 없을 때 무리하지 않는다”는 메시지로 해석할 수 있다.</p><p class="small">적용: 현금 8%를 유지하고 고평가 성장주 추격을 제한한다.</p></div>
+        <div class="panel guru"><div class="name"><h3>레이 달리오</h3><span class="badge">분산·금</span></div><p class="quote-note">부채 사이클과 통화 신뢰 리스크가 커질수록 금은 포트폴리오 보험 역할을 한다.</p><p class="small">적용: 금 10%는 수익 극대화보다 생존성 강화 목적이다.</p></div>
+        <div class="panel guru"><div class="name"><h3>존 보글</h3><span class="badge good">저비용 인덱스</span></div><p class="quote-note">개별 종목 예측보다 낮은 비용으로 시장 전체를 장기 보유하는 원칙.</p><p class="small">적용: VOO를 30% 중심축으로 둔다.</p></div>
+        <div class="panel guru"><div class="name"><h3>하워드 막스</h3><span class="badge warn">사이클·심리</span></div><p class="quote-note">좋은 자산도 비싸게 사면 좋은 투자가 아닐 수 있다. 사이클의 위치를 인식해야 한다.</p><p class="small">적용: SMH·KOSPI·QQQ는 좋지만 비중 제한과 리밸런싱이 필요하다.</p></div>
+        <div class="panel guru"><div class="name"><h3>드러켄밀러</h3><span class="badge">유동성·추세</span></div><p class="quote-note">시장 전체는 이익만이 아니라 중앙은행·유동성·추세의 영향을 크게 받는다.</p><p class="small">적용: Fed 인하 지연 가능성을 감안해 현금과 금을 보유한다.</p></div>
+        <div class="panel guru"><div class="name"><h3>BTC 낙관론/회의론</h3><span class="badge risk">균형</span></div><p class="quote-note">낙관론은 ETF·희소성·제도권 채택을, 회의론은 현금흐름 부재·규제·투기성을 강조한다.</p><p class="small">적용: 0%도 20%도 아닌 5%의 옵션성 비중이 균형적이다.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="rules">
+      <div class="section-title"><div><h2>8. 리밸런싱 규칙</h2><p>자산배분의 핵심은 “맞히는 것”보다 “틀렸을 때도 살아남는 구조”다.</p></div></div>
+      <div class="grid-2">
+        <div class="panel rules">
+          <div class="rule"><b>정기 리밸런싱:</b> 분기마다 점검하고, 반기마다 실제 조정한다. 세금·환전 비용이 크면 연 1회로 낮춘다.</div>
+          <div class="rule"><b>밴드 리밸런싱:</b> 단일 자산이 목표비중 대비 ±5%p 이상 벗어나면 조정한다. BTC는 ±3%p만 벗어나도 점검한다.</div>
+          <div class="rule"><b>급락 시 리밸런싱:</b> VOO/QQQ가 고점 대비 -10%, -15%, -20% 하락할 때마다 현금의 25%씩 분할 투입한다.</div>
+          <div class="rule"><b>과열 시 축소:</b> SMH+QQQ+KOSPI 합산이 40%를 넘거나, SMH가 목표 대비 2배가 되면 일부 이익실현한다.</div>
+          <div class="rule"><b>현금 사용 규칙:</b> 현금 8% 중 최소 2~3%는 끝까지 남겨 예상 밖의 충격에 대비한다.</div>
+        </div>
+        <div class="panel">
+          <h3>최종 행동 지침</h3>
+          <table><tbody>
+            <tr><td>현재 기준 추천 비중</td><td>VOO 30 / QQQ 12 / SCHD 15 / SMH 8 / KOSPI 12 / GOLD 10 / BTC 5 / 현금 8</td></tr>
+            <tr><td>가장 조심할 점</td><td>AI·반도체·한국 증시 노출이 생각보다 중복되어 있다는 점</td></tr>
+            <tr><td>장기 투자자 행동</td><td>가격 예측 대신 분할매수·비중관리·리밸런싱 규칙을 지킨다</td></tr>
+            <tr><td>일괄매수 여부</td><td>총 투자금의 30~40%만 즉시 배치, 나머지는 3~6개월 또는 조정 구간에 분할</td></tr>
+            <tr><td>점검 지표</td><td>Fed 경로, CPI/PCE, 10년물, DXY, AI CapEx, 반도체 EPS, BTC ETF 플로우, USD/KRW</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sources">
+      <div class="section-title"><div><h2>9. 참고 자료 및 검증 메모</h2><p>아래 자료를 바탕으로 작성했으며, 실시간 데이터는 소스별 지연·환율·장중 변동이 있을 수 있다.</p></div></div>
+      <div class="source-grid">
+        <div class="source-box"><h3>기존 참고 페이지</h3><ul>
+          <li><a href="https://kirinonakar.github.io/invest/SP500.html">S&P 500 투자전략 리서치 대시보드</a></li>
+          <li><a href="https://kirinonakar.github.io/invest/KOSPI.html">KOSPI 투자전략 리서치 대시보드</a></li>
+          <li><a href="https://kirinonakar.github.io/invest/gold.html">금 투자 리서치 대시보드</a></li>
+          <li><a href="https://kirinonakar.github.io/invest/BTC.html">비트코인 투자 리서치 대시보드</a></li>
+        </ul></div>
+        <div class="source-box"><h3>ETF 공식 자료</h3><ul>
+          <li><a href="https://investor.vanguard.com/investment-products/etfs/profile/voo">Vanguard VOO 공식 페이지</a></li>
+          <li><a href="https://www.invesco.com/us/en/financial-products/etfs/invesco-qqq-trust-series-1.html">Invesco QQQ 공식 페이지</a></li>
+          <li><a href="https://www.schwabassetmanagement.com/products/schd">Schwab SCHD 공식 페이지</a></li>
+          <li><a href="https://www.vaneck.com/us/en/investments/semiconductor-etf-smh/portfolio/">VanEck SMH 공식 페이지</a></li>
+        </ul></div>
+        <div class="source-box"><h3>최근 뉴스·시장 데이터</h3><ul>
+          <li>VOO, QQQ, SCHD, SMH, BTC 가격: 2026-05-12 UTC 기준 시장 데이터</li>
+          <li>금 현물: Reuters 및 Investing.com XAU/USD, 2026-05-12</li>
+          <li>KOSPI: Seoul Economic Daily, Yonhap, Investing.com, 2026-05-11~12</li>
+          <li>S&P 500 Forward P/E: FactSet Earnings Insight, 2026-05-08</li>
+          <li>AI·반도체: Reuters, MarketWatch, VanEck holdings</li>
+        </ul></div>
+        <div class="source-box"><h3>거시경제 데이터</h3><ul>
+          <li><a href="https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm">Federal Reserve FOMC statement, 2026-04-29</a></li>
+          <li><a href="https://fred.stlouisfed.org/series/DGS10">FRED DGS10, 미국 10년물 국채금리</a></li>
+          <li><a href="https://www.bls.gov/cpi/">BLS CPI release calendar / latest CPI</a></li>
+          <li>DXY: Trading Economics, Investing.com, Yahoo Finance</li>
+        </ul></div>
+        <div class="source-box"><h3>투자 대가 발언·철학</h3><ul>
+          <li>Berkshire Hathaway cash position and Buffett-style cash discipline: Reuters/Berkshire reports</li>
+          <li>Ray Dalio debt cycle and gold allocation views: Reuters and public interviews</li>
+          <li>Howard Marks memos: Oaktree / Brookfield memo archive</li>
+          <li>John Bogle low-cost indexing philosophy: Vanguard materials</li>
+          <li>Stanley Druckenmiller liquidity and AI/macro views: public interviews and market commentary</li>
+          <li>ARK Invest Bitcoin 2030 scenarios and BTC skeptic views: ARK, Reuters, public market commentary</li>
+        </ul></div>
+        <div class="source-box"><h3>주의 사항</h3><ul>
+          <li>본 자료는 투자 참고용 리서치이며 투자 조언이 아니다.</li>
+          <li>수익률·변동성·최대낙폭은 과거 데이터와 현재 전망을 결합한 추정치다.</li>
+          <li>ETF 가격, 지수, 금, BTC는 장중·거래소·환율에 따라 달라진다.</li>
+          <li>확인 불가능하거나 지연 가능한 데이터는 본문에서 “확인 필요” 또는 “추정”으로 처리했다.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <footer class="foot">작성일: 2026-05-12 · 이 HTML은 단일 파일 대시보드이며 Chart.js CDN만 사용합니다. 모든 투자 판단과 책임은 투자자 본인에게 있습니다.</footer>
+  </main>
+
+  <script>
+    const colors = {VOO:'#60a5fa', QQQ:'#a78bfa', SCHD:'#34d399', SMH:'#f59e0b', KOSPI:'#fb7185', GOLD:'#facc15', BTC:'#f97316', '현금':'#cbd5e1'};
+    const labels = ['VOO','QQQ','SCHD','SMH','KOSPI','GOLD','BTC','현금'];
+    const scenarios = {
+      defensive: {name:'방어형', weights:[20,5,25,3,7,20,3,17]},
+      balanced: {name:'균형형', weights:[30,12,15,8,12,10,5,8]},
+      aggressive: {name:'공격형', weights:[25,22,5,15,10,5,12,6]}
+    };
+    const assetNames = {VOO:'미국 대형주 핵심 베타', QQQ:'성장주·AI·빅테크', SCHD:'배당성장·가치·방어', SMH:'반도체·AI 인프라', KOSPI:'한국 주식·반도체·수출', GOLD:'금·위험회피 헤지', BTC:'비트코인·디지털 희소성', '현금':'MMF·예금·단기채'};
+
+    function makeDoughnut(id, data, title){
+      const ctx=document.getElementById(id);
+      return new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:labels.map(l=>colors[l]),borderColor:'#0b1323',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#cbd5e1',boxWidth:12,padding:12,font:{size:12}}},tooltip:{callbacks:{label:(c)=>`${c.label}: ${c.raw}%`}},title:{display:!!title,text:title,color:'#e5edf7',font:{size:15,weight:'bold'}}}}});
+    }
+    makeDoughnut('chartDefensive', scenarios.defensive.weights);
+    makeDoughnut('chartBalanced', scenarios.balanced.weights);
+    makeDoughnut('chartAggressive', scenarios.aggressive.weights);
+    makeDoughnut('chartRecommended', scenarios.balanced.weights, '추천 포트폴리오 · 균형형');
+
+    function fillTable(id, weights){
+      const el=document.getElementById(id);
+      el.innerHTML = labels.map((l,i)=>`<tr><td><span class="asset-dot" style="background:${colors[l]}"></span>${l}</td><td class="weight">${weights[i]}%</td></tr>`).join('');
+    }
+    fillTable('tblDefensive', scenarios.defensive.weights);
+    fillTable('tblBalanced', scenarios.balanced.weights);
+    fillTable('tblAggressive', scenarios.aggressive.weights);
+
+    const matrix = [
+      ['VOO',8,7,7,2,5,7.0,'장기 코어로 적합하나 미국 대형주 밸류에이션 부담 존재'],
+      ['QQQ',9,5,8,1,7,6.5,'AI 성장 프리미엄은 유효하지만 금리와 고PER에 민감'],
+      ['SCHD',5,8,4,4,4,7.0,'배당·가치·방어 성격으로 포트폴리오 안정화'],
+      ['SMH',10,3,9,1,9,6.0,'AI 인프라 핵심 수혜지만 고베타·집중 리스크가 큼'],
+      ['KOSPI',8,4,5,3,7,7.0,'반도체 이익 상향과 저평가 정상화 기대, 단기 급등 부담'],
+      ['GOLD',3,7,6,9,5,7.0,'부채·지정학·실질금리 하락 헤지. 가격 부담은 존재'],
+      ['BTC',9,2,8,5,10,5.5,'장기 옵션성은 크지만 규제·레버리지·유동성 리스크 큼'],
+      ['현금',1,10,1,8,1,7.5,'고금리 환경의 방어·기회자금. 강세장 언더퍼폼 가능']
+    ];
+    function bar(v, color){return `<div class="score"><div class="bar"><span style="width:${v*10}%; background:${color}"></span></div><span class="rank">${v}</span></div>`}
+    document.getElementById('matrixRows').innerHTML = matrix.map(r=>{
+      const c=colors[r[0]];
+      return `<tr><td><span class="asset-dot" style="background:${c}"></span><b>${r[0]}</b><br><span class="small">${assetNames[r[0]]}</span></td><td>${bar(r[1],c)}</td><td>${bar(r[2],c)}</td><td>${bar(r[3], '#fb7185')}</td><td>${bar(r[4], '#facc15')}</td><td>${bar(r[5], '#f97316')}</td><td>${bar(r[6], '#34d399')}</td><td>${r[7]}</td></tr>`
+    }).join('');
+  </script>
+</body>
+</html>
