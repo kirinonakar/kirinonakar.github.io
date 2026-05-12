@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>비트코인 투자 리서치 대시보드 | 2026-05-12</title>
+  <style>
+    :root {
+      --bg: #08090d;
+      --panel: #10131a;
+      --panel-2: #151922;
+      --line: rgba(255, 184, 77, 0.18);
+      --text: #f6f2ea;
+      --muted: #a9a29a;
+      --orange: #f7931a;
+      --gold: #ffd166;
+      --red: #ff6b6b;
+      --green: #52d273;
+      --blue: #74a6ff;
+      --gray: #2b303b;
+      --shadow: 0 28px 80px rgba(0,0,0,.42);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(247,147,26,.26), transparent 27rem),
+        radial-gradient(circle at 88% 0%, rgba(255,209,102,.14), transparent 29rem),
+        linear-gradient(180deg, #07080c 0%, #0c0f16 40%, #07080c 100%);
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: min(1240px, calc(100% - 36px)); margin: 0 auto; }
+    .hero { padding: 54px 0 28px; position: relative; overflow: hidden; }
+    .nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 44px; }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--gold); font-weight: 800; }
+    .coin {
+      width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+      color: #15100a; font-weight: 900; background: linear-gradient(135deg, var(--orange), var(--gold));
+      box-shadow: 0 0 42px rgba(247,147,26,.35);
+    }
+    .tag { border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--muted); border-radius: 999px; padding: 8px 12px; font-size: 13px; }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 22px; align-items: stretch; }
+    .hero-copy, .hero-panel, .card, .table-card, .note-box {
+      border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      border-radius: 26px; box-shadow: var(--shadow); backdrop-filter: blur(14px);
+    }
+    .hero-copy { padding: 34px; min-height: 410px; display: flex; flex-direction: column; justify-content: space-between; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--gold); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    h1 { font-size: clamp(38px, 5vw, 68px); line-height: 1.02; margin: 14px 0 18px; }
+    .subtitle { max-width: 760px; color: #d7d0c8; font-size: 18px; line-height: 1.75; }
+    .conclusion { margin-top: 26px; padding: 18px 20px; border: 1px solid rgba(247,147,26,.3); border-radius: 20px; background: rgba(247,147,26,.08); color: #fff0d2; line-height: 1.65; }
+    .hero-panel { padding: 24px; }
+    .price-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .price { font-size: clamp(34px, 4vw, 52px); font-weight: 900; }
+    .delta { color: var(--red); font-weight: 700; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px; }
+    .kpi { padding: 16px; border-radius: 18px; background: rgba(12,15,22,.72); border: 1px solid rgba(255,255,255,.075); min-height: 105px; }
+    .kpi small { display: block; color: var(--muted); margin-bottom: 8px; }
+    .kpi strong { font-size: 21px; display: block; }
+    .kpi em { font-style: normal; color: var(--muted); font-size: 12px; display: block; margin-top: 7px; line-height: 1.45; }
+    .section { padding: 34px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 18px; }
+    h2 { font-size: clamp(26px, 3vw, 38px); margin: 0; }
+    .section-head p { max-width: 680px; margin: 0; color: var(--muted); line-height: 1.65; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .card { padding: 22px; }
+    .card h3 { margin: 0 0 12px; font-size: 21px; }
+    .card p, .card li { color: #cfc8bf; line-height: 1.65; }
+    ul { margin: 10px 0 0; padding-left: 18px; }
+    li + li { margin-top: 8px; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 7px 10px; font-size: 12px; font-weight: 800; border: 1px solid rgba(255,255,255,.1); }
+    .pill.pos { color: #bdf5c9; background: rgba(82,210,115,.12); border-color: rgba(82,210,115,.25); }
+    .pill.neu { color: #ffe5a5; background: rgba(255,209,102,.10); border-color: rgba(255,209,102,.25); }
+    .pill.neg { color: #ffc1c1; background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.25); }
+    .market-card { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; }
+    .icon { width: 42px; height: 42px; border-radius: 15px; display: grid; place-items: center; background: rgba(247,147,26,.14); color: var(--gold); font-size: 20px; }
+    .meter { height: 9px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 12px; }
+    .meter > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--orange), var(--gold)); width: var(--w); }
+    .table-card { overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 15px; border-bottom: 1px solid rgba(255,255,255,.075); vertical-align: top; text-align: left; font-size: 14px; line-height: 1.55; }
+    th { color: var(--gold); background: rgba(247,147,26,.08); font-size: 12px; text-transform: uppercase; letter-spacing: .07em; }
+    td { color: #ddd5cc; }
+    tr:last-child td { border-bottom: none; }
+    .scenario { position: relative; overflow: hidden; }
+    .scenario::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(247,147,26,.18), transparent 14rem); pointer-events: none; }
+    .scenario .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    .scenario .target { font-size: 34px; font-weight: 900; margin: 8px 0; }
+    .prob { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 6px; }
+    .prob strong { color: var(--gold); }
+    .bar-wrap { height: 18px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; border: 1px solid rgba(255,255,255,.08); }
+    .bar { height: 100%; width: var(--w); background: linear-gradient(90deg, var(--orange), var(--gold)); border-radius: 999px; }
+    .calc { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: rgba(0,0,0,.32); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 18px; line-height: 1.75; color: #f9e4b7; overflow-x: auto; }
+    .chart { padding: 18px; background: rgba(0,0,0,.22); border-radius: 20px; border: 1px solid rgba(255,255,255,.08); }
+    .stack-row { display: grid; grid-template-columns: 120px 1fr 100px; gap: 12px; align-items: center; margin: 12px 0; color: #ddd; }
+    .hbar { height: 18px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+    .hbar i { display: block; height: 100%; width: var(--w); background: linear-gradient(90deg, rgba(247,147,26,.72), rgba(255,209,102,.95)); border-radius: 999px; }
+    .band { position: relative; height: 240px; margin-top: 14px; background: linear-gradient(90deg, rgba(255,107,107,.08), rgba(255,209,102,.08), rgba(82,210,115,.08)); border: 1px solid rgba(255,255,255,.08); border-radius: 22px; overflow: hidden; }
+    .tick { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.35); left: var(--x); }
+    .tick span { position: absolute; top: 10px; left: 8px; min-width: 120px; color: #fff; font-size: 12px; background: rgba(0,0,0,.45); padding: 6px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,.08); }
+    .source-list { columns: 2; gap: 28px; font-size: 13px; color: var(--muted); }
+    .source-list li { break-inside: avoid; }
+    .note-box { padding: 20px; color: #cfc8bf; line-height: 1.7; }
+    .risk-high { color: #ffc1c1; font-weight: 800; }
+    .risk-mid { color: #ffe5a5; font-weight: 800; }
+    .risk-low { color: #bdf5c9; font-weight: 800; }
+    .footer { padding: 42px 0 70px; color: var(--muted); text-align: center; }
+    .mini { font-size: 12px; color: var(--muted); }
+    @media (max-width: 980px) {
+      .hero-grid, .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .section-head { flex-direction: column; align-items: flex-start; }
+      .source-list { columns: 1; }
+    }
+    @media (max-width: 720px) {
+      .wrap { width: min(100% - 22px, 1240px); }
+      .hero-copy, .hero-panel, .card { padding: 18px; border-radius: 22px; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .nav { align-items: flex-start; flex-direction: column; }
+      table { min-width: 860px; }
+      .table-card { overflow-x: auto; }
+      .stack-row { grid-template-columns: 82px 1fr 72px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand"><div class="coin">₿</div><div>BTC RESEARCH TERMINAL</div></div>
+        <div class="tag">데이터 기준일: <strong>2026-05-12</strong> · 가격/환율/ETF/온체인은 공개 스냅샷 기준</div>
+      </div>
+      <div class="hero-grid">
+        <section class="hero-copy">
+          <div>
+            <div class="eyebrow">Premium Digital Asset Dashboard</div>
+            <h1>비트코인 투자 리서치 대시보드</h1>
+            <p class="subtitle">BTC의 가격·ETF 수급·온체인 밸류에이션·거시 변수·기관 리포트를 한 화면에서 비교하기 위한 단일 HTML 리서치 파일입니다. 모든 목표가격은 투자 권유가 아니라 <strong>시나리오 기반 후보값</strong>입니다.</p>
+          </div>
+          <div class="conclusion"><strong>한 줄 결론:</strong> 현재 BTC는 ETF 누적 수요와 거래소 잔고 감소라는 구조적 지지 요인이 있으나, 고금리 장기화·달러 강세·파생 레버리지·상단 매물 부담이 1년 기대수익률을 제한하는 <strong>중립~완만한 긍정 구간</strong>으로 판단한다.</div>
+        </section>
+        <aside class="hero-panel">
+          <div class="price-row">
+            <div>
+              <div class="mini">BTC 현물 가격, USD</div>
+              <div class="price">$81,483</div>
+              <div class="delta">일중 약보합 · 실시간 소스별 차이 가능</div>
+            </div>
+            <div class="tag">KRW ≈ ₩120.6M</div>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi"><small>시가총액</small><strong>$1.633T</strong><em>KRW 환산 약 ₩2,417조</em></div>
+            <div class="kpi"><small>BTC 도미넌스</small><strong>58.28%</strong><em>전체 크립토 시장 내 비중</em></div>
+            <div class="kpi"><small>현물 ETF 최근 흐름</small><strong>5D +$130M</strong><em>05/05~05/11, 05/11은 예비값</em></div>
+            <div class="kpi"><small>MVRV / Z-score</small><strong>≈1.47 / 0.88</strong><em>소스별 산식·기준일 차이 있음</em></div>
+            <div class="kpi"><small>Realized Price</small><strong>≈$54.1K</strong><em>공개 스냅샷 기준, 최신성 확인 필요</em></div>
+            <div class="kpi"><small>확률가중 목표가격</small><strong>$103K</strong><em>KRW ≈ ₩152.4M · 기대수익률 +26.4%</em></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="section">
+      <div class="section-head">
+        <h2>투자 요약</h2>
+        <p>비트코인은 현금흐름을 창출하는 주식이 아니므로 EPS, PER, 영업이익 대신 네트워크 희소성, ETF·기관 수요, 온체인 비용기반, 유동성 사이클을 중심으로 판단했다.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <h3>핵심 투자 포인트</h3>
+          <ul>
+            <li>최대 공급량 2,100만 개와 2024년 반감기 이후 채굴 보상 3.125 BTC로 신규 공급 압박이 축소됐다.</li>
+            <li>미국 현물 ETF는 단기 변동은 있으나 누적 순유입과 AUM이 제도권 수요의 핵심 통로다.</li>
+            <li>거래소 BTC 보유량 감소는 즉시 매도 가능한 유동 공급 축소 신호로 해석될 수 있다.</li>
+            <li>현재 가격은 단기보유자 실현가격 부근을 상회해 추세 회복의 최소 조건은 충족했다.</li>
+            <li>금·나스닥·달러 유동성과 동시에 비교되는 글로벌 고베타 유동성 자산으로 자리잡고 있다.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>핵심 리스크</h3>
+          <ul>
+            <li>미국 금리 인하 지연, 달러 강세, 10년물 금리 상승은 할인율과 위험자산 선호를 압박한다.</li>
+            <li>ETF 순유입 둔화 또는 순유출 전환은 2024~2026년 사이클의 가장 중요한 수급 리스크다.</li>
+            <li>파생상품 미결제약정 확대와 펀딩비 급등은 롱 청산형 급락을 키울 수 있다.</li>
+            <li>거래소·수탁사 해킹, 스테이블코인 신뢰 훼손, 규제 강화는 구조적 프리미엄을 훼손한다.</li>
+            <li>Stock-to-Flow 등 단일 모델은 설명력이 약해졌으므로 참고 지표로만 취급해야 한다.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>핵심 수치 스냅샷</h3>
+          <p><strong>BTC 가격:</strong> $81,483 · <strong>KRW:</strong> ₩120,573,654</p>
+          <p><strong>환율:</strong> 1,479.74 KRW/USD · <strong>공급량:</strong> 20.028M BTC · <strong>최대공급:</strong> 21M BTC</p>
+          <p><strong>Fear & Greed:</strong> Alternative.me 49, Neutral. Binance Square 51, Neutral. 소스별 산식 차이 존재.</p>
+          <p><strong>실현시총 추정:</strong> 약 $1.08T = $54,084 × 20.028M BTC. 공식 실현시총이 아니라 공개 실현가격 기반 파생값.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>시장 환경 대시보드</h2>
+        <p>가격, 수요, 공급, 유동성, 레버리지의 다섯 축으로 현재 환경을 분해했다.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card market-card"><div class="icon">↗</div><div><h3>ETF 수급 <span class="pill neu">중립+</span></h3><p>05/08 완료 기준 -$145.7M, 05/11 예비 +$30.9M. 5거래일 예비 합산은 +$130.2M로 강한 순유입은 아니지만 완전한 이탈도 아니다.</p><div class="meter"><i style="--w:58%"></i></div></div></div>
+        <div class="card market-card"><div class="icon">🧊</div><div><h3>온체인 공급 <span class="pill pos">긍정</span></h3><p>거래소 보유량 감소와 장기보유자 비중은 유통 공급 압박을 줄인다. 단, 가격 상승 시 단기 차익실현 공급이 빠르게 출회될 수 있다.</p><div class="meter"><i style="--w:72%"></i></div></div></div>
+        <div class="card market-card"><div class="icon">⛏</div><div><h3>채굴자 동향 <span class="pill neu">중립-</span></h3><p>해시레이트는 약 989 EH/s, 난이도 132.47T. 보안성은 강하지만 채굴 수익성 압박은 매도 압력으로 이어질 수 있다.</p><div class="meter"><i style="--w:48%"></i></div></div></div>
+        <div class="card market-card"><div class="icon">$</div><div><h3>거시 유동성 <span class="pill neg">부정</span></h3><p>연준 기준금리 3.50~3.75% 동결, 10년물 4.42%, DXY 약 98.0. 금리 인하 지연은 BTC 멀티플 상단을 제한한다.</p><div class="meter"><i style="--w:38%"></i></div></div></div>
+        <div class="card market-card"><div class="icon">⚡</div><div><h3>파생상품 레버리지 <span class="pill neu">중립</span></h3><p>Coinglass 기준 BTC 선물 OI는 약 $60.0B, 펀딩비는 소폭 플러스. 극단적 과열은 아니지만 변동성 확대 시 청산 위험은 남아 있다.</p><div class="meter"><i style="--w:52%"></i></div></div></div>
+        <div class="card market-card"><div class="icon">◎</div><div><h3>스테이블코인 유동성 <span class="pill pos">긍정</span></h3><p>전체 스테이블코인 시총은 약 $319B. 크립토 내부 대기자금의 크기는 유지되지만 실제 BTC 매수 전환 여부가 중요하다.</p><div class="meter"><i style="--w:66%"></i></div></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>온체인·밸류에이션 지표</h2>
+        <p>온체인 지표는 산식과 제공사별 기준일이 다르므로, 단일 수치보다 밴드와 방향성을 보는 것이 안전하다.</p>
+      </div>
+      <div class="grid-2">
+        <div class="table-card">
+          <table>
+            <thead><tr><th>지표</th><th>현재/최근값</th><th>해석</th><th>검증 메모</th></tr></thead>
+            <tbody>
+              <tr><td>BTC 현물 가격</td><td>$81,483</td><td>STH 비용기반을 소폭 상회</td><td>실시간 소스별 수십~수백 달러 차이 가능</td></tr>
+              <tr><td>시가총액</td><td>$1.633T</td><td>글로벌 대형 자산군으로 진입</td><td>CoinGecko 기준 공급량 20.028M BTC</td></tr>
+              <tr><td>실현가격</td><td>≈$54.1K</td><td>가격/실현가격 파생 MVRV ≈1.51</td><td>MacroMicro 공개 스냅샷, 최신성 확인 필요</td></tr>
+              <tr><td>LTH Realized Price</td><td>≈$48.1K</td><td>장기보유자 평균 비용기반 대비 여유</td><td>2026-05-07 공개 스냅샷</td></tr>
+              <tr><td>STH Realized Price</td><td>≈$79.0K</td><td>단기 추세선에 가까워 방어 실패 시 변동성 확대</td><td>2026-05-07 공개 스냅샷</td></tr>
+              <tr><td>MVRV Ratio</td><td>≈1.46~1.51</td><td>과열 상단은 아니나 저평가 구간도 아님</td><td>주간 리포트와 실현가격 파생값 차이 존재</td></tr>
+              <tr><td>MVRV Z-score</td><td>0.88</td><td>역사적 버블권과는 거리</td><td>2026-05-09 공개값</td></tr>
+              <tr><td>NVT Signal</td><td>111.86</td><td>네트워크 가치 대비 거래량 부담을 점검</td><td>Glassnode, 24시간 전 값</td></tr>
+              <tr><td>Puell Multiple</td><td>확인 필요</td><td>채굴자 수익성 과열/침체 판단 보조</td><td>공개 최신 숫자 검증 불충분, 시나리오 산식 제외</td></tr>
+              <tr><td>Mayer Multiple</td><td>≈0.93 스냅샷</td><td>200일선 대비 강한 과열은 아님</td><td>2026-05-02 공개 스냅샷, 최신 재확인 필요</td></tr>
+              <tr><td>Fear & Greed</td><td>49~51, Neutral</td><td>극단적 공포·탐욕은 아님</td><td>Alternative.me와 Binance 산식 차이</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>가격 밴드 시각화</h3>
+          <p class="mini">$45K~$170K 범위에 주요 비용기반·현재가·목표 후보를 배치했다.</p>
+          <div class="band" id="bandChart"></div>
+          <div class="note-box" style="margin-top:14px; box-shadow:none;">
+            <strong>사이클 위치:</strong> 2024년 반감기 이후 약 2년차로, 역사적으로 강세장이 연장될 수 있는 구간이나 2026년에는 ETF·금리·달러 유동성 변수의 영향이 과거보다 크다. Stock-to-Flow는 희소성 서사 확인용일 뿐 목표가격 산식에는 직접 반영하지 않았다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>1년 후 BTC 목표가격 시나리오</h2>
+        <p>세 시나리오의 확률 합계는 100%이며, 목표가격은 “후보값”이다.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card scenario">
+          <span class="label">A. Bear Case</span>
+          <div class="target">$62K</div>
+          <p>범위 $50K~$72K · KRW ≈ ₩91.7M</p>
+          <div class="prob"><span>발생 확률</span><strong>25%</strong></div><div class="bar-wrap"><div class="bar" style="--w:25%"></div></div>
+          <ul><li>ETF 순유출, 고금리 장기화, 위험자산 선호 약화</li><li>MVRV가 1.1~1.3배 밴드로 수축</li><li>STH 비용기반 이탈 후 레버리지 청산</li></ul>
+        </div>
+        <div class="card scenario">
+          <span class="label">B. Base Case</span>
+          <div class="target">$100K</div>
+          <p>범위 $85K~$115K · KRW ≈ ₩148.0M</p>
+          <div class="prob"><span>발생 확률</span><strong>50%</strong></div><div class="bar-wrap"><div class="bar" style="--w:50%"></div></div>
+          <ul><li>ETF 수요 완만한 증가, 반감기 이후 공급 압박 유지</li><li>MVRV 정상 구간 1.6~1.9배</li><li>거시 유동성 중립 또는 완만한 개선</li></ul>
+        </div>
+        <div class="card scenario">
+          <span class="label">C. Bull Case</span>
+          <div class="target">$150K</div>
+          <p>범위 $125K~$170K · KRW ≈ ₩222.0M</p>
+          <div class="prob"><span>발생 확률</span><strong>25%</strong></div><div class="bar-wrap"><div class="bar" style="--w:25%"></div></div>
+          <ul><li>ETF 대규모 순유입, 금리 인하, 달러 약세</li><li>MVRV 상단 2.4~2.8배 접근</li><li>기관·기업 재무자산 채택 가속</li></ul>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card">
+          <h3>확률가중 목표가격 계산</h3>
+          <div class="calc">
+            확률가중 목표가격 = Bear × 25% + Base × 50% + Bull × 25%<br>
+            = $62,000 × 0.25 + $100,000 × 0.50 + $150,000 × 0.25<br>
+            = <strong>$103,000</strong><br><br>
+            현재가 대비 기대수익률 = $103,000 / $81,483 - 1 = <strong>+26.4%</strong><br>
+            KRW 환산 = USD 가격 × 1,479.74 KRW/USD<br>
+            확률가중 목표가격 KRW ≈ <strong>₩152,413,220</strong>
+          </div>
+        </div>
+        <div class="card">
+          <h3>시나리오 확률 차트</h3>
+          <div class="chart" id="probChart"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>기관·리서치 리포트 비교</h2>
+        <p>리포트별 목표가격은 기준일과 전망 기간이 다르므로 단순 평균하지 않았다. HTML에서는 1년 시나리오에 직접 맞는 전망과 장기 전망을 구분했다.</p>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>기관</th><th>발간/보도일</th><th>관점</th><th>목표가격/전망</th><th>핵심 논리</th><th>리스크 언급</th><th>출처</th></tr></thead>
+          <tbody>
+            <tr><td>Citi</td><td>2026-03-17</td><td>중립~완만한 긍정</td><td>12개월 $112K · Bear $58K · Bull $165K</td><td>미국 크립토 입법 지연과 거시환경 반영 후 목표 하향</td><td>입법 지연, 매크로 악화</td><td><a href="https://www.reuters.com/business/finance/citigroup-cuts-12-month-bitcoin-ether-targets-us-crypto-legislation-stalls-2026-03-17/">Reuters</a></td></tr>
+            <tr><td>Standard Chartered</td><td>2026-02~03</td><td>중립</td><td>2026년말 $100K, 하방 $50K 언급</td><td>ETF 유출·매크로 부담·금리 인하 지연으로 목표 하향</td><td>ETF 이탈, 고금리, 하방 변동성</td><td><a href="https://phemex.com/news/article/standard-chartered-lowers-bitcoin-price-target-to-100k-for-2026-16904">Phemex 요약</a></td></tr>
+            <tr><td>Bernstein</td><td>2026-03-24~25</td><td>낙관</td><td>2026년말 $150K 유지</td><td>저점 통과 가능성, 기업·ETF 수요, 구조적 채택</td><td>단기 조정과 유동성 둔화</td><td><a href="https://www.coindesk.com/markets/2026/03/24/bitcoin-has-likely-bottomed-bernstein-says-maintaining-usd150k-year-end-target">CoinDesk</a></td></tr>
+            <tr><td>ARK Invest</td><td>2026-05-01 보도 / Big Ideas 2026</td><td>장기 낙관</td><td>2030년 BTC 시총 $16T급 장기 시나리오</td><td>디지털 금, 기관 채택, 장기 네트워크 가치 확장</td><td>장기 전망의 가정 민감도</td><td><a href="https://www.coindesk.com/markets/2026/05/01/cathie-woods-ark-invest-projects-bitcoin-s-market-cap-to-hit-usd16t-by-2030">CoinDesk</a></td></tr>
+            <tr><td>VanEck</td><td>2026-04</td><td>장기 낙관</td><td>5년 내 $1M 가능성 언급</td><td>금 대비 가치저장 수요, 제도권 채택, 희소성</td><td>시간축이 길고 변동성 큼</td><td><a href="https://www.vaneck.com/us/en/blogs/digital-assets/matthew-sigel-the-investment-case-for-bitcoin/">VanEck</a></td></tr>
+            <tr><td>Coinbase Institutional</td><td>2026-04-28</td><td>단기 중립</td><td>가격 목표 없음</td><td>Q2는 지정학·매크로 불확실성으로 균형적 위험</td><td>중동 갈등, 거시 불확실성, 리스크오프</td><td><a href="https://www.coinbase.com/institutional/research-insights/research/market-intelligence/q2-2026-crypto-market-outlook">Coinbase</a></td></tr>
+            <tr><td>Bitwise</td><td>2025-12-15</td><td>낙관</td><td>신고가 경신 전망, 가격 수치 직접 목표는 제한</td><td>ETF가 신규 공급의 100% 이상을 흡수할 수 있다는 수급 논리</td><td>예측은 보장 아님, 사이클 붕괴 가능성</td><td><a href="https://bitwiseinvestments.com/crypto-market-insights/bitwise-10-crypto-predictions-for-2026">Bitwise</a></td></tr>
+            <tr><td>CoinShares</td><td>2026-05-11</td><td>수급 긍정</td><td>가격 목표 없음</td><td>디지털자산 상품 6주 연속 순유입, BTC 주간 +$706.1M</td><td>자금 흐름은 가격 목표가 아님</td><td><a href="https://coinshares.com/insights/research-data/fund-flows-11-05-26/">CoinShares</a></td></tr>
+            <tr><td>Glassnode</td><td>2026 Week 19</td><td>단기 신중</td><td>가격 목표 없음</td><td>상단 공급과 매수 압력 둔화가 단기 가격을 제한</td><td>거래활동 둔화, 매도 우위, 박스권</td><td><a href="https://insights.glassnode.com/the-week-onchain-week-19-2026/">Glassnode</a></td></tr>
+            <tr><td>삼성증권 Digital Asset Weekly</td><td>2026-05-04</td><td>중립</td><td>가격 목표 없음</td><td>4/27~5/1 주간 BTC 상품 +$150M, BTC 도미넌스·거래량 비중 소폭 상승</td><td>스테이블코인·ETF·거래량 동향 관찰 필요</td><td><a href="https://www.samsungpop.com/common.do?cmd=down&contentType=application%2Fpdf&fileName=2020%2F2026050416353805K_02_02.pdf&inlineYn=Y&saveKey=research.pdf">삼성증권 PDF</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card"><h3>가장 보수적</h3><p>Citi Bear $58K와 Standard Chartered 하방 $50K 언급이 가장 낮은 영역이다. 공통 전제는 ETF 수요 둔화, 규제·입법 지연, 고금리 장기화다.</p></div>
+        <div class="card"><h3>중립적</h3><p>Citi Base $112K와 Standard Chartered $100K는 현재가 대비 상방은 열려 있으나 강한 유동성 랠리는 아직 확인되지 않았다는 관점에 가깝다.</p></div>
+        <div class="card"><h3>낙관적</h3><p>Bernstein $150K, ARK·VanEck 장기 전망은 ETF·기관 채택과 금 대비 시장가치 확장을 핵심 논리로 삼는다.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>리스크 매트릭스</h2><p>BTC 리스크는 가격 리스크보다 수급·정책·수탁·유동성 리스크가 함께 움직이는 것이 특징이다.</p></div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>리스크</th><th>발생 가능성</th><th>영향도</th><th>대응/관찰 지표</th></tr></thead>
+          <tbody>
+            <tr><td>현물 ETF 순유출 전환</td><td class="risk-mid">중</td><td class="risk-high">상</td><td>Farside 일일 플로우, ETF AUM, IBIT/FBTC 대형 펀드 흐름</td></tr>
+            <tr><td>미국 금리 재상승·인하 지연</td><td class="risk-high">상</td><td class="risk-high">상</td><td>Fed 점도표, 10Y 금리, CPI/PCE, 실질금리</td></tr>
+            <tr><td>달러 강세</td><td class="risk-mid">중</td><td class="risk-mid">중</td><td>DXY 100 돌파 여부, 달러 유동성 지표</td></tr>
+            <tr><td>규제 강화·회계 기준 변화</td><td class="risk-mid">중</td><td class="risk-high">상</td><td>미 SEC/CFTC/의회 법안, 회계 처리, 은행 수탁 규정</td></tr>
+            <tr><td>거래소·수탁사 해킹</td><td class="risk-low">저~중</td><td class="risk-high">상</td><td>대형 거래소 지갑 이동, 보험·수탁 공시, 온체인 이상거래</td></tr>
+            <tr><td>스테이블코인 신뢰 훼손</td><td class="risk-low">저~중</td><td class="risk-high">상</td><td>USDT/USDC 페그, 준비금 보고서, 시총 급감</td></tr>
+            <tr><td>채굴자 매도 압력</td><td class="risk-mid">중</td><td class="risk-mid">중</td><td>Hashprice, miner reserve, difficulty, 해시레이트</td></tr>
+            <tr><td>파생 레버리지 과열</td><td class="risk-mid">중</td><td class="risk-high">상</td><td>선물 OI, 펀딩비, 롱/숏 청산 규모</td></tr>
+            <tr><td>경기침체형 리스크오프</td><td class="risk-mid">중</td><td class="risk-high">상</td><td>신용스프레드, 실업률, S&P 500/Nasdaq 변동성</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>관찰해야 할 체크포인트</h2><p>다음 지표는 시나리오 확률을 업데이트할 때 우선 관찰한다.</p></div>
+      <div class="grid-4">
+        <div class="card"><h3>ETF·기관</h3><ul><li>미국 현물 ETF 일일/주간 순유입</li><li>IBIT·FBTC·GBTC 플로우 분리</li><li>기업 재무자산 BTC 매수·매도</li></ul></div>
+        <div class="card"><h3>거시</h3><ul><li>연준 발언과 기준금리 경로</li><li>CPI/PCE, 10년물 금리, DXY</li><li>글로벌 유동성·달러 유동성</li></ul></div>
+        <div class="card"><h3>온체인</h3><ul><li>거래소 BTC 보유량</li><li>LTH/STH 공급과 비용기반</li><li>MVRV, NVT, Puell, Mayer</li></ul></div>
+        <div class="card"><h3>시장 구조</h3><ul><li>해시레이트·난이도·채굴자 수익</li><li>펀딩비와 선물 미결제약정</li><li>스테이블코인 시총과 페그</li></ul></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>출처 및 검증 메모</h2><p>실시간성 높은 데이터는 페이지를 열람하는 시점에 달라질 수 있다. 수치 불일치가 있는 경우 HTML 안에 확인 필요 또는 파생 추정으로 표시했다.</p></div>
+      <div class="note-box">
+        <ul class="source-list">
+          <li>BTC 가격: OpenAI Finance snapshot, 2026-05-12.</li>
+          <li>BTC 시가총액·공급량: <a href="https://www.coingecko.com/en/coins/bitcoin">CoinGecko Bitcoin</a>.</li>
+          <li>전체 시장·BTC 도미넌스·스테이블코인 시총: <a href="https://www.coingecko.com/en/charts">CoinGecko Global Charts</a>.</li>
+          <li>USD/KRW 환율: <a href="https://www.investing.com/currencies/usd-krw">Investing.com USD/KRW</a>.</li>
+          <li>미국 BTC 현물 ETF 플로우: <a href="https://farside.co.uk/btc/">Farside Investors BTC ETF Flow</a>.</li>
+          <li>ETF AUM/파생상품 OI: <a href="https://www.coinglass.com/bitcoin-etf">CoinGlass Bitcoin ETF</a>, <a href="https://www.coinglass.com/BitcoinOpenInterest">CoinGlass Futures OI</a>.</li>
+          <li>NVT Signal: <a href="https://studio.glassnode.com/charts/indicators.Nvts?a=BTC">Glassnode NVT Signal</a>.</li>
+          <li>Realized Price/LTH/STH 비용기반/MVRV Z: MacroMicro 공개 차트.</li>
+          <li>채굴 난이도·해시레이트: CoinWarz, Minerstat, Hashrate Index.</li>
+          <li>Fear & Greed: <a href="https://alternative.me/crypto/fear-and-greed-index/">Alternative.me</a>, <a href="https://www.binance.com/en/square/fear-and-greed-index">Binance Square</a>.</li>
+          <li>기관 리포트: Reuters, CoinDesk, Coinbase Institutional, Bitwise, CoinShares, Glassnode, Samsung Securities.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <strong>본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</strong>
+    <p>작성일: 2026-05-12 · 단일 HTML 파일 · 외부 프레임워크 미사용</p>
+  </footer>
+
+  <script>
+    const scenarios = [
+      {name:'Bear', prob:25, target:62000},
+      {name:'Base', prob:50, target:100000},
+      {name:'Bull', prob:25, target:150000}
+    ];
+    const probChart = document.getElementById('probChart');
+    scenarios.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'stack-row';
+      row.innerHTML = `<strong>${s.name}</strong><div class="hbar"><i style="--w:${s.prob}%"></i></div><span>${s.prob}% · $${(s.target/1000).toFixed(0)}K</span>`;
+      probChart.appendChild(row);
+    });
+
+    const band = document.getElementById('bandChart');
+    const points = [
+      {label:'LTH RP $48.1K', v:48100},
+      {label:'Realized $54.1K', v:54084},
+      {label:'Bear $62K', v:62000},
+      {label:'STH RP $79.0K', v:79000},
+      {label:'Current $81.5K', v:81483},
+      {label:'Base $100K', v:100000},
+      {label:'Bull $150K', v:150000}
+    ];
+    const min = 45000, max = 170000;
+    points.forEach((p, idx) => {
+      const x = Math.max(0, Math.min(100, ((p.v-min)/(max-min))*100));
+      const el = document.createElement('div');
+      el.className = 'tick';
+      el.style.setProperty('--x', `${x}%`);
+      el.innerHTML = `<span style="top:${10 + (idx%4)*48}px">${p.label}</span>`;
+      band.appendChild(el);
+    });
+  </script>
+</body>
+</html>
