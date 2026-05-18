@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alphabet / Google 투자 리서치 대시보드</title>
+<style>
+:root{
+  --bg:#070b13;
+  --bg2:#0a1020;
+  --panel:#101827;
+  --panel2:#121c2f;
+  --line:rgba(255,255,255,.11);
+  --text:#eef4ff;
+  --muted:#a9b7cc;
+  --muted2:#7f8ca4;
+  --blue:#4285F4;
+  --red:#EA4335;
+  --yellow:#FBBC05;
+  --green:#34A853;
+  --cyan:#7dd3fc;
+  --purple:#b794f4;
+  --shadow:0 24px 80px rgba(0,0,0,.42);
+  --radius:22px;
+  --radius2:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(66,133,244,.22), transparent 32%),
+    radial-gradient(circle at 85% 6%, rgba(251,188,5,.13), transparent 28%),
+    radial-gradient(circle at 70% 52%, rgba(52,168,83,.08), transparent 30%),
+    linear-gradient(180deg, var(--bg), #05070c 55%, #070b13);
+  color:var(--text);
+  line-height:1.55;
+}
+a{color:#a8d2ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.container{width:min(1440px, calc(100% - 36px)); margin:0 auto}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  backdrop-filter: blur(18px);
+  background:rgba(7,11,19,.78);
+  border-bottom:1px solid var(--line);
+}
+.nav{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:14px 0;
+}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.02em}
+.gmark{width:34px;height:34px;border-radius:12px;background:
+  conic-gradient(from 180deg, var(--blue), var(--green), var(--yellow), var(--red), var(--blue));
+  box-shadow:0 0 30px rgba(66,133,244,.45);
+}
+.navlinks{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.navlinks a{
+  padding:8px 10px;border:1px solid rgba(255,255,255,.09);border-radius:999px;
+  color:var(--muted);font-size:12px;background:rgba(255,255,255,.035)
+}
+.hero{padding:54px 0 28px}
+.hero-grid{
+  display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:stretch
+}
+.hero-card{
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:
+    linear-gradient(135deg, rgba(66,133,244,.18), rgba(18,28,47,.9) 36%, rgba(10,16,32,.95)),
+    radial-gradient(circle at 70% 0%, rgba(234,67,53,.12), transparent 32%);
+  box-shadow:var(--shadow);
+  padding:30px;
+  overflow:hidden;
+  position:relative;
+}
+.hero-card:before{
+  content:"";position:absolute;right:-80px;top:-80px;width:230px;height:230px;
+  border-radius:50%;background:conic-gradient(var(--blue),var(--red),var(--yellow),var(--green),var(--blue));
+  opacity:.12;filter:blur(4px)
+}
+.eyebrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.badge{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;
+  font-size:12px;color:#dce9ff;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055)
+}
+.badge.blue{border-color:rgba(66,133,244,.35);background:rgba(66,133,244,.11)}
+.badge.green{border-color:rgba(52,168,83,.35);background:rgba(52,168,83,.11)}
+.badge.yellow{border-color:rgba(251,188,5,.35);background:rgba(251,188,5,.10)}
+.badge.red{border-color:rgba(234,67,53,.35);background:rgba(234,67,53,.10)}
+h1{font-size:clamp(34px,5vw,66px);line-height:1.05;margin:0 0 16px;letter-spacing:-.05em}
+.subtitle{font-size:17px;color:var(--muted);max-width:880px;margin:0 0 24px}
+.hero-kpi{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px
+}
+.kpi{
+  border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.045);border-radius:18px;padding:15px;
+}
+.kpi .label{font-size:12px;color:var(--muted2);margin-bottom:5px}
+.kpi .value{font-size:22px;font-weight:850;letter-spacing:-.03em}
+.kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.kpi.highlight{background:linear-gradient(135deg, rgba(52,168,83,.16), rgba(66,133,244,.08));border-color:rgba(52,168,83,.24)}
+.side-panel{
+  border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg, rgba(18,28,47,.88), rgba(10,16,32,.92));
+  box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;gap:16px
+}
+.score-ring{
+  min-height:230px;border-radius:24px;display:grid;place-items:center;text-align:center;
+  border:1px solid rgba(255,255,255,.10);
+  background:radial-gradient(circle, rgba(66,133,244,.18) 0 34%, rgba(255,255,255,.04) 35% 100%);
+  position:relative;overflow:hidden
+}
+.score-ring:before{
+  content:"";position:absolute;inset:18px;border-radius:50%;
+  background:conic-gradient(var(--green) 0 38%, var(--blue) 38% 74%, var(--yellow) 74% 89%, var(--red) 89% 100%);
+  mask:radial-gradient(circle, transparent 0 58%, #000 59%);
+  opacity:.9
+}
+.score-ring .inner{position:relative;z-index:1}
+.score-ring .price{font-size:48px;font-weight:900;letter-spacing:-.05em}
+.score-ring .caption{color:var(--muted);font-size:13px}
+.section{padding:34px 0}
+.section-title{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:18px
+}
+.section-title h2{margin:0;font-size:clamp(26px,3.2vw,42px);letter-spacing:-.04em}
+.section-title p{margin:0;color:var(--muted);max-width:760px}
+.grid{display:grid;gap:16px}
+.grid.cols-2{grid-template-columns:repeat(2,1fr)}
+.grid.cols-3{grid-template-columns:repeat(3,1fr)}
+.grid.cols-4{grid-template-columns:repeat(4,1fr)}
+.card{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg, rgba(18,28,47,.82), rgba(12,18,31,.92));
+  box-shadow:0 16px 50px rgba(0,0,0,.24);
+  padding:20px;
+}
+.card h3{margin:0 0 10px;font-size:20px;letter-spacing:-.025em}
+.card p{color:var(--muted);margin:0 0 12px}
+.card ul{margin:10px 0 0;padding-left:18px;color:var(--muted)}
+.card li{margin:7px 0}
+.status{
+  display:inline-flex;padding:5px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.12);
+  font-size:12px;font-weight:700;margin-bottom:10px
+}
+.status.pos{color:#d8ffe6;background:rgba(52,168,83,.10);border-color:rgba(52,168,83,.32)}
+.status.neu{color:#fff4cc;background:rgba(251,188,5,.10);border-color:rgba(251,188,5,.32)}
+.status.neg{color:#ffd7d3;background:rgba(234,67,53,.10);border-color:rgba(234,67,53,.32)}
+.metric-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.pill{
+  display:inline-flex;gap:6px;align-items:center;
+  color:#dce8ff;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);
+  padding:7px 9px;border-radius:12px;font-size:12px
+}
+.pill strong{color:#fff}
+.table-wrap{overflow:auto;border-radius:18px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;min-width:820px;background:rgba(255,255,255,.025)}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#dbe8ff;background:rgba(255,255,255,.055)}
+td{color:#d6e1f2;font-size:14px}
+tr:hover td{background:rgba(255,255,255,.025)}
+.small{font-size:12px;color:var(--muted2)}
+.note{font-size:13px;color:var(--muted);border-left:3px solid rgba(66,133,244,.6);padding-left:12px;margin-top:12px}
+.chart{
+  min-height:260px;border:1px solid rgba(255,255,255,.10);border-radius:20px;background:rgba(255,255,255,.035);
+  padding:16px;position:relative
+}
+.bar-chart{display:flex;align-items:flex-end;gap:10px;height:210px;padding-top:20px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:34px}
+.bar{
+  width:100%;border-radius:10px 10px 4px 4px;min-height:4px;
+  background:linear-gradient(180deg, rgba(66,133,244,.95), rgba(52,168,83,.75));
+  box-shadow:0 8px 30px rgba(66,133,244,.18);
+  position:relative;
+  transition:height .7s ease;
+}
+.bar.red{background:linear-gradient(180deg, rgba(234,67,53,.95), rgba(251,188,5,.75))}
+.bar.yellow{background:linear-gradient(180deg, rgba(251,188,5,.95), rgba(66,133,244,.65))}
+.bar.green{background:linear-gradient(180deg, rgba(52,168,83,.95), rgba(66,133,244,.65))}
+.bar-label{font-size:11px;color:var(--muted);text-align:center;white-space:nowrap}
+.bar-val{font-size:12px;color:#fff;font-weight:800}
+.formula{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  padding:14px;
+  color:#e9f3ff;
+}
+.scenario{
+  position:relative;overflow:hidden;
+}
+.scenario:before{
+  content:"";position:absolute;inset:0;opacity:.13;pointer-events:none;
+  background:radial-gradient(circle at 80% 0%, var(--glow), transparent 36%);
+}
+.scenario.bear{--glow:var(--red)}
+.scenario.base{--glow:var(--blue)}
+.scenario.bull{--glow:var(--green)}
+.scenario .big{font-size:36px;font-weight:900;letter-spacing:-.05em}
+.probbar{height:12px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:8px 0 16px}
+.probbar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--green))}
+.matrix td{text-align:right;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+.matrix td:first-child,.matrix th:first-child{text-align:left}
+.heat-0{background:rgba(234,67,53,.11)}
+.heat-1{background:rgba(251,188,5,.08)}
+.heat-2{background:rgba(66,133,244,.09)}
+.heat-3{background:rgba(52,168,83,.10)}
+.heat-4{background:rgba(52,168,83,.17)}
+.timeline{display:grid;gap:12px}
+.timeline-item{display:grid;grid-template-columns:160px 1fr;gap:14px;border-left:1px solid rgba(255,255,255,.12);padding-left:16px}
+.timeline-item b{color:#fff}
+.target-dot{
+  display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:var(--blue)
+}
+.footer{
+  padding:38px 0 60px;color:var(--muted);border-top:1px solid var(--line);margin-top:34px
+}
+.source-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.source{
+  border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px;background:rgba(255,255,255,.035)
+}
+.source b{color:#fff}
+@media (max-width:1100px){
+  .hero-grid,.grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr}
+  .hero-kpi{grid-template-columns:repeat(2,1fr)}
+  .source-grid{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .container{width:min(100% - 24px, 1440px)}
+  .nav{align-items:flex-start;flex-direction:column}
+  .navlinks{justify-content:flex-start}
+  .hero{padding-top:28px}
+  .hero-card,.side-panel,.card{padding:16px;border-radius:20px}
+  .hero-kpi{grid-template-columns:1fr}
+  .timeline-item{grid-template-columns:1fr}
+  h1{font-size:36px}
+}
+@media print{
+  .topbar{position:static}
+  body{background:#fff;color:#111}
+  .card,.hero-card,.side-panel{break-inside:avoid;background:#fff;color:#111;border-color:#ddd;box-shadow:none}
+  .subtitle,.card p,.card li,td,.small,.note{color:#333}
+  a{color:#0645ad}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="container nav">
+    <div class="brand"><span class="gmark"></span><span>GOOGL Premium Research Dashboard</span></div>
+    <nav class="navlinks">
+      <a href="#summary">요약</a><a href="#business">사업부</a><a href="#eps">EPS</a><a href="#valuation">밸류에이션</a><a href="#scenario">시나리오</a><a href="#analyst">기관</a><a href="#risk">리스크</a><a href="#sources">출처</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-card">
+      <div class="eyebrow">
+        <span class="badge blue">NASDAQ: GOOGL</span>
+        <span class="badge green">데이터 기준일: 2026-05-18</span>
+        <span class="badge yellow">통화: USD / 참고 환율 USDKRW 1,493.74</span>
+        <span class="badge red">투자 참고용</span>
+      </div>
+      <h1>Alphabet / Google 투자 리서치 대시보드</h1>
+      <p class="subtitle">검색 광고, YouTube, Google Cloud, Gemini/Vertex AI, TPU, Waymo를 하나의 EPS 엔진으로 연결해 보는 프리미엄 증권사형 단일 HTML 리서치입니다. 핵심 질문은 “EPS가 어디로 가고, 시장은 그 EPS에 얼마의 PER을 부여하는가?”입니다.</p>
+      <div class="hero-kpi">
+        <div class="kpi"><div class="label">현재 주가</div><div class="value">$396.78</div><div class="sub">2026-05-18 조회 / Class A</div></div>
+        <div class="kpi"><div class="label">시가총액</div><div class="value">$4.81T</div><div class="sub">약 7,180조원 @ 1,493.74</div></div>
+        <div class="kpi"><div class="label">TTM EPS / P/E</div><div class="value">$13.11 / 30.3x</div><div class="sub">GAAP diluted EPS 기준</div></div>
+        <div class="kpi highlight"><div class="label">Forward EPS / PER</div><div class="value">$14.22 / 27.9x</div><div class="sub">FY2026E EPS 기준 계산</div></div>
+        <div class="kpi"><div class="label">P/B / ROE</div><div class="value">10.0x / 31.8%</div><div class="sub">P/B 공개 데이터, ROE 2025 기준</div></div>
+        <div class="kpi"><div class="label">EPS Revision</div><div class="value">상향</div><div class="sub">FY2026 EPS $11.63 → $14.22</div></div>
+        <div class="kpi"><div class="label">확률가중 목표주가 후보</div><div class="value">$413.58</div><div class="sub">Bear/Base/Bull 가정 기반</div></div>
+        <div class="kpi"><div class="label">현재가 대비 기대수익률</div><div class="value">+4.2%</div><div class="sub">배당 제외, 시나리오 기반</div></div>
+      </div>
+    </div>
+    <aside class="side-panel">
+      <div class="score-ring">
+        <div class="inner">
+          <div class="caption">확률가중 시나리오 후보값</div>
+          <div class="price">$413.6</div>
+          <div class="caption">현재가 $396.8 대비 +4.2%</div>
+        </div>
+      </div>
+      <div class="formula">
+        목표주가 = Forward EPS × 적용 PER<br>
+        확률가중 목표주가 = $276.0×20% + $426.6×55% + $495.0×25% = <b>$413.58</b><br>
+        기대수익률 = $413.58 / $396.78 - 1 = <b>+4.2%</b>
+      </div>
+      <p class="note">Q1 2026 보고 EPS $5.11에는 비상장 지분 평가이익 영향이 포함되어 있어, 영업 EPS 추세 판단에는 Search·YouTube·Cloud의 영업이익 흐름과 CAPEX/FCF를 함께 봐야 합니다.</p>
+    </aside>
+  </div>
+</section>
+
+<section id="summary" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>1. 투자 요약</h2>
+      <p>결론은 “EPS 상향은 분명히 긍정적이나, 현 주가는 AI·Cloud 성장과 규제 리스크를 동시에 반영한 중립~완만한 상승 여력 구간”입니다.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3>핵심 투자 포인트</h3>
+        <ul>
+          <li>Search & Other가 Q1 2026 +19% 성장하며 핵심 광고 엔진이 아직 견조함을 증명.</li>
+          <li>Google Cloud는 Q1 2026 매출 +63%, 영업이익 $6.6B로 EPS 기여도가 빠르게 확대.</li>
+          <li>Gemini, Vertex AI, TPU, AI Studio, Workspace AI가 검색·클라우드·개발자 생태계를 동시에 방어.</li>
+          <li>YouTube는 광고와 구독이 함께 성장하며 광고 경기 의존도를 낮추는 방향.</li>
+          <li>대규모 자사주 매입과 순현금성 재무구조가 EPS 방어에 기여.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>핵심 리스크</h3>
+        <ul>
+          <li>미국·EU 반독점 소송과 검색 기본 탑재 계약 리스크는 밸류에이션 할인 요인.</li>
+          <li>AI 검색 전환이 검색 광고의 클릭·CPC·쿼리당 수익화를 훼손할 가능성.</li>
+          <li>2026년 AI CAPEX 확대는 장기 성장 요인이지만 단기 FCF yield와 감가상각비 부담.</li>
+          <li>Amazon Ads, Meta, TikTok, Microsoft, OpenAI, Perplexity 등 경쟁 심화.</li>
+          <li>Q1 보고 EPS에는 일회성 성격의 지분 평가이익이 포함되어 품질 확인 필요.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>한 줄 결론</h3>
+        <p><b>EPS 추세:</b> 2022년 저점 이후 2025년까지 강하게 회복했고, FY2026 컨센서스도 상향됐습니다.</p>
+        <p><b>밸류에이션:</b> Forward EPS $14.22 기준 현재가는 약 27.9배로, 고성장 AI 플랫폼 프리미엄과 규제 할인 요인이 공존합니다.</p>
+        <p><b>판단:</b> “저평가 확정”보다는 Cloud/AI 수익화가 CAPEX와 규제 리스크를 얼마나 상쇄하는지 확인하는 구간입니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="company" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>2. 회사 개요와 수익 구조</h2>
+      <p>Alphabet은 Google Search 광고회사라기보다 검색·동영상·모바일 OS·브라우저·클라우드·AI 인프라·자율주행 옵션을 보유한 플랫폼 지주회사입니다.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>사업 영역</h3>
+        <div class="metric-row">
+          <span class="pill"><strong>Search & Other</strong> 검색 광고</span>
+          <span class="pill"><strong>YouTube Ads</strong> 동영상 광고</span>
+          <span class="pill"><strong>Subscriptions</strong> Premium/Music/TV/Google One</span>
+          <span class="pill"><strong>Google Network</strong> 파트너 광고</span>
+          <span class="pill"><strong>Google Cloud</strong> GCP/Workspace/Vertex AI</span>
+          <span class="pill"><strong>Android/Chrome/Maps/Play</strong> 생태계</span>
+          <span class="pill"><strong>Gemini/TPU</strong> AI 모델·인프라</span>
+          <span class="pill"><strong>Waymo/Other Bets</strong> 장기 옵션</span>
+        </div>
+        <p class="note">GOOGL은 Class A로 1주 1의결권, GOOG는 Class C로 의결권이 없습니다. 경제적 권리는 대체로 동일하되 의결권 차이가 핵심입니다.</p>
+      </div>
+      <div class="card">
+        <h3>주요 고객과 경쟁 구도</h3>
+        <ul>
+          <li><b>고객:</b> 광고주, 일반 소비자, 기업 클라우드 고객, 개발자, AI API/Vertex AI 고객, YouTube 크리에이터·구독자, 모빌리티 파트너.</li>
+          <li><b>광고 경쟁:</b> Meta, Amazon Ads, TikTok/ByteDance, Microsoft, Apple.</li>
+          <li><b>검색/AI 검색 경쟁:</b> Microsoft Bing, OpenAI, Perplexity, Anthropic, Meta AI.</li>
+          <li><b>클라우드 경쟁:</b> AWS, Azure, Oracle Cloud, IBM, CoreWeave.</li>
+          <li><b>동영상/자율주행 경쟁:</b> Netflix, TikTok, Disney, Prime Video, Twitch, Tesla, Cruise, Mobileye.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="industry" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>3. 업황: 디지털 광고·AI·Cloud</h2>
+      <p>업황은 매출 성장에 우호적이지만, AI 투자와 규제의 비용 함수가 동시에 커지고 있습니다.</p>
+    </div>
+    <div class="grid cols-4">
+      <div class="card"><span class="status pos">광고 시장</span><h3>디지털 광고 구조적 성장</h3><p>WPP/Reuters 기준 2026년 글로벌 광고 성장률은 6.1%로 전망되며 디지털 광고는 2025년 글로벌 광고 매출의 73.2%를 차지할 것으로 제시됩니다.</p></div>
+      <div class="card"><span class="status neu">검색 점유율</span><h3>지배력은 높지만 균열</h3><p>StatCounter 기준 2026년 4월 Google의 글로벌 검색 엔진 점유율은 90.02%입니다. 반면 eMarketer는 2026년 미국 검색 광고 지출 내 Google 비중이 48.5%로 20년 만에 절반 아래로 내려갈 수 있다고 봅니다.</p></div>
+      <div class="card"><span class="status pos">Cloud/AI</span><h3>Cloud가 EPS 엔진으로 전환</h3><p>Q1 2026 Cloud 매출은 $20.0B, +63% YoY, 영업이익 $6.6B로, 과거 투자 부문에서 본격적인 이익 레버리지 부문으로 이동 중입니다.</p></div>
+      <div class="card"><span class="status neg">CAPEX/FCF</span><h3>AI 인프라 비용 증가</h3><p>FY2025 CAPEX는 $91.4B였고, 2026년에는 $175~185B 수준의 고강도 투자 가이던스가 제시됐습니다. 장기 경쟁력에는 긍정이나 단기 FCF yield는 압박합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="business" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>4. 사업부 대시보드</h2>
+      <p>각 사업부가 Alphabet EPS에 미치는 방향성을 매출 성장, 마진, 경쟁, 규제 관점에서 요약했습니다.</p>
+    </div>
+    <div class="grid cols-3" id="businessCards"></div>
+  </div>
+</section>
+
+<section id="financials" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>5. 핵심 재무와 실적 전망</h2>
+      <p>2021~2025년 연간 실적과 최근 8개 분기 흐름을 한눈에 비교합니다. 단위는 달러, 금액은 십억 달러입니다.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>연간 매출·영업이익·EPS</h3>
+        <div class="chart" id="annualRevenueChart"></div>
+        <div class="table-wrap"><table id="annualTable"></table></div>
+      </div>
+      <div class="card">
+        <h3>최근 8개 분기</h3>
+        <div class="chart" id="quarterlyRevenueChart"></div>
+        <div class="table-wrap"><table id="quarterlyTable"></table></div>
+        <p class="note">Q1 2026 EPS $5.11은 보고 GAAP diluted EPS입니다. Other income에 비상장 지분 평가이익이 크게 반영되어 반복 영업 EPS로 해석할 때는 주의가 필요합니다.</p>
+      </div>
+    </div>
+    <div class="grid cols-4" style="margin-top:16px">
+      <div class="card"><h3>현금·유가증권</h3><div class="kpi"><div class="value">$126.8B</div><div class="sub">2026-03-31</div></div></div>
+      <div class="card"><h3>장기부채</h3><div class="kpi"><div class="value">$77.5B</div><div class="sub">Q1 2026 senior notes 포함</div></div></div>
+      <div class="card"><h3>TTM FCF</h3><div class="kpi"><div class="value">$64.4B</div><div class="sub">FCF Yield 약 1.34%</div></div></div>
+      <div class="card"><h3>자사주 매입</h3><div class="kpi"><div class="value">$45.7B</div><div class="sub">FY2025 cash flow 기준</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="eps" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>6. EPS 추세 분석</h2>
+      <p>이 리서치의 핵심 섹션입니다. EPS는 광고 경기, Cloud 마진, AI CAPEX, 자사주 매입, 규제 리스크의 결과값입니다.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>최근 5년 연간 EPS</h3>
+        <div class="chart" id="annualEpsChart"></div>
+        <p class="note">저점은 2022년 $4.56, 고점은 2025년 $10.81입니다. 2022년 광고 둔화와 비용 구조 부담 이후 2023~2025년에는 비용 효율화, 광고 회복, Cloud 수익성 개선, 자사주 매입이 EPS를 끌어올렸습니다.</p>
+      </div>
+      <div class="card">
+        <h3>최근 8개 분기 EPS</h3>
+        <div class="chart" id="quarterlyEpsChart"></div>
+        <p class="note">Q1 2026 $5.11은 보고 EPS 기준으로 급등했으나, 지분 평가이익 영향 때문에 EPS 품질 확인이 필요합니다.</p>
+      </div>
+      <div class="card">
+        <h3>Forward EPS와 Revision</h3>
+        <div class="chart" id="forwardEpsChart"></div>
+        <div class="metric-row">
+          <span class="pill"><strong>FY2026E</strong> $14.22</span>
+          <span class="pill"><strong>Revision</strong> $11.63 → $14.22</span>
+          <span class="pill"><strong>방향</strong> 상향</span>
+          <span class="pill"><strong>FY2027E</strong> $15.22 가정</span>
+        </div>
+        <p class="note">FY2027E는 공개 컨센서스 성장률을 단순 적용한 참고값입니다. 공식 컨센서스 수치가 불명확한 경우 “확인 필요”로 표시했습니다.</p>
+      </div>
+      <div class="card">
+        <h3>EPS Bridge</h3>
+        <div class="timeline">
+          <div class="timeline-item"><b>상향 요인</b><span>Search 광고 +19%, YouTube +11%, Cloud +63%, Cloud OI $6.6B, Gemini/Vertex AI 수요, 자사주 매입.</span></div>
+          <div class="timeline-item"><b>하향 요인</b><span>AI CAPEX와 감가상각비, TAC, SBC, 반독점 벌금/구조적 제재, Apple 기본 검색 계약, Other Bets 손실.</span></div>
+          <div class="timeline-item"><b>중립/변수</b><span>환율, 세율, 지분 평가이익, 금리, AI 검색 전환 시 광고 단가와 클릭률 변화.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="valuation" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>7. 밸류에이션과 EPS × PER 민감도</h2>
+      <p>현 주가는 FY2026E EPS $14.22 대비 약 27.9배입니다. Market data provider 기준 Forward P/E는 28~29배대로 차이가 있어, 본 대시보드는 계산값과 외부 제공값을 함께 표시합니다.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>목표주가 계산 구조</h3>
+        <div class="formula">
+          Forward EPS × 적용 PER = 목표주가 후보<br><br>
+          Base Case: $14.22 × 30x = $426.60<br>
+          Bear Case: $11.50 × 24x = $276.00<br>
+          Bull Case: $16.50 × 30x = $495.00
+        </div>
+        <p class="note">PER 30배는 현재 TTM P/E와 유사하지만, EPS 품질·규제·CAPEX 리스크가 커질 경우 20배대 중반 이하로 하락할 수 있습니다. 반대로 AI/Cloud 성장 신뢰도가 강화되면 30배 이상 프리미엄도 가능합니다.</p>
+      </div>
+      <div class="card">
+        <h3>EPS × PER 민감도 매트릭스</h3>
+        <div class="table-wrap"><table class="matrix" id="sensitivityTable"></table></div>
+        <p class="small">행: FY2026E EPS ±10%/±20%, 열: 적용 PER. 단위: 달러/주.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Peer Comparison</h3>
+      <div class="table-wrap"><table id="peerTable"></table></div>
+      <p class="note">동종 비교는 시점과 데이터 제공자 차이에 따라 달라질 수 있습니다. Alphabet의 핵심 비교 포인트는 “광고 플랫폼 PER”이 아니라 “AI·Cloud를 가진 글로벌 플랫폼 PER”로 재평가될 수 있는지입니다.</p>
+    </div>
+  </div>
+</section>
+
+<section id="scenario" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>8. 1년 후 목표주가 후보 3가지</h2>
+      <p>아래 값은 투자 권유가 아니라 시나리오 기반 가정값입니다. 확률 합계는 100%로 맞췄습니다.</p>
+    </div>
+    <div class="grid cols-3" id="scenarioCards"></div>
+    <div class="card" style="margin-top:16px">
+      <h3>시나리오 확률 차트</h3>
+      <div id="scenarioProbChart"></div>
+      <p class="formula">확률가중 목표주가 = Bear $276.00 × 20% + Base $426.60 × 55% + Bull $495.00 × 25% = <b>$413.58</b></p>
+    </div>
+  </div>
+</section>
+
+<section id="analyst" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>9. 글로벌 기관 리포트 비교</h2>
+      <p>공개 기사·컨센서스 페이지에서 확인 가능한 최신 목표주가를 정리했습니다. 원문 리포트의 상세 EPS·DCF 가정은 유료/제한 자료인 경우 “확인 필요”로 표시했습니다.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card"><h3>컨센서스 1</h3><div class="kpi"><div class="value">$410.84</div><div class="sub">MarketBeat 54명 평균 / High $515 / Low $220</div></div></div>
+      <div class="card"><h3>컨센서스 2</h3><div class="kpi"><div class="value">$410.17</div><div class="sub">ValueInvesting.io 70명 평균 / Median $425.85</div></div></div>
+      <div class="card"><h3>컨센서스 3</h3><div class="kpi"><div class="value">$426.44</div><div class="sub">TipRanks 최근 3개월 33명 평균</div></div></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>기관별 목표주가와 논리</h3>
+      <div class="table-wrap"><table id="analystTable"></table></div>
+    </div>
+    <div class="grid cols-3" style="margin-top:16px">
+      <div class="card"><span class="status neg">보수적</span><h3>Morgan Stanley / UBS 계열</h3><p>Q1 이후 목표가를 높이더라도 규제·CAPEX·FCF 압박을 더 크게 반영하는 관점입니다.</p></div>
+      <div class="card"><span class="status neu">중립적</span><h3>MarketBeat 평균 $410.84</h3><p>현재 주가와 큰 차이가 없는 평균값으로, EPS 상향과 리스크 할인이 거의 균형을 이룬 상태입니다.</p></div>
+      <div class="card"><span class="status pos">낙관적</span><h3>Loop/JPMorgan/Mizuho</h3><p>AI·Cloud·검색 방어력·Waymo 옵션을 더 크게 반영하는 쪽이며, $460~$490대 목표가를 제시합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="risk" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>10. 리스크 매트릭스</h2>
+      <p>Alphabet의 리스크는 단일 악재가 아니라 EPS 성장률, PER, 금리, 규제가 동시에 움직일 수 있다는 데 있습니다.</p>
+    </div>
+    <div class="table-wrap"><table id="riskTable"></table></div>
+  </div>
+</section>
+
+<section id="checkpoints" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>11. 앞으로 관찰할 체크포인트</h2>
+      <p>다음 실적 발표 전후로 EPS 추정치가 더 올라가는지, 또는 AI CAPEX와 규제 때문에 멀티플이 눌리는지가 핵심입니다.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>체크리스트</h3>
+        <ul id="checklist"></ul>
+      </div>
+      <div class="card">
+        <h3>데이터 검증 메모</h3>
+        <ul>
+          <li>실시간 주가, Forward P/E, 목표주가는 데이터 제공자별 시점 차이가 크므로 표기일을 반드시 확인해야 합니다.</li>
+          <li>EPS는 특별한 언급이 없으면 GAAP diluted EPS 기준입니다. 조정 EPS와 혼용하지 않았습니다.</li>
+          <li>컨센서스·기관 리포트는 공개 접근 가능한 요약 기반이며, 원문 리포트의 상세 모델은 제한될 수 있습니다.</li>
+          <li>원화 환산은 투자 판단용 확정값이 아니라 환율 기준일 참고값입니다.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sources" class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>12. 출처와 검증</h2>
+      <p>모든 핵심 수치는 아래 출처를 기준으로 확인했습니다. 출처가 불명확하거나 원문 접근이 제한된 수치는 확인 필요로 표시했습니다.</p>
+    </div>
+    <div class="source-grid" id="sourceGrid"></div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p><b>중요 고지:</b> 본 자료의 목표주가와 기대수익률은 Forward EPS와 PER 가정에 따른 후보값입니다. “매수해야 한다”, “무조건 오른다”, “저평가 확정”과 같은 의미가 아닙니다.</p>
+    <p>본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</p>
+  </div>
+</footer>
+
+<script>
+const DATA = {"annual": [{"year": "2021", "revenue": 257.637, "opIncome": 78.714, "netIncome": 76.033, "eps": 5.61, "opMargin": 30.6, "netMargin": 29.5}, {"year": "2022", "revenue": 282.836, "opIncome": 74.842, "netIncome": 59.972, "eps": 4.56, "opMargin": 26.5, "netMargin": 21.2}, {"year": "2023", "revenue": 307.394, "opIncome": 84.293, "netIncome": 73.795, "eps": 5.8, "opMargin": 27.4, "netMargin": 24.0}, {"year": "2024", "revenue": 350.018, "opIncome": 112.39, "netIncome": 100.118, "eps": 8.04, "opMargin": 32.1, "netMargin": 28.6}, {"year": "2025", "revenue": 402.836, "opIncome": 129.039, "netIncome": 132.17, "eps": 10.81, "opMargin": 32.0, "netMargin": 32.8}], "quarterly": [{"q": "Q2 24", "rev": 84.742, "op": 27.425, "net": 23.619, "eps": 1.89}, {"q": "Q3 24", "rev": 88.268, "op": 28.521, "net": 26.301, "eps": 2.12}, {"q": "Q4 24", "rev": 96.469, "op": 30.972, "net": 26.536, "eps": 2.15}, {"q": "Q1 25", "rev": 90.234, "op": 30.606, "net": 34.54, "eps": 2.81}, {"q": "Q2 25", "rev": 96.428, "op": 31.271, "net": 28.196, "eps": 2.31}, {"q": "Q3 25", "rev": 102.346, "op": 31.228, "net": 34.979, "eps": 2.87}, {"q": "Q4 25", "rev": 113.828, "op": 35.934, "net": 34.455, "eps": 2.82}, {"q": "Q1 26", "rev": 109.896, "op": 39.696, "net": 62.578, "eps": 5.11}], "forward": [{"year": "FY2025A", "eps": 10.81, "type": "확정 GAAP diluted"}, {"year": "FY2026E", "eps": 14.22, "type": "컨센서스"}, {"year": "FY2027E", "eps": 15.22, "type": "FY2026E × 1.07 가정"}, {"year": "FY2028E", "eps": null, "type": "공개 자료 제한 / 확인 필요"}], "scenarios": [{"name": "Bear Case", "tag": "규제·CAPEX 할인", "eps": 11.5, "per": 24, "prob": 20, "tone": "bear", "drivers": ["검색 광고 성장 둔화", "AI 검색 전환으로 광고 효율성 압박", "Google Cloud 성장률 둔화", "AI CAPEX·감가상각비 증가", "반독점·Apple 검색 계약 불확실성"], "epsBridge": "검색/YouTube 성장률 둔화, TAC와 감가상각비 상승, Other Bets 손실 확대, EPS 컨센서스 하향", "target": 276.0}, {"name": "Base Case", "tag": "컨센서스 흡수", "eps": 14.22, "per": 30, "prob": 55, "tone": "base", "drivers": ["검색 광고 안정 성장", "YouTube 광고·구독 견조", "Cloud 수익성 개선 지속", "Gemini/AI 기능의 점진적 수익화", "CAPEX 부담을 매출 성장으로 흡수"], "epsBridge": "검색·Cloud·구독 성장과 자사주 매입이 AI 투자비 증가를 대체로 상쇄", "target": 426.6}, {"name": "Bull Case", "tag": "AI 재평가", "eps": 16.5, "per": 30, "prob": 25, "tone": "bull", "drivers": ["AI 검색과 Gemini 수익화 성공", "Cloud AI 수요 고성장", "TPU 기반 비용 효율화", "Waymo 옵션 가치 재평가", "자사주 매입 확대"], "epsBridge": "Cloud 마진 레버리지, Search AI 사용량 증가, Gemini Enterprise/Vertex AI 확대, 자사주 매입 효과", "target": 495.0}], "sensitivity": [{"label": "-20%", "eps": 11.38, "values": [170.7, 204.8, 239.0, 273.1, 307.3, 341.4]}, {"label": "-10%", "eps": 12.8, "values": [192.0, 230.4, 268.8, 307.2, 345.6, 384.0]}, {"label": "Base", "eps": 14.22, "values": [213.3, 256.0, 298.6, 341.3, 383.9, 426.6]}, {"label": "+10%", "eps": 15.64, "values": [234.6, 281.5, 328.4, 375.4, 422.3, 469.2]}, {"label": "+20%", "eps": 17.06, "values": [255.9, 307.1, 358.3, 409.4, 460.6, 511.8]}], "perCols": [15, 18, 21, 24, 27, 30], "analysts": [{"firm": "JPMorgan", "date": "2026-04-30 / 2026-05", "rating": "Overweight / Buy", "target": "$460", "eps": "원문 EPS 가정 공개 제한", "valuation": "멀티플 기반·AI/Cloud 성장 프리미엄", "logic": "Search·Cloud·풀스택 AI를 긍정적으로 평가. 규제와 CAPEX는 할인 요인으로 분리.", "view": "Search 긍정, Cloud/AI 낙관, Waymo 옵션", "revision": "상향 논리", "risk": "반독점·CAPEX 언급 가능", "source": "MarketBeat/관련 보도"}, {"firm": "Goldman Sachs", "date": "2026-04-30", "rating": "Buy", "target": "$450", "eps": "확인 필요", "valuation": "확인 필요", "logic": "Cloud 성장, AI 투자, 핵심 광고 회복을 중심으로 목표가 상향.", "view": "Cloud/AI 긍정", "revision": "상향 논리", "risk": "CAPEX·규제 관찰", "source": "Moomoo/Capital.com 요약"}, {"firm": "Bank of America", "date": "2026-04-30", "rating": "Buy", "target": "$430", "eps": "확인 필요", "valuation": "확인 필요", "logic": "Q1 실적 이후 AI 기반 성장성과 마진 탄력성을 반영해 상향.", "view": "Search·Cloud 긍정", "revision": "상향 논리", "risk": "규제·FCF", "source": "MarketScreener"}, {"firm": "Oppenheimer", "date": "2026-05-15", "rating": "Outperform", "target": "$445", "eps": "확인 필요", "valuation": "확인 필요", "logic": "기존 $425에서 상향. AI와 Cloud 성장, 검색 방어력을 반영한 낙관 케이스.", "view": "AI 낙관", "revision": "상향 논리", "risk": "CAPEX 관찰", "source": "MarketScreener"}, {"firm": "Loop Capital", "date": "2026-05-15", "rating": "Buy", "target": "$490", "eps": "확인 필요", "valuation": "프리미엄 밸류에이션 추정", "logic": "목표가를 $355에서 $490으로 크게 상향. 낙관적 AI·Cloud 재평가 시나리오에 가까움.", "view": "AI/Cloud 강한 낙관", "revision": "상향 논리", "risk": "높은 기대치", "source": "MarketScreener"}, {"firm": "Jefferies", "date": "2026-05-04", "rating": "Buy", "target": "$445", "eps": "확인 필요", "valuation": "확인 필요", "logic": "목표가 $400에서 $445로 상향. 핵심 광고와 Cloud 모멘텀 반영.", "view": "Search·Cloud 긍정", "revision": "상향 논리", "risk": "규제·CAPEX", "source": "MarketScreener"}, {"firm": "Mizuho", "date": "2026-05-06", "rating": "긍정 / Buy 계열", "target": "$460", "eps": "확인 필요", "valuation": "확인 필요", "logic": "목표가 $420에서 $460으로 상향. Q1 이후 성장률과 마진 개선 반영.", "view": "Cloud/AI 긍정", "revision": "상향 논리", "risk": "확인 필요", "source": "MarketScreener"}, {"firm": "Evercore ISI", "date": "2026-04-30", "rating": "Outperform", "target": "$420", "eps": "확인 필요", "valuation": "확인 필요", "logic": "목표가 $400에서 $420으로 상향. Base Case에 가까운 긍정 의견.", "view": "Search 안정, Cloud 긍정", "revision": "완만한 상향", "risk": "규제", "source": "MarketBeat"}, {"firm": "Morgan Stanley", "date": "2026-04-30", "rating": "Overweight", "target": "$375", "eps": "확인 필요", "valuation": "상대적으로 보수적 멀티플", "logic": "목표가 $330에서 $375로 상향했지만 시장 컨센서스 대비 보수적.", "view": "긍정이나 할인 적용", "revision": "상향이나 보수적", "risk": "CAPEX·규제 반영", "source": "MarketBeat"}, {"firm": "UBS", "date": "2026-04-30", "rating": "Neutral", "target": "공개 기사 기준 확인 필요", "eps": "확인 필요", "valuation": "확인 필요", "logic": "중립 의견. AI 투자와 CAPEX/규제 리스크를 더 보수적으로 반영하는 관점.", "view": "AI 수익화 신중", "revision": "중립", "risk": "CAPEX·FCF", "source": "MarketScreener"}, {"firm": "Deutsche Bank", "date": "2026-04-30", "rating": "Buy 재확인", "target": "확인 필요", "eps": "확인 필요", "valuation": "확인 필요", "logic": "Q1 이후 Buy 의견 유지. 구체 수치는 공개 기사 제한.", "view": "Search/Cloud 긍정 추정", "revision": "상향/유지", "risk": "확인 필요", "source": "MarketBeat"}]};
+const BUSINESS = [{"title": "Search Ads", "status": "긍정", "accent": "blue", "metric": "Q1 26 Search & Other $60.4B, +19% YoY", "eps": "EPS 영향: 매우 큼", "summary": "AI Overviews/AI Mode가 쿼리 사용량을 늘렸다는 회사 코멘트와 2025년 paid clicks·CPC 동반 증가가 긍정적이다. 다만 미국 검색 광고 점유율 하락과 반독점 판결은 PER 할인 요인이다."}, {"title": "YouTube", "status": "긍정/중립", "accent": "red", "metric": "Q1 26 Ads $9.88B, +11% YoY", "eps": "EPS 영향: 중간~큼", "summary": "광고는 두 자릿수 성장, 구독은 Alphabet 전체 paid subscriptions 350M으로 확대. Shorts와 TV/Premium이 장기 성장축이지만 콘텐츠 비용과 경기 민감도가 부담이다."}, {"title": "Google Cloud", "status": "긍정", "accent": "green", "metric": "Q1 26 Cloud $20.0B, +63% YoY / OI $6.6B", "eps": "EPS 영향: 빠르게 확대", "summary": "AI 인프라·Enterprise AI Solutions가 성장을 견인했고 Cloud backlog는 4,600억 달러 이상으로 언급됐다. Wiz 인수 통합과 CAPEX·감가상각은 단기 마진 체크포인트다."}, {"title": "AI / Gemini / TPU", "status": "긍정, 단기 FCF 부담", "accent": "yellow", "metric": "API 160억 tokens/min, Gemini Enterprise paid MAU +40% QoQ", "eps": "EPS 영향: 장기 큼 / 단기 혼재", "summary": "Gemini, Vertex AI, TPU 풀스택 전략은 Cloud와 Search 방어에 핵심이다. 하지만 2026년 대규모 AI CAPEX는 FCF yield와 감가상각 부담을 높인다."}, {"title": "Waymo / Other Bets", "status": "중립 / 옵션 가치", "accent": "multi", "metric": "Waymo 50만 autonomous rides/week, Other Bets Q1 OI -$2.1B", "eps": "EPS 영향: 현재는 희석, 장기 옵션", "summary": "상용화 속도와 운행 지역 확대는 프리미엄 옵션이나 현재 손실은 EPS를 희석한다. 분사·외부투자·손실 축소 여부가 관찰 지표다."}];
+const PEERS = [{"company": "Alphabet (GOOGL)", "marketCap": "$4.81T", "pe": "30.3x", "eps": "$13.11", "pb": "10.0x", "note": "Search·YouTube·Cloud·AI 풀스택"}, {"company": "Microsoft", "marketCap": "$3.14T", "pe": "25.1x", "eps": "$16.80", "pb": "7.6x", "note": "Azure·Copilot·enterprise AI"}, {"company": "Meta", "marketCap": "$1.58T", "pe": "22.3x", "eps": "$27.50", "pb": "6.4x", "note": "소셜 광고·AI 추천·Reality Labs"}, {"company": "Amazon", "marketCap": "$2.87T", "pe": "31.6x", "eps": "$8.36", "pb": "6.4x", "note": "AWS·retail ads·commerce"}, {"company": "Apple", "marketCap": "$4.42T", "pe": "36.4x", "eps": "$8.26", "pb": "41.4x", "note": "기기·서비스·검색 계약 변수"}, {"company": "Nvidia", "marketCap": "$5.52T", "pe": "55.2x", "eps": "$4.08", "pb": "확인 필요", "note": "AI GPU/인프라 최대 수혜주"}, {"company": "Netflix", "marketCap": "$0.37T", "pe": "27.5x", "eps": "$3.17", "pb": "11.8x", "note": "동영상 구독·광고 티어"}];
+const RISKS = [{"risk": "검색 광고 성장 둔화", "prob": "중간", "impact": "높음", "eps": "매출 성장률·마진 동시 압박", "watch": "Search & Other 성장률, CPC, paid clicks"}, {"risk": "AI 검색으로 광고 모델 훼손", "prob": "중간", "impact": "높음", "eps": "쿼리당 수익화 하락 가능", "watch": "AI Overviews monetization, 광고 클릭률"}, {"risk": "OpenAI·Microsoft·Perplexity 경쟁", "prob": "높음", "impact": "중간~높음", "eps": "검색 점유율·PER 할인", "watch": "검색 점유율, 브라우저/OS 기본 설정 변화"}, {"risk": "Google Cloud 성장률 둔화", "prob": "중간", "impact": "높음", "eps": "Cloud 영업레버리지 둔화", "watch": "Cloud revenue growth, backlog, OI margin"}, {"risk": "AI CAPEX 과잉 투자", "prob": "중간", "impact": "높음", "eps": "감가상각비·FCF yield 압박", "watch": "CapEx, D&A, FCF margin"}, {"risk": "데이터센터 전력·칩 공급 제약", "prob": "중간", "impact": "중간", "eps": "증설 지연·비용 증가", "watch": "전력 계약, TPU/GPU 공급, 데이터센터 리드타임"}, {"risk": "Apple 검색 기본 탑재 계약", "prob": "중간", "impact": "높음", "eps": "TAC 및 iOS 유입 트래픽 변수", "watch": "DOJ 판결, Apple 검색/AI 전략"}, {"risk": "반독점 구조적 제재", "prob": "중간", "impact": "매우 높음", "eps": "사업 분할·데이터 공유·계약 제한", "watch": "미국 검색/광고기술 소송, EU DMA"}, {"risk": "YouTube 광고 경기 둔화", "prob": "중간", "impact": "중간", "eps": "브랜드 광고·콘텐츠 비용 압박", "watch": "YouTube ads growth, Shorts RPM"}, {"risk": "Gemini 브랜드 신뢰도·제품 완성도", "prob": "중간", "impact": "중간", "eps": "AI 수익화 지연", "watch": "MAU, API 사용량, 엔터프라이즈 계약"}, {"risk": "Waymo 상용화 지연", "prob": "중간", "impact": "낮음~중간", "eps": "Other Bets 손실 지속", "watch": "주간 운행, 지역 확대, 손실 규모"}, {"risk": "환율·금리·세율 변화", "prob": "중간", "impact": "중간", "eps": "달러 강세, 할인율, 세후이익 변동", "watch": "DXY, 미 국채 10년, 실효세율"}];
+const CHECKPOINTS = ["다음 실적 발표: Q2 2026, 2026-07-22 장마감 후 추정 / 일정 변동 확인", "FY2026 EPS 컨센서스 $14.22 유지·상향 여부", "Search & Other 성장률과 AI Overviews/AI Mode 수익화 코멘트", "YouTube Ads 성장률, Premium/Music/TV 구독자 관련 힌트", "Google Cloud 성장률·영업이익률·backlog 전환 속도", "AI CAPEX, 감가상각비, FCF 마진 및 2026년 CAPEX 가이던스 변화", "Gemini 앱/Enterprise MAU, Vertex AI 고객, API token 사용량", "TPU 성능·외부 판매·데이터센터 비용 효율 관련 코멘트", "Waymo 주간 운행 수, 지역 확대, Other Bets 손실", "Apple 검색 계약, DOJ/EU 반독점 소송, 구조적 remedy 관련 뉴스", "Microsoft, Meta, Amazon, OpenAI, Anthropic의 AI 검색·광고 전략", "금리, 달러 인덱스, 원/달러 환율"];
+const SOURCES = [{"id": "S1", "name": "Alphabet Q1 2026 Earnings Release / SEC Exhibit 99.1", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000043/googexhibit991q12026.htm", "note": "Q1 2026 매출, EPS, 세그먼트, 현금, 부채, TAC"}, {"id": "S2", "name": "Alphabet FY2025 Q4 Earnings Release / SEC Exhibit 99.1", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000012/googexhibit991q42025.htm", "note": "FY2025 매출·EPS, Q4 세그먼트, 2026 CAPEX 가이던스"}, {"id": "S3", "name": "Alphabet 2025 Form 10-K / SEC", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm", "note": "연간 재무, 사업 설명, 주식구조, 리스크, 자사주·SBC"}, {"id": "S4", "name": "FinanceCharts GOOGL PE Ratio", "url": "https://www.financecharts.com/stocks/GOOGL/value/pe-ratio", "note": "TTM EPS, P/E, Forward P/E"}, {"id": "S5", "name": "FinanceCharts GOOGL Price-to-Book", "url": "https://www.financecharts.com/stocks/GOOGL/value/price-to-book-value", "note": "P/B, book value per share"}, {"id": "S6", "name": "Simply Wall St GOOGL Forecast", "url": "https://simplywall.st/stocks/us/media/nasdaq-googl/alphabet/future", "note": "FY2026 EPS 컨센서스와 EPS revision"}, {"id": "S7", "name": "MarketBeat GOOGL Forecast", "url": "https://www.marketbeat.com/stocks/NASDAQ/GOOGL/forecast/", "note": "54명 애널리스트 평균·고저 목표주가"}, {"id": "S8", "name": "TipRanks GOOGL Forecast", "url": "https://www.tipranks.com/stocks/googl/forecast", "note": "최근 3개월 애널리스트 목표주가 분포"}, {"id": "S9", "name": "ValueInvesting.io GOOGL Estimates", "url": "https://www.valueinvesting.io/GOOGL/estimates", "note": "70명 애널리스트 목표주가 범위와 BUY 컨센서스"}, {"id": "S10", "name": "StatCounter Search Engine Market Share", "url": "https://gs.statcounter.com/search-engine-market-share", "note": "2026년 4월 글로벌 검색 점유율"}, {"id": "S11", "name": "eMarketer US Search Advertising Forecast 2026", "url": "https://www.emarketer.com/content/us-search-advertising-forecast-2026", "note": "미국 검색 광고 시장 내 Google 점유율 변화"}, {"id": "S12", "name": "Reuters / WPP Media ad forecast", "url": "https://www.reuters.com/business/media-telecom/wpp-media-cuts-2025-global-advertising-revenue-growth-forecast-6-trade-concerns-2025-06-09/", "note": "글로벌 광고 시장·디지털 광고·검색 성장률 전망"}, {"id": "S13", "name": "Trading Economics USD/KRW", "url": "https://tradingeconomics.com/south-korea/currency", "note": "원/달러 환율 참고"}, {"id": "S14", "name": "MarketBeat Earnings Calendar", "url": "https://www.marketbeat.com/stocks/NASDAQ/GOOGL/earnings/", "note": "다음 실적 발표 추정일"}, {"id": "S15", "name": "Public.com Earnings History", "url": "https://public.com/stocks/googl/earnings", "note": "분기 EPS 실적/추정 히스토리 참고"}];
+
+const $ = (sel) => document.querySelector(sel);
+const fmtB = n => `$${n.toFixed(1)}B`;
+const fmt = n => `$${Number(n).toFixed(2)}`;
+function maxOf(arr, key){return Math.max(...arr.map(d => d[key] || 0));}
+function barChart(el, data, labelKey, valueKey, opts={}){
+  const max = maxOf(data, valueKey);
+  const palette = opts.palette || ["blue","green","yellow","red"];
+  el.innerHTML = `<div class="bar-chart">${
+    data.map((d,i)=>{
+      const h = max ? Math.max(4, (d[valueKey]/max)*170) : 0;
+      const val = opts.format ? opts.format(d[valueKey]) : d[valueKey];
+      const cls = palette[i % palette.length];
+      return `<div class="bar-col"><div class="bar-val">${val}</div><div class="bar ${cls}" style="height:${h}px"></div><div class="bar-label">${d[labelKey]}</div></div>`;
+    }).join("")
+  }</div>`;
+}
+function makeTable(el, cols, rows){
+  el.innerHTML = `<thead><tr>${cols.map(c=>`<th>${c.label}</th>`).join("")}</tr></thead><tbody>${
+    rows.map(r=>`<tr>${cols.map(c=>`<td>${c.render ? c.render(r) : (r[c.key] ?? "")}</td>`).join("")}</tr>`).join("")
+  }</tbody>`;
+}
+function renderBusiness(){
+  $("#businessCards").innerHTML = BUSINESS.map((b,i)=>{
+    const st = b.status.includes("긍정") && !b.status.includes("부담") ? "pos" : b.status.includes("중립") ? "neu" : "neg";
+    return `<div class="card">
+      <span class="status ${st}">${b.status}</span>
+      <h3>${b.title}</h3>
+      <p><b>${b.metric}</b></p>
+      <p>${b.summary}</p>
+      <div class="pill"><strong>${b.eps}</strong></div>
+    </div>`;
+  }).join("");
+}
+function renderScenario(){
+  $("#scenarioCards").innerHTML = DATA.scenarios.map(s=>`<div class="card scenario ${s.tone}">
+    <span class="badge ${s.tone === "bull" ? "green" : s.tone === "bear" ? "red" : "blue"}">${s.tag}</span>
+    <h3>${s.name}</h3>
+    <div class="big">$${s.target.toFixed(2)}</div>
+    <div class="metric-row">
+      <span class="pill"><strong>EPS</strong> $${s.eps.toFixed(2)}</span>
+      <span class="pill"><strong>PER</strong> ${s.per}x</span>
+      <span class="pill"><strong>확률</strong> ${s.prob}%</span>
+    </div>
+    <div class="probbar"><span style="width:${s.prob}%"></span></div>
+    <p><b>EPS 변화 요인:</b> ${s.epsBridge}</p>
+    <ul>${s.drivers.map(d=>`<li>${d}</li>`).join("")}</ul>
+  </div>`).join("");
+  $("#scenarioProbChart").innerHTML = DATA.scenarios.map(s=>`<div style="display:grid;grid-template-columns:120px 1fr 80px;gap:12px;align-items:center;margin:10px 0">
+    <b>${s.name}</b><div class="probbar" style="margin:0"><span style="width:${s.prob}%;background:linear-gradient(90deg, ${s.tone==="bear"?"var(--red)":s.tone==="bull"?"var(--green)":"var(--blue)"}, var(--yellow))"></span></div><span>${s.prob}%</span>
+  </div>`).join("");
+}
+function renderSensitivity(){
+  const cols = [{label:"EPS 변화", render:r=>`${r.label}<br><span class="small">EPS $${r.eps}</span>`}].concat(DATA.perCols.map((p,i)=>({label:`PER ${p}x`, render:r=>{
+    const v = r.values[i];
+    const tier = v < 250 ? 0 : v < 330 ? 1 : v < 410 ? 2 : v < 500 ? 3 : 4;
+    return `<span class="heat-${tier}" style="display:block;padding:8px;border-radius:10px">$${v.toFixed(1)}</span>`;
+  }})));
+  makeTable($("#sensitivityTable"), cols, DATA.sensitivity);
+}
+function renderAnalysts(){
+  makeTable($("#analystTable"), [
+    {label:"기관",key:"firm"},{label:"발간일",key:"date"},{label:"의견",key:"rating"},{label:"목표주가",key:"target"},
+    {label:"EPS/실적 가정",key:"eps"},{label:"밸류에이션",key:"valuation"},{label:"핵심 논리",key:"logic"},
+    {label:"사업부 관점",key:"view"},{label:"EPS 논리",key:"revision"},{label:"리스크",key:"risk"},{label:"출처",key:"source"}
+  ], DATA.analysts);
+}
+function renderFinancials(){
+  barChart($("#annualRevenueChart"), DATA.annual, "year", "revenue", {format:v=>`$${v.toFixed(0)}B`});
+  barChart($("#quarterlyRevenueChart"), DATA.quarterly, "q", "rev", {format:v=>`$${v.toFixed(1)}B`, palette:["blue","blue","green","green"]});
+  barChart($("#annualEpsChart"), DATA.annual, "year", "eps", {format:v=>`$${v.toFixed(2)}`, palette:["blue","red","yellow","green"]});
+  barChart($("#quarterlyEpsChart"), DATA.quarterly, "q", "eps", {format:v=>`$${v.toFixed(2)}`, palette:["blue","green","yellow","red"]});
+  barChart($("#forwardEpsChart"), DATA.forward.filter(d=>d.eps), "year", "eps", {format:v=>`$${v.toFixed(2)}`, palette:["green","blue","yellow"]});
+  makeTable($("#annualTable"), [
+    {label:"연도",key:"year"},{label:"매출",render:r=>fmtB(r.revenue)},{label:"영업이익",render:r=>fmtB(r.opIncome)},
+    {label:"순이익",render:r=>fmtB(r.netIncome)},{label:"EPS",render:r=>fmt(r.eps)},{label:"영업마진",render:r=>`${r.opMargin}%`},{label:"순마진",render:r=>`${r.netMargin}%`}
+  ], DATA.annual);
+  makeTable($("#quarterlyTable"), [
+    {label:"분기",key:"q"},{label:"매출",render:r=>fmtB(r.rev)},{label:"영업이익",render:r=>fmtB(r.op)},
+    {label:"순이익",render:r=>fmtB(r.net)},{label:"EPS",render:r=>fmt(r.eps)}
+  ], DATA.quarterly);
+}
+function renderPeerRiskSources(){
+  makeTable($("#peerTable"), [
+    {label:"기업",key:"company"},{label:"시총",key:"marketCap"},{label:"P/E",key:"pe"},{label:"EPS",key:"eps"},{label:"P/B",key:"pb"},{label:"핵심 비교",key:"note"}
+  ], PEERS);
+  makeTable($("#riskTable"), [
+    {label:"리스크",key:"risk"},{label:"발생 가능성",key:"prob"},{label:"영향도",key:"impact"},{label:"EPS 영향",key:"eps"},{label:"대응/관찰 지표",key:"watch"}
+  ], RISKS);
+  $("#checklist").innerHTML = CHECKPOINTS.map(x=>`<li>${x}</li>`).join("");
+  $("#sourceGrid").innerHTML = SOURCES.map(s=>`<div class="source"><b>${s.id}. ${s.name}</b><br><a href="${s.url}" target="_blank" rel="noopener">${s.url}</a><br><span class="small">${s.note}</span></div>`).join("");
+}
+renderBusiness();
+renderFinancials();
+renderSensitivity();
+renderScenario();
+renderAnalysts();
+renderPeerRiskSources();
+</script>
+</body>
+</html>

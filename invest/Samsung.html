@@ -1,286 +1,780 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>삼성전자 투자 리서치 대시보드 | 005930.KS</title>
-  <style>
-    :root{
-      --bg:#050812;--panel:#0b1020;--panel2:#101827;--line:#1f2a44;--line2:#26395e;
-      --text:#eef4ff;--muted:#95a3ba;--soft:#c8d4e8;--blue:#0b5cff;--blue2:#1f8cff;
-      --silver:#d5dce8;--green:#31d79a;--yellow:#ffd166;--red:#ff6b6b;--cyan:#7dd3fc;
-      --shadow:0 26px 80px rgba(0,0,0,.42);--radius:24px;--radius2:16px;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:radial-gradient(circle at 20% 0%,rgba(11,92,255,.22),transparent 34%),radial-gradient(circle at 90% 15%,rgba(125,211,252,.13),transparent 35%),linear-gradient(180deg,#040711 0%,#070b16 48%,#050812 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;line-height:1.55;}
-    a{color:#9fd1ff;text-decoration:none} a:hover{text-decoration:underline}
-    .wrap{width:min(1240px,calc(100% - 32px));margin:0 auto}.grid{display:grid;gap:18px}.section{padding:42px 0}.section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}.section-title h2{margin:0;font-size:28px;letter-spacing:-.03em}.section-title p{margin:4px 0 0;color:var(--muted);max-width:760px}.eyebrow{letter-spacing:.16em;color:#9fd1ff;text-transform:uppercase;font-size:12px;font-weight:800}.tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:rgba(255,255,255,.04);border-radius:999px;padding:6px 10px;color:var(--soft);font-size:12px}.tag.positive{color:#b7ffe4;border-color:rgba(49,215,154,.34);background:rgba(49,215,154,.08)}.tag.neutral{color:#fff0bf;border-color:rgba(255,209,102,.34);background:rgba(255,209,102,.08)}.tag.negative{color:#ffd0d0;border-color:rgba(255,107,107,.34);background:rgba(255,107,107,.08)}
-    .card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(16,24,39,.92),rgba(8,12,24,.92));border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;position:relative;overflow:hidden}.card:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(11,92,255,.10),transparent 34%);pointer-events:none}.card>*{position:relative}.mini{font-size:12px;color:var(--muted)}.num{font-variant-numeric:tabular-nums}.hero{padding:52px 0 26px}.hero-card{padding:34px;border-radius:32px;background:linear-gradient(135deg,rgba(7,14,35,.98),rgba(2,7,18,.94)),radial-gradient(circle at 20% 20%,rgba(11,92,255,.35),transparent 28%);border:1px solid rgba(129,162,217,.25);position:relative;overflow:hidden}.hero-card:after{content:"SAMSUNG 005930.KS";position:absolute;right:-34px;top:20px;font-size:76px;font-weight:900;letter-spacing:.02em;color:rgba(255,255,255,.035);white-space:nowrap;pointer-events:none}.hero-top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.hero h1{font-size:clamp(34px,5vw,66px);line-height:1.02;margin:14px 0 14px;letter-spacing:-.06em}.hero-lead{color:#c9d5e8;font-size:17px;max-width:850px}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.btn{border:1px solid rgba(159,209,255,.32);border-radius:999px;padding:10px 14px;background:rgba(255,255,255,.05);color:#e9f4ff;font-weight:700;font-size:13px}.kpi-grid{grid-template-columns:repeat(7,1fr);margin-top:24px}.kpi{border:1px solid rgba(159,209,255,.18);background:rgba(255,255,255,.045);border-radius:18px;padding:16px;min-height:112px}.kpi .label{font-size:12px;color:#9db0cc}.kpi .value{font-size:22px;font-weight:900;letter-spacing:-.035em;margin-top:8px}.kpi .sub{font-size:12px;color:var(--muted);margin-top:6px}.kpi.highlight{background:linear-gradient(180deg,rgba(11,92,255,.22),rgba(11,92,255,.08));border-color:rgba(70,155,255,.45)}
-    .toc{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}.toc a{padding:8px 10px;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:999px;color:#d8e6ff;font-size:13px}.two{grid-template-columns:1.1fr .9fr}.three{grid-template-columns:repeat(3,1fr)}.four{grid-template-columns:repeat(4,1fr)}.five{grid-template-columns:repeat(5,1fr)}
-    .summary h3,.card h3{margin:0 0 12px;font-size:18px}.bullet{display:grid;gap:10px;margin:0;padding:0;list-style:none}.bullet li{display:flex;gap:10px;color:#dbe6f7}.dot{width:8px;height:8px;border-radius:50%;margin-top:8px;background:var(--blue2);flex:0 0 auto}.dot.green{background:var(--green)}.dot.yellow{background:var(--yellow)}.dot.red{background:var(--red)}.conclusion{margin-top:18px;border-left:3px solid var(--blue2);padding:12px 14px;background:rgba(11,92,255,.08);border-radius:0 14px 14px 0;color:#e9f4ff}
-    .industry-card{min-height:220px}.industry-card h3{display:flex;justify-content:space-between;gap:10px;align-items:center}.metric-row{display:grid;grid-template-columns:72px 1fr;gap:10px;margin:9px 0;color:#d6e1f2}.metric-row span:first-child{color:#8ea1bf;font-size:12px}.bar{height:9px;background:#152139;border-radius:99px;overflow:hidden;margin-top:8px}.bar>i{display:block;height:100%;width:var(--w);background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:99px}.bar.green>i{background:linear-gradient(90deg,#20bf7a,#8cffce)}.bar.yellow>i{background:linear-gradient(90deg,#f0a800,#ffe08a)}.bar.red>i{background:linear-gradient(90deg,#e64b5b,#ff9a9a)}
-    .calc-box{border:1px dashed rgba(159,209,255,.32);background:rgba(9,21,45,.72);border-radius:20px;padding:18px}.formula{font-size:18px;font-weight:800;letter-spacing:-.02em}.formula small{display:block;font-weight:500;color:var(--muted);margin-top:8px}.scenario-card{border-top:4px solid var(--line2)}.scenario-card.bear{border-top-color:var(--red)}.scenario-card.base{border-top-color:var(--blue2)}.scenario-card.bull{border-top-color:var(--green)}.scenario-head{display:flex;justify-content:space-between;align-items:center}.scenario-card .price{font-size:30px;font-weight:950;letter-spacing:-.04em;margin:12px 0}.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.fact{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px}.fact b{display:block;font-size:17px}.fact span{font-size:12px;color:var(--muted)}.prob-wrap{display:grid;gap:10px}.prob-row{display:grid;grid-template-columns:86px 1fr 48px;gap:10px;align-items:center}.prob-track{height:14px;background:#152139;border-radius:999px;overflow:hidden}.prob-fill{height:100%;width:var(--p);background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:999px}.prob-fill.red{background:linear-gradient(90deg,#d9475b,#ff8d8d)}.prob-fill.green{background:linear-gradient(90deg,#1fb981,#78f0c5)}
-    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px}.table{width:100%;border-collapse:collapse;min-width:940px;background:rgba(5,9,18,.78)}.table th,.table td{padding:12px 13px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:top;text-align:left}.table th{font-size:12px;color:#a9bad4;text-transform:uppercase;letter-spacing:.04em;background:rgba(11,92,255,.08);position:sticky;top:0}.table td{font-size:13px;color:#dce7f8}.table tr:hover td{background:rgba(255,255,255,.025)}.table .right{text-align:right}.dist{height:280px;width:100%;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:12px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--blue2);margin-right:5px}.risk-grid{grid-template-columns:repeat(2,1fr)}.risk-item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:14px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.035)}.risk-title{font-weight:800}.risk-note{color:var(--muted);font-size:12px;margin-top:4px}.score{display:flex;gap:6px}.pill{font-size:11px;border-radius:999px;padding:4px 8px;border:1px solid var(--line2);color:#dbe6f7}.pill.high{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.35);color:#ffd2d2}.pill.mid{background:rgba(255,209,102,.12);border-color:rgba(255,209,102,.35);color:#fff0c3}.pill.low{background:rgba(49,215,154,.12);border-color:rgba(49,215,154,.35);color:#caffeb}.timeline{display:grid;gap:12px}.check{display:flex;gap:12px;padding:14px;border-left:2px solid rgba(31,140,255,.65);background:rgba(255,255,255,.035);border-radius:0 14px 14px 0}.check b{display:block}.check span{color:var(--muted);font-size:13px}.source-list{columns:2;column-gap:28px}.source-list li{break-inside:avoid;margin:0 0 10px;color:#c9d5e8;font-size:13px}.foot{padding:28px 0 42px;color:#9aa9c0}.disclaimer{border:1px solid rgba(255,209,102,.28);background:rgba(255,209,102,.08);border-radius:20px;padding:18px;color:#fff1ca}.note{color:#9fb0c8;font-size:12px;margin-top:8px}.print-only{display:none}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}.card,.hero-card{animation:fadeUp .55s ease both}.card:nth-child(2){animation-delay:.05s}.card:nth-child(3){animation-delay:.1s}
-    @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.five,.four{grid-template-columns:repeat(2,1fr)}.two,.three,.risk-grid{grid-template-columns:1fr}.hero-top{display:block}.hero-card:after{font-size:48px;right:-20px;top:10px}.source-list{columns:1}}
-    @media(max-width:720px){.wrap{width:min(100% - 22px,1240px)}.hero{padding-top:28px}.hero-card{padding:24px}.kpi-grid,.five,.four{grid-template-columns:1fr}.section-title{display:block}.facts{grid-template-columns:1fr}.prob-row{grid-template-columns:70px 1fr 42px}.hero h1{font-size:38px}.source-list{columns:1}.card{padding:18px}}
-    @media print{body{background:white;color:#111}.card,.hero-card{box-shadow:none;background:white;border-color:#ccc}.toc,.btn{display:none}.print-only{display:block}.source-list{columns:1}a{color:#111}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>삼성전자 투자 리서치 대시보드 | 005930.KS</title>
+<style>
+:root {
+  --bg:#050914;
+  --bg2:#08152a;
+  --panel:#0b1730;
+  --panel2:#0e1d3a;
+  --line:rgba(130,180,255,.22);
+  --text:#eef6ff;
+  --muted:#a7b7d0;
+  --dim:#71839e;
+  --blue:#0b5cff;
+  --cyan:#36e6ff;
+  --green:#52f0a3;
+  --amber:#ffd166;
+  --red:#ff6b7a;
+  --violet:#9b8cff;
+  --shadow:0 18px 45px rgba(0,0,0,.35);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--text); background:
+    radial-gradient(circle at 10% 0%, rgba(21,108,255,.35), transparent 31%),
+    radial-gradient(circle at 86% 8%, rgba(54,230,255,.22), transparent 28%),
+    linear-gradient(135deg,#030712 0%,#061225 44%,#02040a 100%);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  line-height:1.58;
+}
+a{color:#8ddcff;text-decoration:none}
+a:hover{text-decoration:underline}
+.wrapper{width:min(1440px, calc(100% - 32px)); margin:0 auto;}
+header.hero{
+  padding:56px 0 34px; position:relative; overflow:hidden;
+}
+.hero-card{
+  border:1px solid var(--line);
+  background:linear-gradient(135deg,rgba(13,35,76,.9),rgba(5,10,24,.92) 58%,rgba(0,87,255,.20));
+  border-radius:32px; padding:34px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+}
+.hero-card:before{
+  content:""; position:absolute; inset:-70px -100px auto auto; width:360px; height:360px;
+  background:radial-gradient(circle, rgba(54,230,255,.25), transparent 65%); filter:blur(3px);
+}
+.eyebrow{letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-size:.78rem;font-weight:800}
+h1{margin:10px 0 12px; font-size:clamp(2.1rem,5vw,4.8rem); line-height:1.02; letter-spacing:-.065em}
+h2{font-size:clamp(1.5rem,2.6vw,2.35rem); margin:0 0 12px; letter-spacing:-.04em}
+h3{font-size:1.18rem;margin:0 0 10px}
+p{margin:0 0 12px}
+.hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:22px; align-items:end; position:relative}
+.hero-summary{max-width:820px;color:#dbe9ff;font-size:1.06rem}
+.pill-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.pill{border:1px solid rgba(54,230,255,.25); background:rgba(54,230,255,.08); color:#dffbff; padding:7px 11px; border-radius:999px; font-size:.82rem; font-weight:700}
+.kpi-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-top:24px}
+.kpi{
+  background:linear-gradient(180deg,rgba(14,33,69,.92),rgba(7,15,31,.92));
+  border:1px solid var(--line); border-radius:18px; padding:16px; min-height:112px;
+}
+.kpi small{display:block;color:var(--muted);font-weight:700;margin-bottom:8px}
+.kpi b{font-size:clamp(1.22rem,2.1vw,1.9rem); letter-spacing:-.03em}
+.kpi .sub{display:block;margin-top:6px;color:var(--dim);font-size:.78rem}
+.nav{
+  position:sticky; top:0; z-index:20; backdrop-filter:blur(16px);
+  background:rgba(2,6,16,.74); border-bottom:1px solid rgba(130,180,255,.12)
+}
+.nav-inner{display:flex; gap:8px; overflow-x:auto; padding:10px 0}
+.nav a{white-space:nowrap; color:#dcecff; border:1px solid rgba(130,180,255,.18); background:rgba(255,255,255,.04); padding:9px 12px; border-radius:999px; font-size:.86rem}
+section{padding:34px 0}
+.section-head{display:flex; justify-content:space-between; gap:18px; align-items:end; margin-bottom:18px}
+.section-head p{color:var(--muted); max-width:780px}
+.grid{display:grid; gap:16px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{
+  background:linear-gradient(180deg,rgba(13,29,60,.90),rgba(7,14,30,.92));
+  border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:0 8px 25px rgba(0,0,0,.18);
+}
+.card.glow{box-shadow:0 0 0 1px rgba(54,230,255,.13), 0 18px 45px rgba(0,72,255,.16)}
+.card .metric{font-size:1.9rem; font-weight:900; letter-spacing:-.04em}
+.muted{color:var(--muted)}
+.dim{color:var(--dim)}
+.badge{display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:6px 10px; font-size:.78rem; font-weight:900; border:1px solid rgba(255,255,255,.14)}
+.badge.pos{color:#bdf8d9;background:rgba(82,240,163,.12);border-color:rgba(82,240,163,.25)}
+.badge.mid{color:#fff0ba;background:rgba(255,209,102,.12);border-color:rgba(255,209,102,.25)}
+.badge.neg{color:#ffc6ce;background:rgba(255,107,122,.12);border-color:rgba(255,107,122,.25)}
+.list{padding-left:18px;margin:10px 0 0}
+.list li{margin:7px 0}
+.driver-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px}
+.driver{background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08); padding:12px; border-radius:16px}
+.driver b{display:block; color:#fff}
+.driver span{display:block; color:var(--muted); font-size:.86rem; margin-top:4px}
+.canvas-wrap{height:300px; width:100%; margin-top:6px; position:relative}
+canvas{width:100%; height:100%; display:block}
+.table-wrap{overflow:auto; border-radius:18px; border:1px solid rgba(130,180,255,.16); background:rgba(255,255,255,.03)}
+table{width:100%; border-collapse:collapse; min-width:780px}
+th,td{padding:12px 13px; text-align:left; border-bottom:1px solid rgba(130,180,255,.12); vertical-align:top}
+th{position:sticky; top:0; background:#0b1730; color:#cfe6ff; font-size:.84rem; letter-spacing:-.01em}
+td{font-size:.9rem; color:#e6f0ff}
+tr:hover td{background:rgba(54,230,255,.035)}
+.formula{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:rgba(54,230,255,.08); border:1px solid rgba(54,230,255,.2); color:#dffbff; border-radius:16px; padding:14px; overflow:auto}
+.scenario{position:relative; overflow:hidden}
+.scenario:after{content:""; position:absolute; inset:auto -50px -70px auto; width:180px; height:180px; border-radius:50%; opacity:.18}
+.scenario.bear:after{background:var(--red)} .scenario.base:after{background:var(--cyan)} .scenario.bull:after{background:var(--green)}
+.probbar{display:flex; height:28px; overflow:hidden; border-radius:999px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); margin:14px 0}
+.probbar div{display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:900; color:#06111e}
+.probbar .bear{background:linear-gradient(90deg,#ff7a86,#ffb0b7)}
+.probbar .base{background:linear-gradient(90deg,#36e6ff,#91f7ff)}
+.probbar .bull{background:linear-gradient(90deg,#52f0a3,#b4ffd4)}
+.heat td{text-align:right; font-variant-numeric:tabular-nums}
+.heat td:first-child,.heat th:first-child{text-align:left}
+.footer-note{border-top:1px solid rgba(130,180,255,.16); padding:28px 0 54px; color:var(--muted)}
+.source-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+.source{padding:12px; border-radius:14px; border:1px solid rgba(130,180,255,.14); background:rgba(255,255,255,.035)}
+.source b{color:#fff}
+.source p{font-size:.84rem; margin:4px 0 0; color:var(--muted)}
+.tagline{font-size:1.05rem;color:#d4e6ff}
+.small{font-size:.83rem}
+.inline-kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px}
+.inline-kpis .driver{min-height:86px}
+@media (max-width: 1024px){
+  .hero-grid,.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .driver-grid,.source-grid,.inline-kpis{grid-template-columns:1fr}
+  .section-head{display:block}
+}
+@media (max-width: 640px){
+  .wrapper{width:min(100% - 20px, 1440px)}
+  .hero-card{padding:24px 18px}
+  .kpi-grid{grid-template-columns:1fr}
+  table{min-width:640px}
+  section{padding:26px 0}
+}
+@media print{
+  body{background:#fff;color:#111}
+  .nav{display:none}
+  .card,.hero-card{box-shadow:none;background:#fff;color:#111}
+}
+</style>
 </head>
 <body>
-  <header class="hero">
-    <div class="wrap hero-card">
-      <div class="hero-top">
+<header class="hero">
+  <div class="wrapper">
+    <div class="hero-card">
+      <div class="hero-grid">
         <div>
-          <div class="eyebrow">Premium Equity Research Dashboard</div>
+          <div class="eyebrow">005930.KS · Common Stock · Samsung Electronics</div>
           <h1>삼성전자 투자 리서치 대시보드</h1>
-          <p class="hero-lead">분석 대상: <b>삼성전자 보통주 005930.KS</b>. 메모리 슈퍼사이클, HBM4, 파운드리 턴어라운드, DX 수요 둔화를 동시에 반영한 시나리오 기반 참고 자료입니다.</p>
-          <div class="hero-actions">
-            <a class="btn" href="#summary">투자 요약</a><a class="btn" href="#industry">업황</a><a class="btn" href="#valuation">밸류에이션</a><a class="btn" href="#scenario">목표주가 후보</a><a class="btn" href="#reports">기관 리포트</a><a class="btn" href="#risks">리스크</a>
+          <p class="hero-summary">EPS 회복의 방향과 시장이 부여하는 PER/PBR 프리미엄을 중심으로, 메모리 사이클·HBM 경쟁력·파운드리 손익·DX 수익성을 분해한 시나리오 기반 리서치입니다.</p>
+          <div class="pill-row">
+            <span class="pill">데이터 기준일: 2026-05-18</span>
+            <span class="pill">보통주 005930.KS 기준</span>
+            <span class="pill">단위: 원 / 조원</span>
+            <span class="pill">투자 참고용</span>
           </div>
         </div>
-        <div class="tag positive">데이터 기준일: 2026-05-11</div>
+        <div class="card glow">
+          <h3>한 줄 결론</h3>
+          <p class="tagline">현재 주가는 이미 FY2026 EPS 급증을 상당 부분 반영하고 있으나, HBM4·eSSD·파운드리 손익 개선이 동시 확인될 경우 추가 리레이팅 여지가 남아 있습니다.</p>
+          <div class="probbar" aria-label="scenario probability bar">
+            <div class="bear" style="width:30%">Bear 30%</div>
+            <div class="base" style="width:50%">Base 50%</div>
+            <div class="bull" style="width:20%">Bull 20%</div>
+          </div>
+          <p class="small muted">확률가중 목표주가 후보 = 240,000×30% + 352,104×50% + 577,500×20% = <b>363,552원</b></p>
+        </div>
       </div>
-      <div class="grid kpi-grid">
-        <div class="kpi"><div class="label">현재 주가</div><div class="value num">₩285,250</div><div class="sub">보통주, 05.11 12:39 KST</div></div>
-        <div class="kpi"><div class="label">시가총액</div><div class="value num">₩1,667.7조</div><div class="sub">상장주식수 58.46억주 기준</div></div>
-        <div class="kpi"><div class="label">Forward EPS</div><div class="value num">₩33,469</div><div class="sub">Mirae 2026F 보통주 EPS</div></div>
-        <div class="kpi"><div class="label">Forward PER</div><div class="value num">8.5x</div><div class="sub">현재가 ÷ 2026F EPS</div></div>
-        <div class="kpi"><div class="label">1Q26 EPS</div><div class="value num">₩7,123</div><div class="sub">공식 자료, 보통주</div></div>
-        <div class="kpi highlight"><div class="label">확률가중 목표주가 후보</div><div class="value num">₩312,000</div><div class="sub">Bear/Base/Bull 가중 평균</div></div>
-        <div class="kpi"><div class="label">기대수익률 후보</div><div class="value num">+9.4%</div><div class="sub">₩312,000 ÷ ₩285,250 - 1</div></div>
+      <div class="kpi-grid">
+        <div class="kpi"><small>현재 주가</small><b>281,000원</b><span class="sub">Google Finance 지연시세, 2026-05-18 15:30 KST</span></div>
+        <div class="kpi"><small>시가총액</small><b>1,792.34조원</b><span class="sub">보통주 기준 시총 표기 자료</span></div>
+        <div class="kpi"><small>FY1 Forward EPS</small><b>41,424원</b><span class="sub">공개 컨센서스/리포트 기준 대표값</span></div>
+        <div class="kpi"><small>FY1 Forward PER</small><b>6.8배</b><span class="sub">현재가 ÷ FY1 EPS</span></div>
+        <div class="kpi"><small>Forward PBR</small><b>2.7배</b><span class="sub">현재가 ÷ FY2026E BPS 104,534원</span></div>
+        <div class="kpi"><small>FY2026E ROE</small><b>48.6%</b><span class="sub">공개 전망치 기준</span></div>
+        <div class="kpi"><small>EPS Revision</small><b>상향</b><span class="sub">AI 메모리·서버 SSD·DRAM ASP 개선</span></div>
+        <div class="kpi"><small>확률가중 목표주가 후보</small><b>363,552원</b><span class="sub">현재가 대비 기대수익률 29.4%</span></div>
       </div>
-      <p class="note">주가·시가총액은 장중 값입니다. 리서치 목표가는 발간일·기준주가가 다르므로 단순 비교용이며, 삼성전자우 데이터와 혼합하지 않았습니다.</p>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="wrap">
-    <section id="summary" class="section">
-      <div class="section-title"><div><div class="eyebrow">Executive Summary</div><h2>투자 요약 카드</h2><p>현재 논리는 “메모리 가격과 AI 서버 수요가 실적을 끌어올리지만, HBM·파운드리·노사 리스크가 밸류에이션 할인/프리미엄을 좌우한다”로 압축됩니다.</p></div></div>
-      <div class="grid two">
-        <article class="card summary"><h3>핵심 투자 포인트</h3><ul class="bullet">
-          <li><span class="dot green"></span><span><b>메모리 가격 급등 구간.</b> DRAM과 NAND 계약가격이 AI 서버·eSSD 수요와 제한된 공급 배분으로 급등하고 있습니다.</span></li>
-          <li><span class="dot green"></span><span><b>DS 이익 레버리지.</b> 1Q26 DS 매출 81.7조원, 영업이익 53.7조원으로 전사 이익의 대부분을 창출했습니다.</span></li>
-          <li><span class="dot green"></span><span><b>HBM4 회복 옵션.</b> 공식 자료는 HBM4 및 SOCAMM2 매출 개시, HBM4E 샘플 일정을 언급하며 AI 제품 중심 전략을 제시했습니다.</span></li>
-          <li><span class="dot yellow"></span><span><b>주주환원 확대 여지.</b> 2024~2026년 FCF 50% 환원 정책과 자사주 소각이 EPS·PBR 해석에 우호적입니다.</span></li>
-          <li><span class="dot yellow"></span><span><b>풀스택 프리미엄 가능성.</b> 메모리·파운드리·로직·패키징·세트 사업을 함께 보유한 구조는 AI 인프라 시대에 재평가 요인입니다.</span></li>
-        </ul><div class="conclusion"><b>한 줄 결론:</b> 현 주가는 실적 추정 상향을 상당 부분 반영했지만, HBM4 양산/고객 승인과 파운드리 흑자 전환 여부에 따라 추가 리레이팅 또는 급격한 할인 재부과가 모두 가능한 구간입니다.</div></article>
-        <article class="card summary"><h3>핵심 리스크</h3><ul class="bullet">
-          <li><span class="dot red"></span><span><b>HBM 경쟁력 회복 지연.</b> SK하이닉스·Micron 대비 점유율/마진 회복이 늦어지면 프리미엄이 제한됩니다.</span></li>
-          <li><span class="dot red"></span><span><b>노사·성과급 충당금 리스크.</b> 일부 IB는 노조 리스크로 영업이익 추정치를 낮췄습니다.</span></li>
-          <li><span class="dot yellow"></span><span><b>파운드리 수율/수주 불확실성.</b> 2nm·4nm 수율과 대형 고객 확보가 핵심 체크포인트입니다.</span></li>
-          <li><span class="dot yellow"></span><span><b>DX 수요 둔화.</b> 메모리 가격 상승은 스마트폰·PC·TV·가전 원가 부담으로 돌아옵니다.</span></li>
-          <li><span class="dot yellow"></span><span><b>AI CAPEX 둔화.</b> 북미 CSP 투자 속도가 둔화되면 메모리 가격과 HBM 주문 가시성이 동시에 흔들릴 수 있습니다.</span></li>
-        </ul><div class="conclusion"><b>자료 사용 원칙:</b> 목표주가는 확정 전망이 아닌 시나리오 후보값입니다. 출처가 공개적으로 확인되지 않는 숫자는 “확인 필요”로 처리했습니다.</div></article>
-      </div>
-    </section>
+<nav class="nav">
+  <div class="wrapper nav-inner">
+    <a href="#summary">투자 요약</a>
+    <a href="#company">회사 개요</a>
+    <a href="#business">사업부</a>
+    <a href="#industry">업황</a>
+    <a href="#financials">재무</a>
+    <a href="#eps">EPS</a>
+    <a href="#valuation">밸류에이션</a>
+    <a href="#scenarios">시나리오</a>
+    <a href="#reports">기관 리포트</a>
+    <a href="#risks">리스크</a>
+    <a href="#sources">출처</a>
+  </div>
+</nav>
 
-    <section id="company" class="section">
-      <div class="section-title"><div><div class="eyebrow">Company Overview</div><h2>회사 개요와 사업 구조</h2><p>삼성전자는 DS·DX·SDC·Harman을 축으로 메모리 반도체, 시스템 반도체, 파운드리, 모바일·TV·가전, 디스플레이, 전장 오디오를 포괄합니다.</p></div></div>
-      <div class="grid four">
-        <article class="card"><h3>DS: Device Solutions</h3><p>DRAM, NAND, HBM, eSSD, 모바일 AP, 이미지센서, 파운드리. 수요처는 AI 서버, 데이터센터, PC, 모바일, 엔터프라이즈 SSD, 자동차·HPC입니다.</p><p class="note">1Q26 DS: 매출 81.7조원, 영업이익 53.7조원.</p></article>
-        <article class="card"><h3>DX: Device eXperience</h3><p>MX/Networks, Visual Display, Digital Appliances. 스마트폰, 태블릿, 웨어러블, TV, 가전, 네트워크 장비가 중심입니다.</p><p class="note">1Q26 DX: 매출 52.7조원, 영업이익 3.0조원.</p></article>
-        <article class="card"><h3>SDC: Samsung Display</h3><p>모바일 OLED, IT OLED, 대형 디스플레이, OLED 모니터/프리미엄 TV 패널. 고부가 OLED와 8.6G IT OLED가 관찰 포인트입니다.</p><p class="note">1Q26 SDC: 매출 6.7조원, 영업이익 0.4조원.</p></article>
-        <article class="card"><h3>Harman</h3><p>자동차 전장, 커넥티드카, 오디오, 인포테인먼트. 전장 소프트웨어와 프리미엄 오디오 시장이 핵심입니다.</p><p class="note">1Q26 Harman: 매출 3.8조원, 영업이익 0.2조원.</p></article>
+<main>
+<section id="summary">
+  <div class="wrapper">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Investment Snapshot</div>
+        <h2>투자 요약 카드</h2>
       </div>
-      <div class="grid two" style="margin-top:18px">
-        <article class="card"><h3>주요 경쟁사</h3><ul class="bullet">
-          <li><span class="dot"></span><span><b>메모리:</b> SK하이닉스, Micron, Kioxia, Western Digital/SanDisk.</span></li>
-          <li><span class="dot"></span><span><b>파운드리:</b> TSMC, Intel Foundry, GlobalFoundries.</span></li>
-          <li><span class="dot"></span><span><b>모바일·가전:</b> Apple, Xiaomi, TCL, LG전자, Sony 등.</span></li>
-        </ul></article>
-        <article class="card"><h3>주요 고객·수요처</h3><ul class="bullet">
-          <li><span class="dot green"></span><span>AI 서버·데이터센터: HBM, DDR5/RDIMM, eSSD, 고성능 파운드리.</span></li>
-          <li><span class="dot yellow"></span><span>PC·모바일: 가격 상승은 메모리 수익에 긍정, 세트 수요에는 부담.</span></li>
-          <li><span class="dot"></span><span>스마트폰·TV·가전·자동차 전장: 프리미엄 제품과 AI 기능 강화가 믹스 개선 요인.</span></li>
-        </ul></article>
+      <p>메모리 업황 회복과 HBM4 전환의 기대가 커졌지만, 삼성전자는 단일 메모리 기업이 아니라 파운드리·시스템LSI·스마트폰·디스플레이까지 포함하는 복합 하드웨어 기업입니다. 따라서 EPS 추세를 사업부별로 분해해야 합니다.</p>
+    </div>
+    <div class="grid grid-4">
+      <div class="card">
+        <span class="badge pos">핵심 투자 포인트</span>
+        <ul class="list">
+          <li>AI 서버·GPU 사이클에 따른 고부가 DRAM/HBM 수요 확대</li>
+          <li>eSSD·서버 SSD 수요로 NAND 믹스 개선 가능</li>
+          <li>HBM4·HBM4E·SOCAMM2 로드맵 가시화</li>
+          <li>파운드리 선단 가동률과 베이스다이 수주 개선 가능성</li>
+          <li>Galaxy 프리미엄 믹스가 DX 이익 방어</li>
+        </ul>
       </div>
-    </section>
+      <div class="card">
+        <span class="badge neg">핵심 리스크</span>
+        <ul class="list">
+          <li>HBM 고객사 승인 및 점유율 회복 지연</li>
+          <li>SK하이닉스·Micron 대비 HBM 경쟁력 할인</li>
+          <li>파운드리 적자 지속과 수율 불확실성</li>
+          <li>메모리 가격 피크아웃 또는 공급 과잉 재발</li>
+          <li>노사·지정학·관세·환율 변동</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="badge pos">EPS 추세 한 줄</span>
+        <p class="metric">상향</p>
+        <p class="muted">2023년 다운사이클 저점 이후 2025년 회복, 1Q26에는 메모리 매출과 ASP 상승으로 분기 EPS가 7,123원까지 급등했습니다.</p>
+      </div>
+      <div class="card">
+        <span class="badge mid">밸류에이션 해석</span>
+        <p class="metric">6.8x</p>
+        <p class="muted">FY1 EPS 기준 PER은 낮아 보이나, 메모리 사이클 기업은 EPS와 PER이 동시에 움직입니다. EPS 피크 근접 시 PER은 오히려 낮아지는 착시가 발생할 수 있습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <section id="industry" class="section">
-      <div class="section-title"><div><div class="eyebrow">Industry Dashboard</div><h2>반도체 및 IT 업황</h2><p>메모리 공급 부족은 삼성전자 DS 실적을 끌어올리는 반면, 같은 가격 상승이 DX 세트 수요에는 비용 부담으로 작용합니다.</p></div></div>
-      <div class="grid five">
-        <article class="card industry-card"><h3>DRAM <span class="tag positive">긍정</span></h3><div class="metric-row"><span>가격</span><b>2Q26 PC DDR5 +43~48% 전망</b></div><div class="bar green" style="--w:88%"><i></i></div><div class="metric-row"><span>수요</span><p>AI 서버·RDIMM·HBM 전환이 범용 DRAM 공급을 압박.</p></div><div class="metric-row"><span>관찰</span><p>3Q 가격 상승률 둔화 여부, PC OEM 재고.</p></div></article>
-        <article class="card industry-card"><h3>NAND/eSSD <span class="tag positive">긍정</span></h3><div class="metric-row"><span>가격</span><b>2Q26 NAND +70~75% 전망 자료 존재</b></div><div class="bar green" style="--w:86%"><i></i></div><div class="metric-row"><span>수요</span><p>엔터프라이즈 SSD가 생산 배분 우선순위를 차지.</p></div><div class="metric-row"><span>리스크</span><p>가격 급등이 클라이언트 SSD·모바일 스토리지 수요를 위축.</p></div></article>
-        <article class="card industry-card"><h3>HBM <span class="tag positive">긍정</span></h3><div class="metric-row"><span>상황</span><b>HBM4·HBM4E가 리레이팅 핵심</b></div><div class="bar green" style="--w:78%"><i></i></div><div class="metric-row"><span>경쟁</span><p>SK하이닉스 선두, 삼성 회복, Micron 증설의 3사 경쟁.</p></div><div class="metric-row"><span>관찰</span><p>NVIDIA·AMD·ASIC 고객 승인과 마진.</p></div></article>
-        <article class="card industry-card"><h3>Foundry/System LSI <span class="tag neutral">중립</span></h3><div class="metric-row"><span>상황</span><b>적자 축소·흑자 전환 가능성</b></div><div class="bar yellow" style="--w:58%"><i></i></div><div class="metric-row"><span>경쟁</span><p>TSMC와 첨단 공정 격차, 수율, 고객 다변화가 관건.</p></div><div class="metric-row"><span>옵션</span><p>2nm 모바일, 4nm AI/HPC 물량, LPU/ASIC 수주.</p></div></article>
-        <article class="card industry-card"><h3>DX·모바일·TV·가전 <span class="tag negative">부정</span></h3><div class="metric-row"><span>수요</span><b>PC·스마트폰 출하 둔화 우려</b></div><div class="bar red" style="--w:42%"><i></i></div><div class="metric-row"><span>원가</span><p>메모리 가격 상승이 세트 BOM 부담으로 연결.</p></div><div class="metric-row"><span>대응</span><p>프리미엄 믹스, 폴더블, AI TV, 원가 최적화.</p></div></article>
+<section id="company">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Company Overview</div><h2>회사 개요와 경쟁 구도</h2></div>
+      <p>삼성전자는 DS·DX·SDC·Harman을 보유한 글로벌 IT 하드웨어 복합 기업입니다. EPS의 핵심 변수는 메모리 가격과 HBM 믹스지만, 구조적 할인 요인은 파운드리 수익성·HBM 경쟁력 격차·비메모리 이익 안정성입니다.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>주요 사업 영역</h3>
+        <ul class="list">
+          <li><b>DS</b>: Memory, Foundry, System LSI</li>
+          <li><b>DX</b>: MX, VD, 생활가전, 네트워크</li>
+          <li><b>SDC</b>: 모바일·대형·IT OLED</li>
+          <li><b>Harman</b>: 전장 오디오, 디지털 콕핏, 커넥티드카</li>
+        </ul>
       </div>
-      <div class="grid two" style="margin-top:18px">
-        <article class="card"><h3>상승 요인</h3><ul class="bullet"><li><span class="dot green"></span><span>AI 서버 CAPEX 확대와 CSP의 장기공급계약.</span></li><li><span class="dot green"></span><span>DRAM/NAND 가격 상승과 제한적 신규 캐파.</span></li><li><span class="dot green"></span><span>HBM4 승인·양산 확대, 파운드리 흑자 전환.</span></li><li><span class="dot green"></span><span>주주환원 확대 및 자사주 소각.</span></li></ul></article>
-        <article class="card"><h3>하락 요인</h3><ul class="bullet"><li><span class="dot red"></span><span>AI CAPEX 둔화 또는 고객 재고 축적에 따른 가격 피크아웃.</span></li><li><span class="dot red"></span><span>노조·성과급 비용 확대와 생산 차질.</span></li><li><span class="dot red"></span><span>중국 수요 둔화·경쟁 심화, DX 수익성 악화.</span></li><li><span class="dot red"></span><span>파운드리 수율·대형 고객 확보 실패.</span></li></ul></article>
+      <div class="card">
+        <h3>주요 제품</h3>
+        <p class="muted">DRAM, NAND, HBM, DDR5, LPDDR, eSSD, CXL 메모리, 선단 파운드리/GAA, 2nm·3nm, 모바일 AP, 이미지센서, Galaxy 스마트폰, TV/OLED/QLED, 가전, 전장 솔루션.</p>
       </div>
-    </section>
+      <div class="card">
+        <h3>경쟁사와 수요처</h3>
+        <p class="muted">메모리는 SK하이닉스·Micron·Kioxia/WD, 파운드리는 TSMC·Intel Foundry, 스마트폰은 Apple·중국 OEM, 디스플레이는 BOE·LG디스플레이가 주요 비교 대상입니다. 수요처는 AI 서버, CSP, GPU/AI 가속기, PC·모바일, 엔터프라이즈 SSD, 프리미엄 스마트폰입니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <section id="financials" class="section">
-      <div class="section-title"><div><div class="eyebrow">Financial Snapshot</div><h2>핵심 재무 및 실적 전망</h2><p>확정 실적과 추정치를 분리했습니다. 연간 2026E 수치는 기관별 편차가 매우 커서 단일 컨센서스보다 범위로 해석하는 편이 안전합니다.</p></div></div>
-      <div class="grid four">
-        <article class="card"><h3>1Q26 확정</h3><div class="fact"><b class="num">매출 133.9조원</b><span>+43% QoQ, 사상 최대</span></div><div class="fact"><b class="num">영업이익 57.2조원</b><span>OPM 42.8%</span></div><div class="fact"><b class="num">순이익 47.2조원</b><span>EPS 7,123원</span></div></article>
-        <article class="card"><h3>부문별 1Q26</h3><div class="fact"><b class="num">DS OP 53.7조</b><span>Memory 매출 74.8조</span></div><div class="fact"><b class="num">DX OP 3.0조</b><span>MX/NW OP 2.8조</span></div><div class="fact"><b class="num">SDC 0.4조 / Harman 0.2조</b><span>비메모리 부문은 상대적으로 낮은 기여</span></div></article>
-        <article class="card"><h3>2026E 범위</h3><div class="fact"><b class="num">OP 243.8~360조원</b><span>Mirae·DS·Citi·KB 공개 자료 범위</span></div><div class="fact"><b class="num">EPS 33,469~46,186원</b><span>Mirae·DS 기준 확인 가능 범위</span></div><div class="fact"><b class="num">Q2 컨센서스 OP 84조</b><span>Kiwoom 보도 내 시장 컨센서스</span></div></article>
-        <article class="card"><h3>주주환원</h3><div class="fact"><b class="num">정규 배당 9.8조원/년</b><span>2024~2026 정책</span></div><div class="fact"><b class="num">FCF 50% 환원</b><span>3개년 누적 기준</span></div><div class="fact"><b class="num">자사주 소각</b><span>2024~2025 매입분 일부 소각 진행</span></div></article>
+<section id="business">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Business Dashboard</div><h2>사업부별 대시보드</h2></div>
+      <p>1Q26 기준 사업부별 흐름입니다. DS가 EPS를 압도적으로 끌어올렸고, DX·SDC·Harman은 변동성을 완충하는 보조 이익원으로 작동합니다.</p>
+    </div>
+    <div class="grid grid-4">
+      <div class="card">
+        <span class="badge pos">DS · 긍정</span>
+        <div class="inline-kpis">
+          <div class="driver"><span>매출</span><b>81.7조원</b></div>
+          <div class="driver"><span>영업이익</span><b>53.7조원</b></div>
+          <div class="driver"><span>마진</span><b>65.7%</b></div>
+        </div>
+        <p class="muted" style="margin-top:14px">메모리 매출 74.8조원. AI 서버·고부가 DRAM/HBM/eSSD 수요와 ASP 상승이 EPS 회복의 핵심.</p>
+        <p class="small"><b>EPS 영향:</b> + + + · 최대 기여</p>
+      </div><div class="card">
+        <span class="badge mid">DX · 중립</span>
+        <div class="inline-kpis">
+          <div class="driver"><span>매출</span><b>52.7조원</b></div>
+          <div class="driver"><span>영업이익</span><b>3.0조원</b></div>
+          <div class="driver"><span>마진</span><b>5.7%</b></div>
+        </div>
+        <p class="muted" style="margin-top:14px">MX/NW는 Galaxy S26 출시 효과와 프리미엄 믹스가 방어했지만 Q2 이후 출시 효과 둔화와 원가 부담을 점검해야 함.</p>
+        <p class="small"><b>EPS 영향:</b> + · 안정화 기여</p>
+      </div><div class="card">
+        <span class="badge mid">SDC · 중립</span>
+        <div class="inline-kpis">
+          <div class="driver"><span>매출</span><b>6.7조원</b></div>
+          <div class="driver"><span>영업이익</span><b>0.4조원</b></div>
+          <div class="driver"><span>마진</span><b>6.0%</b></div>
+        </div>
+        <p class="muted" style="margin-top:14px">계절적 비수기와 모바일 패널 약세. 대형·IT OLED 및 하이엔드 패널 믹스 개선이 관찰 포인트.</p>
+        <p class="small"><b>EPS 영향:</b> 0/+ · 보조 기여</p>
+      </div><div class="card">
+        <span class="badge mid">Harman · 중립</span>
+        <div class="inline-kpis">
+          <div class="driver"><span>매출</span><b>3.8조원</b></div>
+          <div class="driver"><span>영업이익</span><b>0.2조원</b></div>
+          <div class="driver"><span>마진</span><b>5.3%</b></div>
+        </div>
+        <p class="muted" style="margin-top:14px">전장·커넥티드카 수요는 구조 성장이나 단기 관세·수요 변수로 이익 기여는 제한적.</p>
+        <p class="small"><b>EPS 영향:</b> 0 · 소폭 기여</p>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <section id="valuation" class="section">
-      <div class="section-title"><div><div class="eyebrow">Valuation</div><h2>밸류에이션 섹션</h2><p>Forward EPS × 적용 PER 구조를 명시하고, 사이클·HBM·파운드리 할인/프리미엄을 민감도로 반영했습니다.</p></div></div>
-      <div class="grid two">
-        <article class="card calc-box"><h3>목표주가 계산 구조</h3><p class="formula">목표주가 후보 = Forward EPS × 적용 PER<small>예: Base Case = 40,000원 × 8.0배 = 320,000원</small></p><p class="formula" style="margin-top:18px">확률가중 목표주가 = 208,000×25% + 320,000×50% + 400,000×25% = 312,000원</p><p class="formula" style="margin-top:18px">현재가 대비 기대수익률 = 312,000 ÷ 285,250 - 1 = +9.4%</p><p class="note">Mirae 2026F EPS 33,469원 기준 현재 PER은 8.5배입니다. 다만 12개월 후 주가는 2027F 이익을 일부 반영할 수 있어 시나리오 EPS는 32,000~50,000원으로 둔 범위 추정입니다.</p></article>
-        <article class="card"><h3>밸류에이션 해석</h3><ul class="bullet"><li><span class="dot green"></span><span><b>메모리 사이클:</b> 가격 상승이 실적을 앞당기면 EPS가 빠르게 상향되고 PER 부담이 낮아집니다.</span></li><li><span class="dot yellow"></span><span><b>HBM 경쟁력:</b> HBM4 고객 승인과 마진 개선은 SK하이닉스 대비 할인 축소의 핵심입니다.</span></li><li><span class="dot yellow"></span><span><b>파운드리:</b> 적자 축소 또는 흑자 전환은 SOTP 할인율 축소로 연결될 수 있습니다.</span></li><li><span class="dot red"></span><span><b>DX 둔화:</b> 세트 수요 둔화는 전사 멀티플의 상단을 제한합니다.</span></li></ul></article>
+<section id="industry">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Industry Dashboard</div><h2>반도체·IT 하드웨어 업황</h2></div>
+      <p>HBM 캐파 확대는 범용 DRAM 공급을 조이는 동시에 고부가 제품 믹스를 끌어올립니다. 반면 패키징·수율·고객 인증이 지연되면 EPS 상향 속도는 빠르게 둔화될 수 있습니다.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <span class="badge pos">DRAM · 긍정</span>
+        <div class="driver-grid">
+          <div class="driver"><span>가격</span><b>강세</b></div>
+          <div class="driver"><span>수요</span><b>AI 서버·고용량 DDR5</b></div>
+          <div class="driver"><span>공급</span><b>HBM 전환으로 범용 공급 제약</b></div>
+          <div class="driver"><span>EPS</span><b>+ + +</b></div>
+        </div>
+        <p class="muted" style="margin-top:12px">Commodity DRAM과 서버 DDR5 가격 회복은 FY1 EPS 상향의 가장 직접적인 레버리지.</p>
+      </div><div class="card">
+        <span class="badge pos">NAND/eSSD · 긍정</span>
+        <div class="driver-grid">
+          <div class="driver"><span>가격</span><b>회복</b></div>
+          <div class="driver"><span>수요</span><b>고용량 서버 SSD</b></div>
+          <div class="driver"><span>공급</span><b>공급 절제 지속</b></div>
+          <div class="driver"><span>EPS</span><b>+ +</b></div>
+        </div>
+        <p class="muted" style="margin-top:12px">eSSD 수요가 NAND 믹스와 ASP를 끌어올리지만 소비자 제품 회복 속도는 확인 필요.</p>
+      </div><div class="card">
+        <span class="badge pos">HBM · 긍정/검증 필요</span>
+        <div class="driver-grid">
+          <div class="driver"><span>가격</span><b>프리미엄</b></div>
+          <div class="driver"><span>수요</span><b>GPU·AI 가속기</b></div>
+          <div class="driver"><span>공급</span><b>수율·패키징 병목</b></div>
+          <div class="driver"><span>EPS</span><b>+ + + / 리스크</b></div>
+        </div>
+        <p class="muted" style="margin-top:12px">HBM4·SOCAMM2·HBM4E 로드맵은 긍정적이나, 핵심 고객 승인·점유율 회복 속도가 밸류에이션 프리미엄을 좌우.</p>
+      </div><div class="card">
+        <span class="badge mid">Foundry · 중립</span>
+        <div class="driver-grid">
+          <div class="driver"><span>가격</span><b>선단 공정 믹스 관건</b></div>
+          <div class="driver"><span>수요</span><b>AI/모바일 SoC</b></div>
+          <div class="driver"><span>공급</span><b>2nm·1.4nm 수율</b></div>
+          <div class="driver"><span>EPS</span><b>0/+</b></div>
+        </div>
+        <p class="muted" style="margin-top:12px">단기 비수기와 적자 부담이 남아 있으나 HBM4 베이스 다이와 2nm 고객 확보가 개선 포인트.</p>
+      </div><div class="card">
+        <span class="badge mid">Smartphone · 중립</span>
+        <div class="driver-grid">
+          <div class="driver"><span>가격</span><b>프리미엄 ASP 방어</b></div>
+          <div class="driver"><span>수요</span><b>출시 효과 둔화 가능</b></div>
+          <div class="driver"><span>공급</span><b>원가·부품비 부담</b></div>
+          <div class="driver"><span>EPS</span><b>+</b></div>
+        </div>
+        <p class="muted" style="margin-top:12px">Galaxy 프리미엄 믹스는 수익성 방어 요인. 단, 스마트폰 출하량과 ASP 둔화는 EPS 하방 변수.</p>
+      </div><div class="card">
+        <span class="badge mid">Display · 중립</span>
+        <div class="driver-grid">
+          <div class="driver"><span>가격</span><b>하이엔드 믹스</b></div>
+          <div class="driver"><span>수요</span><b>모바일 계절성</b></div>
+          <div class="driver"><span>공급</span><b>OLED 경쟁 심화</b></div>
+          <div class="driver"><span>EPS</span><b>0/+</b></div>
+        </div>
+        <p class="muted" style="margin-top:12px">OLED 모니터·IT OLED는 장기 긍정이나 단기 계절성으로 분기 이익 변동성이 큼.</p>
       </div>
-      <div class="grid two" style="margin-top:18px">
-        <article class="card"><h3>Peer comparison</h3><div class="table-wrap"><table class="table"><thead><tr><th>기업</th><th>핵심 노출</th><th>시총/밸류에이션</th><th>해석</th></tr></thead><tbody>
-          <tr><td>Samsung Electronics</td><td>메모리+파운드리+DX</td><td>시총 약 ₩1,667.7조, 26F PER 8.5x</td><td>메모리 이익 급증과 파운드리 할인 축소 사이의 재평가 구간</td></tr>
-          <tr><td>SK hynix</td><td>HBM/DRAM</td><td>Google Finance 기준 시총 약 ₩1,342조, TTM PER 31x대</td><td>HBM 선도 프리미엄, 삼성 대비 순수 메모리 베타 높음</td></tr>
-          <tr><td>Micron</td><td>DRAM/NAND/HBM</td><td>Forward PE 약 7.8x 자료 존재</td><td>AI 메모리 수혜이나 주가 급등 후 변동성 확대</td></tr>
-          <tr><td>TSMC</td><td>첨단 파운드리</td><td>Forward PE 24~26x 자료 범위</td><td>첨단공정 독주 프리미엄, 삼성 파운드리 할인 비교 기준</td></tr>
-          <tr><td>Apple</td><td>프리미엄 디바이스</td><td>Forward PE 31~33x 자료 범위</td><td>DX/모바일 수요 비교 기준. 메모리 비용 상승은 BOM 부담</td></tr>
-        </tbody></table></div><p class="note">Peer 지표는 거래소·데이터 공급자·산식에 따라 차이가 크며, 보통주/ADR/회계연도 차이를 고려해야 합니다.</p></article>
-        <article class="card"><h3>PER/PBR 밴드 설명</h3><div id="bandChart" class="dist" role="img" aria-label="Valuation band chart"></div><p class="note">밴드는 정밀 과거 시계열이 아닌 리서치 해석용 도식입니다. 2026F 이익 급증으로 PER은 낮아 보이지만, PBR은 주가 급등으로 과거 저점권을 벗어났습니다. HBM4와 파운드리 흑자 전환이 확인되면 상단 밴드, 가격 피크아웃이 확인되면 중하단 밴드가 타당해집니다.</p></article>
-      </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <section id="scenario" class="section">
-      <div class="section-title"><div><div class="eyebrow">12M Target Scenario</div><h2>1년 후 목표주가 후보 3가지</h2><p>아래 목표주가는 확정 전망이 아니라 가정에 따른 후보값입니다. 세 시나리오의 확률 합계는 100%입니다.</p></div></div>
-      <div class="grid three">
-        <article class="card scenario-card bear"><div class="scenario-head"><h3>Bear Case</h3><span class="tag negative">확률 25%</span></div><div class="price num">₩208,000</div><div class="facts"><div class="fact"><b>EPS ₩32,000</b><span>메모리 상승 둔화</span></div><div class="fact"><b>PER 6.5x</b><span>HBM·파운드리 할인</span></div></div><p>HBM 경쟁력 회복 지연, 파운드리 수율/수주 부진, 스마트폰·가전 수요 둔화, 노사 비용 반영으로 할인 밸류에이션 적용.</p></article>
-        <article class="card scenario-card base"><div class="scenario-head"><h3>Base Case</h3><span class="tag neutral">확률 50%</span></div><div class="price num">₩320,000</div><div class="facts"><div class="fact"><b>EPS ₩40,000</b><span>컨센서스 중간권</span></div><div class="fact"><b>PER 8.0x</b><span>정상화 멀티플</span></div></div><p>DRAM 업황 정상화, NAND 회복, HBM 점진 개선, 파운드리 적자 축소, DX 안정적 수익성을 반영한 중심 시나리오.</p></article>
-        <article class="card scenario-card bull"><div class="scenario-head"><h3>Bull Case</h3><span class="tag positive">확률 25%</span></div><div class="price num">₩400,000</div><div class="facts"><div class="fact"><b>EPS ₩50,000</b><span>이익 상향 지속</span></div><div class="fact"><b>PER 8.0x</b><span>프리미엄 일부 회복</span></div></div><p>AI 서버 투자 확대, HBM4 점유율·마진 개선, DRAM/NAND 공급 부족 지속, 파운드리 대형 고객 확보가 동시에 발생.</p></article>
+<section id="financials">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Financials</div><h2>핵심 재무 및 실적 전망</h2></div>
+      <p>확정 실적과 전망치를 분리했습니다. 2026E는 공개 컨센서스 플랫폼과 주요 증권사 리포트의 대표값/범위를 조합한 참고치이며, 향후 revision에 따라 빠르게 변할 수 있습니다.</p>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>최근 5년 연간 실적</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>연도</th><th>매출</th><th>영업이익</th><th>지배주주순익</th><th>EPS</th></tr></thead>
+            <tbody>
+              <tr><td>2021</td><td>279.6조원</td><td>51.6조원</td><td>39.2조원</td><td>5,777원</td></tr><tr><td>2022</td><td>302.2조원</td><td>43.4조원</td><td>54.7조원</td><td>8,057원</td></tr><tr><td>2023</td><td>258.9조원</td><td>6.6조원</td><td>14.5조원</td><td>2,131원</td></tr><tr><td>2024</td><td>300.9조원</td><td>32.7조원</td><td>33.6조원</td><td>4,950원</td></tr><tr><td>2025</td><td>333.6조원</td><td>43.6조원</td><td>44.3조원</td><td>6,605원</td></tr><tr><td>2026E</td><td>668.7조원</td><td>341.4조원</td><td>276.2조원</td><td>41,424원</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="grid two" style="margin-top:18px">
-        <article class="card"><h3>확률 차트</h3><div class="prob-wrap">
-          <div class="prob-row"><b>Bear</b><div class="prob-track"><div class="prob-fill red" style="--p:25%"></div></div><span>25%</span></div>
-          <div class="prob-row"><b>Base</b><div class="prob-track"><div class="prob-fill" style="--p:50%"></div></div><span>50%</span></div>
-          <div class="prob-row"><b>Bull</b><div class="prob-track"><div class="prob-fill green" style="--p:25%"></div></div><span>25%</span></div>
-        </div><p class="note">확률가중 목표주가 후보 = 312,000원. 현재가 285,250원 대비 +9.4%입니다.</p></article>
-        <article class="card"><h3>계산식 검증</h3><div class="table-wrap"><table class="table"><thead><tr><th>구분</th><th class="right">EPS</th><th class="right">PER</th><th class="right">목표주가</th><th class="right">확률</th><th class="right">가중값</th></tr></thead><tbody>
-          <tr><td>Bear</td><td class="right">32,000</td><td class="right">6.5</td><td class="right">208,000</td><td class="right">25%</td><td class="right">52,000</td></tr>
-          <tr><td>Base</td><td class="right">40,000</td><td class="right">8.0</td><td class="right">320,000</td><td class="right">50%</td><td class="right">160,000</td></tr>
-          <tr><td>Bull</td><td class="right">50,000</td><td class="right">8.0</td><td class="right">400,000</td><td class="right">25%</td><td class="right">100,000</td></tr>
-          <tr><td><b>합계</b></td><td></td><td></td><td></td><td class="right"><b>100%</b></td><td class="right"><b>312,000</b></td></tr>
-        </tbody></table></div></article>
+      <div class="card">
+        <h3>최근 8개 분기 실적</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>분기</th><th>매출</th><th>영업이익</th><th>순이익</th><th>EPS</th></tr></thead>
+            <tbody>
+              <tr><td>2Q24</td><td>74.1조원</td><td>10.4조원</td><td>9.8조원</td><td>1,419원</td></tr><tr><td>3Q24</td><td>79.1조원</td><td>9.2조원</td><td>10.1조원</td><td>1,440원</td></tr><tr><td>4Q24</td><td>75.8조원</td><td>6.5조원</td><td>7.8조원</td><td>1,116원</td></tr><tr><td>1Q25</td><td>79.1조원</td><td>6.7조원</td><td>8.2조원</td><td>1,192원</td></tr><tr><td>2Q25</td><td>74.6조원</td><td>4.7조원</td><td>5.1조원</td><td>737원</td></tr><tr><td>3Q25</td><td>86.1조원</td><td>12.2조원</td><td>12.2조원</td><td>1,802원</td></tr><tr><td>4Q25</td><td>93.8조원</td><td>20.1조원</td><td>19.6조원</td><td>2,909원</td></tr><tr><td>1Q26</td><td>133.9조원</td><td>57.2조원</td><td>47.2조원</td><td>7,123원</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <section id="reports" class="section">
-      <div class="section-title"><div><div class="eyebrow">Analyst Report Monitor</div><h2>국내외 기관 리포트 비교</h2><p>공개적으로 확인 가능한 최신 리포트·보도 기반입니다. 원문이 유료/비공개인 경우 기사화된 핵심 내용만 반영했습니다.</p></div></div>
-      <div class="grid two">
-        <article class="card"><h3>목표주가 분포</h3><div id="targetChart" class="dist" role="img" aria-label="Target price distribution"></div><div class="legend"><span><i></i>기관 목표주가</span><span><i style="background:#ffd166"></i>확률가중 목표주가 후보</span><span><i style="background:#31d79a"></i>컨센서스 평균</span></div></article>
-        <article class="card"><h3>보수·중립·낙관 요약</h3><ul class="bullet"><li><span class="dot red"></span><span><b>보수적:</b> Goldman 260,000원, NH 290,000원, DS/Mirae/Citi 300,000원. 노사 리스크·비용·파운드리/LSI 불확실성을 반영.</span></li><li><span class="dot yellow"></span><span><b>중립적:</b> Kiwoom 330,000원, Nomura 340,000원, JPMorgan 350,000원. 메모리 업황 강세와 HBM 회복을 반영하되 비용 리스크 감안.</span></li><li><span class="dot green"></span><span><b>낙관적:</b> KB 360,000원, 컨센서스 최고 400,000원. 2027년까지 공급 부족, AI 수요 구조화, 파운드리 턴어라운드 기대.</span></li></ul><div class="conclusion">리포트 간 가장 큰 차이는 ① HBM4 회복 속도, ② 파운드리/LSI 흑자 전환 시점, ③ 노조·성과급 비용 반영 여부, ④ 메모리 가격 상승 지속기간입니다.</div></article>
+<section id="eps">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">EPS Core Section</div><h2>EPS 추세 분석</h2></div>
+      <p>이 대시보드의 핵심은 “EPS가 어디로 움직이는가”입니다. 2023년 메모리 다운사이클 저점 이후 EPS는 회복했으며, 1Q26에는 DS 이익 급증이 분기 EPS를 끌어올렸습니다.</p>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>최근 5년 + FY1 EPS</h3>
+        <div class="canvas-wrap"><canvas id="annualEpsChart"></canvas></div>
       </div>
-      <div class="card" style="margin-top:18px"><h3>리포트 테이블</h3><div class="table-wrap"><table class="table"><thead><tr><th>기관명</th><th>발간일</th><th>투자의견</th><th>목표주가</th><th>핵심 논리</th><th>HBM/DRAM/NAND</th><th>파운드리·시스템</th><th>DX·모바일·가전</th><th>리스크</th><th>출처</th></tr></thead><tbody>
-        <tr><td>Kiwoom</td><td>2026-05-11</td><td>Buy / Top Pick</td><td>330,000</td><td>2Q26 매출 181조·OP 100조 전망, 컨센서스 상회</td><td>범용 DRAM +55%, NAND +72% QoQ 전망</td><td>파운드리·System LSI 흑자 전환 기대</td><td>PC·스마트폰 수요 둔화가 3Q 가격 상승률 둔화 요인</td><td>메모리 가격 둔화</td><td><a href="https://news.bizwatch.co.kr/article/market/2026/05/11/0001">Bizwatch</a></td></tr>
-        <tr><td>KB Securities</td><td>2026-05-04</td><td>Buy</td><td>360,000</td><td>2026 OP 360조원으로 상향, 2027년 공급이 더 타이트할 전망</td><td>AI 수요 증가가 공급 증가를 앞선다는 논리</td><td>직접 언급 제한</td><td>메모리 원가 부담은 세트 수요 변수</td><td>가격 급등의 수요 파괴 가능성</td><td><a href="https://kbthink.com/securities-view.html?docId=20260430144812513K">KB Think</a></td></tr>
-        <tr><td>JPMorgan</td><td>2026-05-08</td><td>Overweight</td><td>350,000</td><td>노조 리스크에도 메모리 업사이클 장기화 가능성</td><td>메모리 상승 사이클 지속</td><td>확인 필요</td><td>확인 필요</td><td>파업·성과급 충당금</td><td><a href="https://en.sedaily.com/international/2026/05/08/jpmorgan-calls-samsung-strike-risk-a-buying-opportunity">Seoul Economic Daily</a></td></tr>
-        <tr><td>Nomura</td><td>2026-05-04</td><td>확인 필요</td><td>340,000</td><td>메모리 구조적 수요와 리스크 프리미엄 축소 가능성</td><td>HBM4·AI 메모리 강세</td><td>확인 필요</td><td>확인 필요</td><td>출처가 짧은 뉴스형이라 세부 확인 필요</td><td><a href="https://www.bitget.com/asia/news/detail/12560605396234">Bitget/Glonghui</a></td></tr>
-        <tr><td>Citi</td><td>2026-04-30</td><td>Buy</td><td>300,000</td><td>노조·성과급 충당금으로 2026/27 OP 추정 하향</td><td>HBM 매출 2026년 YoY 3배 기대, HBM4 승인 중요</td><td>확인 필요</td><td>비반도체 임금·비용 부담</td><td>노사 갈등, 성과급 충당금</td><td><a href="https://stock.mk.co.kr/news/view/1077089">MK</a></td></tr>
-        <tr><td>DS Investment</td><td>2026-04-30</td><td>매수</td><td>300,000</td><td>1Q26 메모리와 파운드리 모두 순항, 2Q OP 79.3조 전망</td><td>DRAM ASP +30%, NAND ASP +41% QoQ 전망</td><td>LSI/파운드리 1Q -1조 추정, 개선 가능성</td><td>B2C 부진에도 반도체 이익이 상쇄</td><td>가격 급등 지속성</td><td><a href="https://file.alphasquare.co.kr/media/pdfs/market-report/%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%901Q2620260504DS%ED%88%AC%EC%9E%90%EC%A6%9D%EA%B6%8C.">PDF</a></td></tr>
-        <tr><td>Mirae Asset</td><td>2026-03-18</td><td>Buy</td><td>300,000</td><td>풀스택 플레이어, 파운드리 할인 축소와 EPS 상향</td><td>DRAM/NAND ASP 상향, AI 제품 중심</td><td>GTC 2026 LPU 수주로 할인 축소 논리</td><td>직접 영향은 제한적</td><td>고객 수주 실현·수율</td><td><a href="https://securities.miraeasset.com/bbs/download/2143264.pdf?attachmentId=2143264">PDF</a></td></tr>
-        <tr><td>NH Investment</td><td>2026-04-08</td><td>BUY</td><td>290,000</td><td>파운드리/LSI 개선과 메모리 훈풍, HBM 자신감 회복</td><td>우호적 메모리 업황과 2026 실적 강세</td><td>개선 관점</td><td>확인 필요</td><td>HBM 회복 속도</td><td><a href="https://www.newspim.com/news/view/20260408000157">NewsPim</a></td></tr>
-        <tr><td>Goldman Sachs</td><td>2026-03-11</td><td>Buy</td><td>260,000</td><td>메모리 가격과 AI 수요로 이익 상향, 여전히 저평가</td><td>DRAM/NAND 공급 타이트</td><td>확인 필요</td><td>확인 필요</td><td>가격 피크아웃</td><td><a href="https://www.investing.com/news/stock-market-news/goldman-raises-targets-on-samsung-sk-hynix-on-stronger-memory-pricing-4555076">Investing.com</a></td></tr>
-        <tr><td>Investing.com Consensus</td><td>2026-05-11 확인</td><td>Strong Buy</td><td>평균 314,076<br>고 400,000 / 저 205,000</td><td>36명 애널리스트 기반 컨센서스</td><td>개별 세부 논리 없음</td><td>개별 세부 논리 없음</td><td>개별 세부 논리 없음</td><td>컨센서스 집계 산식 확인 필요</td><td><a href="https://kr.investing.com/equities/samsung-electronics-co-ltd-consensus-estimates">Investing Korea</a></td></tr>
-      </tbody></table></div></div>
-    </section>
-
-    <section id="risks" class="section">
-      <div class="section-title"><div><div class="eyebrow">Risk Matrix</div><h2>리스크 매트릭스</h2><p>발생 가능성과 영향도를 분리하고, 관찰 가능한 지표를 붙였습니다.</p></div></div>
-      <div class="grid risk-grid">
-        <div class="risk-item"><div><div class="risk-title">HBM 경쟁력 회복 지연</div><div class="risk-note">NVIDIA/AMD/ASIC 고객 승인, HBM4E 샘플, HBM 매출 믹스.</div></div><div class="score"><span class="pill mid">가능성 중</span><span class="pill high">영향 상</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">SK하이닉스·Micron과 경쟁 심화</div><div class="risk-note">HBM3E/HBM4 점유율, ASP, 장기공급계약.</div></div><div class="score"><span class="pill high">가능성 상</span><span class="pill high">영향 상</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">파운드리 수율 부진</div><div class="risk-note">2nm/4nm 수율, HPC·AI 고객 테이프아웃, 적자 축소 속도.</div></div><div class="score"><span class="pill mid">가능성 중</span><span class="pill high">영향 상</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">TSMC와 격차 확대</div><div class="risk-note">선단 공정 로드맵, 수주 발표, CAPEX 효율성.</div></div><div class="score"><span class="pill mid">가능성 중</span><span class="pill high">영향 상</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">중국 수요 둔화와 현지 경쟁</div><div class="risk-note">중국 스마트폰·TV·가전 판매, 현지 CE 사업 철수/축소 뉴스.</div></div><div class="score"><span class="pill high">가능성 상</span><span class="pill mid">영향 중</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">NAND 회복 지연 또는 수요 파괴</div><div class="risk-note">eSSD 가격, 클라이언트 SSD 수요, NAND 재고.</div></div><div class="score"><span class="pill mid">가능성 중</span><span class="pill mid">영향 중</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">AI CAPEX 둔화</div><div class="risk-note">MSFT/GOOGL/META/AMZN CAPEX 가이던스, GPU 출하 일정.</div></div><div class="score"><span class="pill low">가능성 하</span><span class="pill high">영향 상</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">스마트폰·PC 수요 부진</div><div class="risk-note">IDC/Gartner 출하 전망, Galaxy 판매량, 채널 재고.</div></div><div class="score"><span class="pill high">가능성 상</span><span class="pill mid">영향 중</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">환율·금리·지정학</div><div class="risk-note">원/달러, 수출 규제, 중동·미중 갈등, 에너지 비용.</div></div><div class="score"><span class="pill mid">가능성 중</span><span class="pill mid">영향 중</span></div></div>
-        <div class="risk-item"><div><div class="risk-title">공급 과잉 전환</div><div class="risk-note">P5/신규 캐파, 업계 CAPEX, 재고일수, 가동률.</div></div><div class="score"><span class="pill low">가능성 하</span><span class="pill high">영향 상</span></div></div>
+      <div class="card">
+        <h3>최근 8개 분기 EPS</h3>
+        <div class="canvas-wrap"><canvas id="quarterEpsChart"></canvas></div>
       </div>
-    </section>
-
-    <section id="checkpoints" class="section">
-      <div class="section-title"><div><div class="eyebrow">Checklist</div><h2>관찰해야 할 체크포인트</h2><p>다음 이벤트와 지표가 목표주가 후보의 Bear/Base/Bull 이동을 좌우합니다.</p></div></div>
-      <div class="grid two">
-        <article class="card timeline">
-          <div class="check"><div><b>다음 실적 발표</b><span>2Q26 잠정/확정 실적, DS·DX·SDC·Harman 부문별 OP.</span></div></div>
-          <div class="check"><div><b>DRAM/NAND 가격지표</b><span>TrendForce, DRAMeXchange, eSSD 계약가격, PC/모바일 DRAM 가격.</span></div></div>
-          <div class="check"><div><b>HBM 공급계약 및 고객사 동향</b><span>NVIDIA Vera Rubin, AMD, ASIC 고객 승인과 HBM4E 샘플 결과.</span></div></div>
-          <div class="check"><div><b>AI 서버 CAPEX</b><span>Microsoft, Meta, Amazon, Alphabet, Oracle 등 CAPEX 가이던스.</span></div></div>
-          <div class="check"><div><b>Peer 실적 코멘트</b><span>SK하이닉스, Micron, TSMC 실적 발표 내 가격·재고·수요 코멘트.</span></div></div>
-        </article>
-        <article class="card timeline">
-          <div class="check"><div><b>파운드리 수주·수율 뉴스</b><span>2nm 모바일, 4nm AI/HPC, LPU/ASIC 고객 확보.</span></div></div>
-          <div class="check"><div><b>Galaxy·DX 판매량</b><span>프리미엄 스마트폰, 폴더블, TV·가전 경쟁 구도와 중국 사업 영향.</span></div></div>
-          <div class="check"><div><b>환율 및 금리</b><span>원화 약세는 수출 이익에 긍정, 비용·자본시장에는 혼합적.</span></div></div>
-          <div class="check"><div><b>노사 협상</b><span>성과급 충당금, 파업 일정, 생산 차질 가능성.</span></div></div>
-          <div class="check"><div><b>주주환원 정책 변화</b><span>2026년 정규 배당, 추가 환원, 자사주 소각 확대 여부.</span></div></div>
-        </article>
+    </div>
+    <div class="grid grid-3" style="margin-top:16px">
+      <div class="card">
+        <span class="badge pos">Forward EPS</span>
+        <p class="metric">FY1 41,424원</p>
+        <p class="muted">FY2는 주요 공개 리포트 범위의 중간값 관점에서 약 56,500원으로 해석. FY3 컨센서스는 공개 자료 제한.</p>
       </div>
-    </section>
+      <div class="card">
+        <span class="badge pos">EPS 성장률</span>
+        <p class="metric">527%</p>
+        <p class="muted">FY2025 EPS 6,605원 대비 FY2026E 대표값 기준. 단, 메모리 사이클상 EPS 급증 이후 PER 디레이팅 가능성을 함께 고려해야 합니다.</p>
+      </div>
+      <div class="card">
+        <span class="badge mid">Revision 판단</span>
+        <p class="metric">상향</p>
+        <p class="muted">DRAM/NAND ASP, HBM4 로드맵, 서버 SSD 수요가 상향 요인. HBM 인증 지연·파운드리 적자·AI CAPEX 둔화는 하향 요인입니다.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>EPS Bridge</h3>
+      <div class="grid grid-4">
+        <div class="driver"><span>DRAM 가격</span><b>+ + +</b><span>서버 DDR5/범용 공급 제약</span></div>
+        <div class="driver"><span>NAND/eSSD</span><b>+ +</b><span>고용량 SSD 믹스 개선</span></div>
+        <div class="driver"><span>HBM 출하·ASP</span><b>+ + + / 리스크</b><span>인증·점유율·수율이 관건</span></div>
+        <div class="driver"><span>Foundry/S.LSI</span><b>0 / +</b><span>적자 축소와 선단 고객 확보</span></div>
+        <div class="driver"><span>Smartphone ASP</span><b>+</b><span>프리미엄 Galaxy 믹스</span></div>
+        <div class="driver"><span>Display</span><b>0 / +</b><span>OLED 계절성·IT OLED</span></div>
+        <div class="driver"><span>환율</span><b>+ / -</b><span>원화 약세는 매출에 긍정, 비용엔 부담</span></div>
+        <div class="driver"><span>CAPEX·감가상각</span><b>-</b><span>캐파 확대 이후 고정비 부담</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <section id="sources" class="section">
-      <div class="section-title"><div><div class="eyebrow">Sources & Validation</div><h2>출처와 검증 메모</h2><p>수치가 다른 경우 발간일·기준가·산식 차이를 분리했습니다.</p></div></div>
-      <article class="card"><ul class="source-list">
-        <li>삼성전자 1Q26 공식 실적: 매출 133.9조원, OP 57.2조원, DS 매출 81.7조원·OP 53.7조원, HBM4·SOCAMM2·HBM4E 언급. <a href="https://news.samsung.com/global/samsung-electronics-announces-first-quarter-2026-results">Samsung Newsroom</a></li>
-        <li>삼성전자 1Q26 실적 PDF: 순이익 47.2조원, EPS 7,123원, ROE 41%, 부문별 매출/OP. <a href="https://images.samsung.com/is/content/samsung/assets/global/ir/docs/2026_1Q_conference_eng.pdf">Samsung IR PDF</a></li>
-        <li>주가·시가총액·상장주식수: 2026-05-11 12:39 KST, 현재가 285,250원, 시총 1,667,650,973백만원, 상장주식수 5,846,279천주. <a href="https://stock.mk.co.kr/price/home/KR7005930003">MK Stock</a></li>
-        <li>2026F Mirae 추정: 매출 592.4조원, OP 243.8조원, EPS 33,469원, 목표주가 300,000원. <a href="https://securities.miraeasset.com/bbs/download/2143264.pdf?attachmentId=2143264">Mirae Asset PDF</a></li>
-        <li>2026F DS투자증권 추정: 매출 651.4조원, OP 312.3조원, EPS 46,186원, 목표주가 300,000원. <a href="https://file.alphasquare.co.kr/media/pdfs/market-report/%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%901Q2620260504DS%ED%88%AC%EC%9E%90%EC%A6%9D%EA%B6%8C.">DS Investment PDF</a></li>
-        <li>Kiwoom 2026-05-11 보도: 목표주가 330,000원, 2Q26 매출 181조원·OP 100조원 전망, 컨센서스 164조/84조. <a href="https://news.bizwatch.co.kr/article/market/2026/05/11/0001">Bizwatch</a></li>
-        <li>KB 2026-05-04: 목표주가 360,000원, 2026년 OP 360조원으로 상향, 2027년 공급 타이트 전망. <a href="https://kbthink.com/securities-view.html?docId=20260430144812513K">KB Think</a></li>
-        <li>Citi 2026-04-30 보도: 목표주가 320,000원에서 300,000원으로 하향, 노조/성과급 충당금 리스크. <a href="https://stock.mk.co.kr/news/view/1077089">MK News</a></li>
-        <li>Investing.com 컨센서스: 36명, 평균 목표주가 314,076원, 최고 400,000원, 최저 205,000원. <a href="https://kr.investing.com/equities/samsung-electronics-co-ltd-consensus-estimates">Investing Korea</a></li>
-        <li>TrendForce/The Elec: 2Q26 PC DDR5 DRAM 가격 +43~48% 전망. <a href="https://www.thelec.net/news/articleView.html?idxno=10155">The Elec</a></li>
-        <li>TrendForce/Tom's Hardware: 2Q26 DRAM +58~63%, NAND +70~75% 전망, eSSD 우선 배분, 신규 캐파 지연. <a href="https://www.tomshardware.com/pc-components/dram/dram-and-nand-contract-prices-to-climb-again-in-q2">Tom's Hardware</a></li>
-        <li>TrendForce HBM: 2026 HBM 시장 성장, SK하이닉스 선두, 삼성 회복, Micron 증설. <a href="https://www.trendforce.com/research/download/RP260204DA3">TrendForce</a></li>
-        <li>Gartner: 2026 PC 출하 -10.4%, 스마트폰 -8.4%, DRAM+SSD 가격 +130% 추정. <a href="https://www.gartner.com/en/newsroom/press-releases/2026-02-26-gartner-says-surging-memory-costs-will-reduce-global-pc-and-smartphone-shipments-in-2026">Gartner</a></li>
-        <li>Samsung 주주환원: 2024~2026 정규 배당 9.8조원/년, FCF 50% 환원. <a href="https://www.samsung.com/global/ir/stock-information/shareholder-return/">Samsung IR</a></li>
-        <li>삼성전자 중국 일부 TV·가전 판매 중단 및 경쟁 심화: <a href="https://www.reuters.com/business/media-telecom/samsung-says-discontinue-china-sales-some-consumer-electronics-products-2026-05-06/">Reuters</a></li>
-      </ul><div class="disclaimer"><b>검증 메모:</b> Forward PER은 기준 EPS가 2026F인지 12개월 선행/2027F 블렌드인지에 따라 크게 달라집니다. 본 대시보드는 현재가 285,250원 ÷ Mirae 2026F EPS 33,469원 = 8.5배를 Hero KPI로 사용했고, 목표주가 시나리오는 12개월 후 시장이 2027F 이익을 일부 선반영할 수 있다는 가정으로 EPS 범위를 별도 설정했습니다.</div></article>
-    </section>
-  </main>
-  <footer class="wrap foot"><div class="disclaimer">본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</div><p class="note">작성 방식: 공개 자료 기반 단일 HTML 정적 대시보드. 외부 프레임워크 미사용. 숫자와 링크는 페이지 작성 시점 기준이며 실시간 업데이트되지 않습니다.</p></footer>
+<section id="valuation">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Valuation</div><h2>밸류에이션과 민감도</h2></div>
+      <p>목표주가는 단정값이 아니라 EPS와 적용 멀티플의 함수입니다. 메모리 기업은 EPS가 상향되는 구간에 PER이 낮아 보일 수 있어 PBR/ROE도 함께 확인해야 합니다.</p>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>계산 구조</h3>
+        <div class="formula">목표주가 후보 = Forward EPS × 적용 PER<br>보조 목표주가 = BPS × 적용 PBR<br>확률가중 목표주가 = Bear×30% + Base×50% + Bull×20%<br>현재가 대비 기대수익률 = 363,552 ÷ 281,000 - 1 = 29.4%</div>
+        <p class="muted" style="margin-top:12px">현재가 281,000원은 FY1 EPS 41,424원 기준 6.8배입니다. 시장이 HBM 회복과 파운드리 개선을 얼마나 확신하느냐에 따라 8~12배 이상의 적용 PER이 달라질 수 있습니다.</p>
+      </div>
+      <div class="card">
+        <h3>Peer comparison</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>기업</th><th>비교 포인트</th><th>프리미엄/할인 요인</th></tr></thead>
+            <tbody>
+              <tr><td>SK하이닉스</td><td>HBM 점유율·AI DRAM 순수도</td><td>HBM 리더십 프리미엄</td></tr>
+              <tr><td>Micron</td><td>DRAM/NAND 사이클 민감도</td><td>미국 AI 공급망 프리미엄</td></tr>
+              <tr><td>TSMC</td><td>선단 파운드리 수익성</td><td>높은 ROE와 고객 집중력</td></tr>
+              <tr><td>Apple</td><td>프리미엄 디바이스 생태계</td><td>하드웨어+서비스 멀티플</td></tr>
+              <tr><td>Samsung Electronics</td><td>메모리+파운드리+DX 복합</td><td>HBM 회복 시 리레이팅, 파운드리 적자 시 할인</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <h3>EPS × PER 민감도 매트릭스</h3>
+        <div id="heatmap" class="table-wrap"></div>
+      </div>
+      <div class="card">
+        <h3>PBR × BPS 보조 밸류에이션</h3>
+        <div id="pbrmap" class="table-wrap"></div>
+        <p class="muted small" style="margin-top:10px">주의: 저PBR 1.0~1.6배 구간은 보수적 하방 밴드에 가까우며, 현재 FY2026E ROE가 높게 추정되는 국면에서는 2배 이상 PBR도 관찰될 수 있습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <script>
-    const fmt = n => n.toLocaleString('ko-KR');
-    function drawTargetChart(){
-      const el=document.getElementById('targetChart'); if(!el) return;
-      const data=[
-        ['Goldman',260000],['NH',290000],['Citi',300000],['DS',300000],['Mirae',300000],['Kiwoom',330000],['Nomura',340000],['JPM',350000],['KB',360000],['Consensus High',400000]
-      ];
-      const weighted=312000, consensus=314076;
-      const w=el.clientWidth||600,h=el.clientHeight||280,pad={l:58,r:18,t:26,b:52};
-      const min=200000,max=410000;
-      const x=v=>pad.l+(v-min)/(max-min)*(w-pad.l-pad.r);
-      const y=i=>pad.t+i*((h-pad.t-pad.b)/(data.length-1));
-      let svg=`<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">`;
-      svg+=`<rect width="${w}" height="${h}" rx="18" fill="rgba(255,255,255,.015)"/>`;
-      [200000,250000,300000,350000,400000].forEach(t=>{svg+=`<line x1="${x(t)}" y1="18" x2="${x(t)}" y2="${h-38}" stroke="rgba(255,255,255,.08)"/><text x="${x(t)}" y="${h-18}" fill="#91a4c1" font-size="11" text-anchor="middle">${Math.round(t/10000)}만</text>`});
-      svg+=`<line x1="${x(weighted)}" y1="18" x2="${x(weighted)}" y2="${h-38}" stroke="#ffd166" stroke-width="2" stroke-dasharray="5 4"/><text x="${x(weighted)+4}" y="22" fill="#ffd166" font-size="11">가중 ${fmt(weighted)}</text>`;
-      svg+=`<line x1="${x(consensus)}" y1="34" x2="${x(consensus)}" y2="${h-38}" stroke="#31d79a" stroke-width="2" stroke-dasharray="3 4"/><text x="${x(consensus)+4}" y="38" fill="#31d79a" font-size="11">컨센서스 ${fmt(consensus)}</text>`;
-      data.forEach((d,i)=>{svg+=`<text x="12" y="${y(i)+4}" fill="#cfe1ff" font-size="11">${d[0]}</text><line x1="${pad.l}" y1="${y(i)}" x2="${x(d[1])}" y2="${y(i)}" stroke="rgba(31,140,255,.55)" stroke-width="6" stroke-linecap="round"/><circle cx="${x(d[1])}" cy="${y(i)}" r="5" fill="#7dd3fc"/><text x="${x(d[1])+8}" y="${y(i)+4}" fill="#dbeafe" font-size="11">${fmt(d[1])}</text>`});
-      svg+='</svg>'; el.innerHTML=svg;
-    }
-    function drawBandChart(){
-      const el=document.getElementById('bandChart'); if(!el) return;
-      const w=el.clientWidth||600,h=el.clientHeight||280,pad={l:50,r:18,t:24,b:40};
-      const vals=[70000,95000,130000,180000,230000,285250,312000,360000,400000];
-      const labels=['저점','1x P/B','저평가','정상화','리레이팅','현재','가중','KB','상단'];
-      const min=50000,max=420000;
-      const x=i=>pad.l+i*((w-pad.l-pad.r)/(vals.length-1));
-      const y=v=>h-pad.b-(v-min)/(max-min)*(h-pad.t-pad.b);
-      let svg=`<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">`;
-      svg+=`<rect width="${w}" height="${h}" rx="18" fill="rgba(255,255,255,.015)"/>`;
-      [100000,200000,300000,400000].forEach(t=>{svg+=`<line x1="${pad.l}" y1="${y(t)}" x2="${w-pad.r}" y2="${y(t)}" stroke="rgba(255,255,255,.08)"/><text x="10" y="${y(t)+4}" fill="#91a4c1" font-size="11">${Math.round(t/10000)}만</text>`});
-      let path=vals.map((v,i)=>(i?'L':'M')+x(i)+' '+y(v)).join(' ');
-      svg+=`<path d="${path}" fill="none" stroke="#1f8cff" stroke-width="3"/>`;
-      vals.forEach((v,i)=>{let color=i===5?'#ffd166':i===6?'#31d79a':'#7dd3fc';svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="${color}"/><text x="${x(i)}" y="${h-17}" fill="#91a4c1" font-size="10" text-anchor="middle">${labels[i]}</text>`});
-      svg+=`<text x="${w-18}" y="22" text-anchor="end" fill="#cfe1ff" font-size="12">밸류에이션 밴드 개념도</text></svg>`;
-      el.innerHTML=svg;
-    }
-    window.addEventListener('load',()=>{drawTargetChart();drawBandChart();});
-    window.addEventListener('resize',()=>{drawTargetChart();drawBandChart();});
-  </script>
+<section id="scenarios">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Target Scenario</div><h2>1년 후 목표주가 후보 3가지</h2></div>
+      <p>아래 목표주가는 투자 권유가 아니라 가정 기반 산출값입니다. 확률 합계는 100%이며, 가격은 보통주 005930.KS 기준입니다.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card scenario bear">
+        <span class="badge neg">Bear Case · 확률 30%</span>
+        <p class="metric">240,000원</p>
+        <p class="muted">EPS 30,000원 × PER 8.0배</p>
+        <ul class="list"><li>메모리 가격 상승 둔화</li><li>HBM 고객사 승인 지연 또는 점유율 회복 실패</li><li>파운드리 적자 지속</li><li>스마트폰 수요 둔화</li><li>EPS 컨센서스 하향</li></ul>
+        <p class="small"><b>EPS 변화 요인:</b> DRAM/NAND ASP 둔화, HBM 믹스 개선 지연, 감가상각 부담</p>
+      </div><div class="card scenario base">
+        <span class="badge mid">Base Case · 확률 50%</span>
+        <p class="metric">352,104원</p>
+        <p class="muted">EPS 41,424원 × PER 8.5배</p>
+        <ul class="list"><li>DRAM 업황 정상화</li><li>NAND·eSSD 완만한 회복</li><li>HBM 공급 확대와 인증 개선</li><li>파운드리 적자 완만한 축소</li><li>컨센서스 수준 실적</li></ul>
+        <p class="small"><b>EPS 변화 요인:</b> AI 서버 수요, eSSD 성장, 고부가 메모리 믹스 개선</p>
+      </div><div class="card scenario bull">
+        <span class="badge pos">Bull Case · 확률 20%</span>
+        <p class="metric">577,500원</p>
+        <p class="muted">EPS 55,000원 × PER 10.5배</p>
+        <ul class="list"><li>AI 서버 CAPEX 확대</li><li>HBM3E/HBM4 점유율 회복</li><li>DRAM 공급 부족</li><li>NAND 가격 회복 가속</li><li>파운드리 수율·고객 확보 개선</li></ul>
+        <p class="small"><b>EPS 변화 요인:</b> HBM ASP·마진 확대, 서버 SSD 고성장, 파운드리 손익 개선</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>확률가중 목표주가 계산</h3>
+      <div class="formula">240,000원 × 30% + 352,104원 × 50% + 577,500원 × 20% = 363,552원<br>현재가 대비 기대수익률 = 363,552원 ÷ 281,000원 - 1 = 29.4%</div>
+      <div class="canvas-wrap"><canvas id="scenarioChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<section id="reports">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Analyst Reports</div><h2>국내외 기관 리포트 비교</h2></div>
+      <p>원문 접근이 제한된 일부 외국계·국내 리포트는 공개 컨센서스 페이지와 언론 보도에 기반해 “공개 자료 제한”으로 표시했습니다. 수치가 확인되지 않은 EPS는 임의로 채우지 않았습니다.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card"><span class="badge neg">보수적</span><p class="metric">270,000원</p><p class="muted">대신증권 2026-02-23. 목표 P/B 3.0배 및 상대적으로 낮은 FY2026 EPS 가정.</p></div>
+      <div class="card"><span class="badge mid">중립~우호</span><p class="metric">338,298원</p><p class="muted">Investing.com 최근 3개월 애널리스트 평균 목표가. TradingView는 342,047.75원으로 유사.</p></div>
+      <div class="card"><span class="badge pos">낙관적</span><p class="metric">400,000~460,000원</p><p class="muted">미래에셋 400,000원, Citi 460,000원. HBM·AI 메모리 확대에 높은 확신을 반영.</p></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>기관별 비교 표</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>기관</th><th>발간일</th><th>의견</th><th>목표주가</th><th>EPS/실적 가정</th><th>밸류에이션</th><th>핵심 논리</th><th>HBM/메모리</th><th>파운드리</th><th>DX</th><th>Revision</th><th>리스크</th><th>출처</th></tr></thead>
+          <tbody>
+            <tr><td>미래에셋증권</td><td>2026-05-07</td><td>매수</td><td>400,000원</td><td>2026E EPS 40,275원 / 2027E 55,783원</td><td>SOTP, fair value 393,100원</td><td>HBM4·AI 메모리 매출 확대, DS 이익 급증</td><td>2026 HBM 매출 33.8조원, 2027 63.5조원 전망</td><td>선단·HBM 베이스다이 기여 확인 필요</td><td>상대적으로 안정</td><td>상향</td><td>HBM 인증 지연, CAPEX·공급 조절 실패</td><td>미래에셋 PDF</td></tr><tr><td>KB증권</td><td>2026-05-11</td><td>Buy 유지</td><td>360,000원</td><td>2026E 지배순익 288.5조원 / 2027E 386.4조원</td><td>2027E P/E 약 4.7배 언급</td><td>DRAM·HBM·Foundry 3개 엔진 동시 회복</td><td>AI DC향 출하 비중 확대</td><td>2025년 7조원 적자에서 2027년 BEP 근접 전망</td><td>프리미엄 믹스 방어</td><td>상향</td><td>메모리 가격 피크아웃, 수율</td><td>KB PDF</td></tr><tr><td>대신증권</td><td>2026-02-23</td><td>BUY 유지</td><td>270,000원</td><td>2026F EPS 23,069원 / 2027F 24,056원</td><td>목표 P/B 3.0배</td><td>2026 OP 201조원으로 상향, 메모리 OP 1위 회복 가능성</td><td>HBM4 speed 경쟁력 기대</td><td>보수적</td><td>제한적 언급</td><td>상향</td><td>ASP 가정 민감도</td><td>대신 PDF</td></tr><tr><td>NH투자증권</td><td>2026-04-30 보도</td><td>자료 제한</td><td>290,000원</td><td>2026 OP 309조원 보도</td><td>공개 자료 제한</td><td>실적 서프라이즈 이후 목표가 상향</td><td>AI 메모리 수혜</td><td>자료 제한</td><td>자료 제한</td><td>상향</td><td>공개 자료 제한</td><td>서울경제 보도</td></tr><tr><td>삼성증권</td><td>2026-04-30 보도</td><td>자료 제한</td><td>270,000원</td><td>공개 자료 제한</td><td>공개 자료 제한</td><td>CSP 인프라 투자 사이클 지속 관점</td><td>긍정</td><td>자료 제한</td><td>자료 제한</td><td>상향</td><td>AI CAPEX 둔화</td><td>서울경제 보도</td></tr><tr><td>IBK투자증권</td><td>2026-04-30 보도</td><td>자료 제한</td><td>350,000원</td><td>분기 OP 86/106/115조원 보도</td><td>공개 자료 제한</td><td>2~4Q26 분기 이익 증가 전망</td><td>긍정</td><td>자료 제한</td><td>자료 제한</td><td>상향</td><td>분기 실적 변동성</td><td>서울경제 보도</td></tr><tr><td>JPMorgan</td><td>2026-05-13</td><td>Buy</td><td>350,000원</td><td>공개 자료 제한</td><td>공개 자료 제한</td><td>최근 3개월 컨센서스 Strong Buy 내 최신 리포트</td><td>자료 제한</td><td>자료 제한</td><td>자료 제한</td><td>상향/우호</td><td>자료 제한</td><td>Investing.com</td></tr><tr><td>Citi</td><td>2026-05-12</td><td>Buy</td><td>460,000원</td><td>공개 자료 제한</td><td>공개 자료 제한</td><td>낙관적 목표가</td><td>우호적 가정 추정</td><td>자료 제한</td><td>자료 제한</td><td>상향/우호</td><td>자료 제한</td><td>Investing.com</td></tr><tr><td>CLSA</td><td>2026-05-11</td><td>Buy</td><td>400,000원</td><td>공개 자료 제한</td><td>공개 자료 제한</td><td>외국계 최신 Buy</td><td>자료 제한</td><td>자료 제한</td><td>자료 제한</td><td>상향/우호</td><td>자료 제한</td><td>Investing.com</td></tr><tr><td>Nomura/Instinet</td><td>2026-05-04</td><td>Buy</td><td>340,000원</td><td>공개 자료 제한</td><td>공개 자료 제한</td><td>중립~우호 목표가</td><td>자료 제한</td><td>자료 제한</td><td>자료 제한</td><td>중립/우호</td><td>자료 제한</td><td>Investing.com</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="risks">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Risk Matrix</div><h2>리스크 매트릭스</h2></div>
+      <p>현재 시장은 EPS 회복을 빠르게 가격에 반영하고 있습니다. 따라서 리스크는 단순 악재가 아니라 “EPS revision을 꺾을 수 있는 변수”로 관찰해야 합니다.</p>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>리스크 항목</th><th>발생 가능성</th><th>영향도</th><th>EPS 영향</th><th>대응/관찰 지표</th></tr></thead>
+          <tbody>
+            <tr><td>HBM 고객사 인증 지연</td><td>중</td><td>상</td><td>- - -</td><td>HBM3E/HBM4 승인·양산 코멘트, NVIDIA/AMD/CSP 공급망 언급</td></tr><tr><td>HBM4 수율·패키징 병목</td><td>중</td><td>상</td><td>- -</td><td>I-Cube/X-Cube, CoWoS/2.5D 패키징 캐파, 수율 지표</td></tr><tr><td>SK하이닉스·Micron 대비 HBM 경쟁력 열위</td><td>중</td><td>상</td><td>- - -</td><td>HBM 점유율, ASP, 고객 포트폴리오</td></tr><tr><td>파운드리 적자 지속</td><td>중</td><td>중~상</td><td>- -</td><td>2nm/1.4nm 고객 확보, 선단 가동률, 베이스다이 수주</td></tr><tr><td>NAND 회복 지연</td><td>중</td><td>중</td><td>-</td><td>eSSD 계약, NAND spot/contract price, 재고</td></tr><tr><td>AI CAPEX 둔화</td><td>낮음~중</td><td>상</td><td>- - -</td><td>NVIDIA/AMD 주문, CSP CAPEX 가이던스</td></tr><tr><td>메모리 공급 과잉 재발</td><td>중</td><td>상</td><td>- - -</td><td>wafer input, CAPEX, HBM 전환에 따른 범용 공급</td></tr><tr><td>스마트폰 수요 둔화</td><td>중</td><td>중</td><td>-</td><td>Galaxy 판매량, ASP, 프리미엄 믹스</td></tr><tr><td>환율 변동</td><td>중</td><td>중</td><td>+/-</td><td>원/달러, 수출 매출·원가 구조</td></tr><tr><td>노사·생산 차질</td><td>낮음~중</td><td>상</td><td>- -</td><td>파업·법원 명령·고객 품질 수용 여부</td></tr><tr><td>지정학·규제·관세</td><td>중</td><td>중~상</td><td>- -</td><td>미중 규제, 수출통제, 관세, 희토류·소재 리스크</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>관찰해야 할 체크포인트</h3>
+      <div class="grid grid-2">
+        <ul class="list"><li>2Q26 실적 발표와 DS 영업이익률</li><li>FY2026/FY2027 EPS 컨센서스 3개월·6개월 revision</li><li>DRAM/NAND contract price 및 서버 DDR5 가격</li><li>HBM3E 고객 인증, HBM4/HBM4E 샘플·양산 일정</li><li>eSSD 고용량 제품 수요와 ASP</li></ul>
+        <ul class="list"><li>SK하이닉스·Micron 분기 실적 코멘트</li><li>TSMC 실적 및 선단 파운드리 수요 코멘트</li><li>NVIDIA·AMD·주요 CSP의 AI 인프라 CAPEX</li><li>Galaxy S26/폴더블 판매량, ASP, 프리미엄 믹스</li><li>원/달러 환율, 글로벌 금리, 수출 규제</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrapper">
+    <div class="section-head">
+      <div><div class="eyebrow">Sources & Validation</div><h2>출처와 검증 노트</h2></div>
+      <p>실시간·컨센서스 데이터는 공급자별 지연·산식 차이가 있습니다. 현재가는 Google Finance 지연시세를 대시보드 기준값으로 사용했고, 목표주가 평균은 Investing.com/TradingView를 교차 확인했습니다.</p>
+    </div>
+    <div class="source-grid">
+      <div class="source"><b>S1 · <a href="https://news.samsung.com/global/samsung-electronics-announces-first-quarter-2026-results" target="_blank" rel="noopener">Samsung Newsroom — 1Q 2026 results</a></b><p>1Q26 매출·영업이익, 사업부 코멘트</p></div><div class="source"><b>S2 · <a href="https://www.samsung.com/global/ir/financial-information/earnings-release/" target="_blank" rel="noopener">Samsung IR — 1Q 2026 Earnings Presentation</a></b><p>분기별 재무표, EPS, 사업부별 매출·영업이익</p></div><div class="source"><b>S3 · <a href="https://www.samsung.com/global/ir/financial-information/audited-financial-statements/" target="_blank" rel="noopener">Samsung IR — FY2025/4Q 2025 Results & Annual Report</a></b><p>연간 실적, EPS, 연결 재무제표</p></div><div class="source"><b>S4 · <a href="https://www.google.com/finance/quote/005930:KRX" target="_blank" rel="noopener">Google Finance 005930:KRX</a></b><p>2026-05-18 15:30 KST 지연시세, 시가총액, trailing EPS/PER</p></div><div class="source"><b>S5 · <a href="https://www.investing.com/equities/samsung-electronics-co-ltd-consensus-estimates" target="_blank" rel="noopener">Investing.com Analyst Forecast</a></b><p>최근 3개월 애널리스트 컨센서스, 평균 목표가·최신 리포트 리스트</p></div><div class="source"><b>S6 · <a href="https://www.tradingview.com/symbols/KRX-005930/forecast/" target="_blank" rel="noopener">TradingView Forecast 005930</a></b><p>36~42명 애널리스트 타깃 및 분기 EPS 추정</p></div><div class="source"><b>S7 · <a href="https://www.marketscreener.com/quote/stock/SAMSUNG-ELECTRONICS-CO-LT-6494906/financials/" target="_blank" rel="noopener">MarketScreener Forecasts</a></b><p>FY2026/FY2027 매출·이익·BPS·ROE 전망</p></div><div class="source"><b>S8 · <a href="https://securities.miraeasset.com/bbs/download/2144364.pdf?attachmentId=2144364" target="_blank" rel="noopener">Mirae Asset Securities Report</a></b><p>2026-05-07 목표주가 400,000원, HBM 매출 전망</p></div><div class="source"><b>S9 · <a href="https://rdata.kbsec.com/pdf_data/20260511065709280E.pdf" target="_blank" rel="noopener">KB Securities Report</a></b><p>2026-05-11 목표주가 360,000원, DS/Foundry 개선 논리</p></div><div class="source"><b>S10 · <a href="https://money2.daishin.com/m_file/file/271/56665_Daishin%20Securities_Samsung%20Electronics%20%28005930%20KS%20Feb%2023%2C%202026%29.pdf" target="_blank" rel="noopener">Daishin Securities Report</a></b><p>2026-02-23 목표주가 270,000원, EPS/PBR 가정</p></div><div class="source"><b>S11 · <a href="https://www.reuters.com/technology/" target="_blank" rel="noopener">Reuters — memory demand / strike risk</a></b><p>AI 메모리 수요, 노사·공급망 리스크 뉴스</p></div><div class="source"><b>S12 · <a href="https://www.sedaily.com/" target="_blank" rel="noopener">서울경제 — 증권사 목표주가 상향 보도</a></b><p>국내 증권사 목표주가·이익 전망 보도 요약</p></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>중요 검증 메모</h3>
+      <ul class="list">
+        <li>현재가·시가총액은 2026-05-18 장마감 지연시세 기준이며, 다른 공급자의 전일 종가와 다를 수 있습니다.</li>
+        <li>Forward EPS는 공개 컨센서스 플랫폼과 주요 증권사 리포트의 대표값입니다. 지배주주순이익 기준 EPS와 조정 EPS가 혼재될 수 있어 원문 산식 확인이 필요합니다.</li>
+        <li>목표주가 후보는 “Forward EPS × 적용 PER” 방식의 시나리오 산출값이며, 리포트 목표가와 동일한 추천 의견이 아닙니다.</li>
+        <li>삼성전자는 메모리 사이클 기업이므로 EPS와 PER이 동시에 변할 수 있습니다. EPS 피크 구간에서는 낮은 PER이 저평가를 의미하지 않을 수 있습니다.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer-note">
+  <div class="wrapper">
+    <p><b>본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</b></p>
+    <p class="small">작성일: 2026-05-18 · 자료 범위: 삼성전자 공식 IR, 공개 컨센서스 플랫폼, 국내외 증권사 공개 리포트 및 주요 뉴스. 외부 프레임워크·CDN 없이 HTML/CSS/JavaScript만 사용했습니다.</p>
+  </div>
+</footer>
+
+<script>
+const DATA = {"annualEPS": [{"year": "2021", "eps": 5777, "note": "반도체 호황"}, {"year": "2022", "eps": 8057, "note": "5년 고점"}, {"year": "2023", "eps": 2131, "note": "메모리 다운사이클 저점"}, {"year": "2024", "eps": 4950, "note": "회복 국면"}, {"year": "2025", "eps": 6605, "note": "DS 회복 지속"}, {"year": "2026E", "eps": 41424, "note": "FY1 공개 컨센서스/리포트 범위"}], "quarterEPS": [{"q": "2Q24", "eps": 1419}, {"q": "3Q24", "eps": 1440}, {"q": "4Q24", "eps": 1116}, {"q": "1Q25", "eps": 1192}, {"q": "2Q25", "eps": 737}, {"q": "3Q25", "eps": 1802}, {"q": "4Q25", "eps": 2909}, {"q": "1Q26", "eps": 7123}], "quarterFin": [{"q": "2Q24", "rev": 74.1, "op": 10.4, "ni": 9.8, "eps": 1419}, {"q": "3Q24", "rev": 79.1, "op": 9.2, "ni": 10.1, "eps": 1440}, {"q": "4Q24", "rev": 75.8, "op": 6.5, "ni": 7.8, "eps": 1116}, {"q": "1Q25", "rev": 79.1, "op": 6.7, "ni": 8.2, "eps": 1192}, {"q": "2Q25", "rev": 74.6, "op": 4.7, "ni": 5.1, "eps": 737}, {"q": "3Q25", "rev": 86.1, "op": 12.2, "ni": 12.2, "eps": 1802}, {"q": "4Q25", "rev": 93.8, "op": 20.1, "ni": 19.6, "eps": 2909}, {"q": "1Q26", "rev": 133.9, "op": 57.2, "ni": 47.2, "eps": 7123}], "scenarios": [{"name": "Bear Case", "eps": 30000, "per": 8.0, "target": 240000, "prob": 30, "tone": "bear", "assumptions": ["메모리 가격 상승 둔화", "HBM 고객사 승인 지연 또는 점유율 회복 실패", "파운드리 적자 지속", "스마트폰 수요 둔화", "EPS 컨센서스 하향"], "drivers": "DRAM/NAND ASP 둔화, HBM 믹스 개선 지연, 감가상각 부담"}, {"name": "Base Case", "eps": 41424, "per": 8.5, "target": 352104, "prob": 50, "tone": "base", "assumptions": ["DRAM 업황 정상화", "NAND·eSSD 완만한 회복", "HBM 공급 확대와 인증 개선", "파운드리 적자 완만한 축소", "컨센서스 수준 실적"], "drivers": "AI 서버 수요, eSSD 성장, 고부가 메모리 믹스 개선"}, {"name": "Bull Case", "eps": 55000, "per": 10.5, "target": 577500, "prob": 20, "tone": "bull", "assumptions": ["AI 서버 CAPEX 확대", "HBM3E/HBM4 점유율 회복", "DRAM 공급 부족", "NAND 가격 회복 가속", "파운드리 수율·고객 확보 개선"], "drivers": "HBM ASP·마진 확대, 서버 SSD 고성장, 파운드리 손익 개선"}], "currentPrice": 281000, "fy1Eps": 41424, "bps2026": 104534, "perCols": [8, 10, 12, 14, 16], "epsMultipliers": [-0.2, -0.1, 0, 0.1, 0.2], "pbrCols": [1.0, 1.2, 1.4, 1.6, 2.0, 2.4, 2.8, 3.0]};
+
+function money(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+function drawBarChart(canvasId, data, labelKey, valueKey, opts={}) {
+  const canvas = document.getElementById(canvasId);
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const w = rect.width, h = rect.height;
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:44,r:16,t:22,b:44};
+  const max = Math.max(...data.map(d=>d[valueKey])) * 1.12;
+  const min = Math.min(0, ...data.map(d=>d[valueKey]));
+  const plotW = w-pad.l-pad.r, plotH = h-pad.t-pad.b;
+  ctx.strokeStyle = 'rgba(130,180,255,.18)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let i=0;i<5;i++){
+    const y = pad.t + plotH*i/4;
+    ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y);
+  }
+  ctx.stroke();
+  ctx.font = '12px system-ui';
+  ctx.fillStyle = 'rgba(220,236,255,.72)';
+  ctx.textAlign = 'right';
+  for(let i=0;i<5;i++){
+    const val = max - (max-min)*i/4;
+    const y = pad.t + plotH*i/4 + 4;
+    ctx.fillText(Math.round(val).toLocaleString('ko-KR'), pad.l-8, y);
+  }
+  const barGap = 10;
+  const bw = (plotW - barGap*(data.length-1))/data.length;
+  data.forEach((d,i)=>{
+    const x = pad.l + i*(bw+barGap);
+    const bh = (d[valueKey]-min)/(max-min)*plotH;
+    const y = pad.t + plotH - bh;
+    const grad = ctx.createLinearGradient(0,y,0,pad.t+plotH);
+    grad.addColorStop(0,'rgba(54,230,255,.96)');
+    grad.addColorStop(1,'rgba(11,92,255,.68)');
+    ctx.fillStyle = grad;
+    roundRect(ctx,x,y,bw,bh,8);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(238,246,255,.85)';
+    ctx.textAlign = 'center';
+    ctx.fillText(d[labelKey], x+bw/2, h-17);
+  });
+}
+
+function drawScenarioChart() {
+  const canvas = document.getElementById('scenarioChart');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const w=rect.width,h=rect.height;
+  ctx.clearRect(0,0,w,h);
+  const pad={l:120,r:20,t:24,b:40};
+  const max=Math.max(...DATA.scenarios.map(s=>s.target))*1.15;
+  const colors={'Bear Case':'#ff6b7a','Base Case':'#36e6ff','Bull Case':'#52f0a3'};
+  DATA.scenarios.forEach((s,i)=>{
+    const y=pad.t+i*70;
+    const bw=(w-pad.l-pad.r)*(s.target/max);
+    ctx.fillStyle='rgba(255,255,255,.08)';
+    roundRect(ctx,pad.l,y,w-pad.l-pad.r,24,12); ctx.fill();
+    ctx.fillStyle=colors[s.name];
+    roundRect(ctx,pad.l,y,bw,24,12); ctx.fill();
+    ctx.fillStyle='rgba(238,246,255,.9)';
+    ctx.font='700 13px system-ui'; ctx.textAlign='right';
+    ctx.fillText(s.name, pad.l-12, y+17);
+    ctx.textAlign='left';
+    ctx.fillText(money(s.target)+' · '+s.prob+'%', pad.l+bw+10, y+17);
+  });
+  ctx.fillStyle='rgba(167,183,208,.85)';
+  ctx.font='12px system-ui'; ctx.textAlign='left';
+  ctx.fillText('가격은 EPS×PER 기반 시나리오 후보값입니다.', pad.l, h-12);
+}
+
+function roundRect(ctx,x,y,w,h,r) {
+  const rr = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr,y);
+  ctx.arcTo(x+w,y,x+w,y+h,rr);
+  ctx.arcTo(x+w,y+h,x,y+h,rr);
+  ctx.arcTo(x,y+h,x,y,rr);
+  ctx.arcTo(x,y,x+w,y,rr);
+  ctx.closePath();
+}
+
+function buildHeatmap() {
+  const epsBase = DATA.fy1Eps;
+  const rows = DATA.epsMultipliers.map(m => {
+    const eps = epsBase * (1+m);
+    return {label:(m>0?'+':'') + Math.round(m*100)+'%', eps};
+  });
+  const cols = DATA.perCols;
+  let values = [];
+  rows.forEach(r => cols.forEach(p => values.push(r.eps*p)));
+  const min = Math.min(...values), max = Math.max(...values);
+  let html = '<table class="heat"><thead><tr><th>EPS 변화</th><th>조정 EPS</th>' + cols.map(c=>`<th>${c}x</th>`).join('') + '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += `<tr><td>${r.label}</td><td>${money(r.eps)}</td>`;
+    cols.forEach(p => {
+      const v = r.eps*p;
+      const t = (v-min)/(max-min);
+      const bg = `rgba(54,230,255,${0.08 + t*0.32})`;
+      const border = `rgba(54,230,255,${0.13 + t*0.32})`;
+      html += `<td style="background:${bg};border-color:${border}">${money(v)}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('heatmap').innerHTML = html;
+}
+
+function buildPBRMap() {
+  const bps = DATA.bps2026;
+  const cols = DATA.pbrCols;
+  let html = '<table class="heat"><thead><tr><th>FY2026E BPS</th>' + cols.map(c=>`<th>${c.toFixed(1)}x</th>`).join('') + '</tr></thead><tbody><tr><td>'+money(bps)+'</td>';
+  cols.forEach(p => {
+    const v = bps*p;
+    const bg = p >= 2.4 ? 'rgba(82,240,163,.18)' : 'rgba(255,209,102,.10)';
+    html += `<td style="background:${bg}">${money(v)}</td>`;
+  });
+  html += '</tr></tbody></table>';
+  document.getElementById('pbrmap').innerHTML = html;
+}
+
+function init() {
+  drawBarChart('annualEpsChart', DATA.annualEPS, 'year', 'eps');
+  drawBarChart('quarterEpsChart', DATA.quarterEPS, 'q', 'eps');
+  drawScenarioChart();
+  buildHeatmap();
+  buildPBRMap();
+}
+window.addEventListener('load', init);
+window.addEventListener('resize', () => {
+  clearTimeout(window.__resizeTimer);
+  window.__resizeTimer = setTimeout(init, 150);
+});
+</script>
 </body>
 </html>

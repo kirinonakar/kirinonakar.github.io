@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NVIDIA 투자 리서치 대시보드</title>
+<style>
+:root {
+  --bg:#050805; --panel:#0b120d; --panel2:#101a13; --card:#0f1711; --line:rgba(118,255,78,.16);
+  --green:#76ff4e; --green2:#39d353; --muted:#9aa8a0; --text:#ecfff0; --soft:#c8d8cd;
+  --amber:#ffd166; --red:#ff6b6b; --blue:#7dd3fc; --violet:#c4b5fd;
+  --shadow:0 24px 70px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+  radial-gradient(circle at 20% -10%,rgba(118,255,78,.15),transparent 34%),
+  radial-gradient(circle at 80% 8%,rgba(57,211,83,.11),transparent 32%),
+  linear-gradient(180deg,#050805 0%,#071008 45%,#050805 100%);color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;line-height:1.58}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background-image:
+  linear-gradient(rgba(118,255,78,.045) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(118,255,78,.045) 1px,transparent 1px),
+  radial-gradient(circle at 50% 50%,rgba(118,255,78,.055),transparent 38%);background-size:42px 42px,42px 42px,100% 100%;mask-image:linear-gradient(to bottom,rgba(0,0,0,1),rgba(0,0,0,.35));}
+a{color:var(--green)}
+.container{width:min(1440px,92vw);margin:auto}
+.nav{position:sticky;top:0;z-index:10;background:rgba(5,8,5,.72);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#76ff4e,#0e3b15);box-shadow:0 0 32px rgba(118,255,78,.35)}
+.links{display:flex;gap:12px;flex-wrap:wrap;font-size:13px}
+.links a{color:var(--soft);text-decoration:none;border:1px solid transparent;padding:7px 10px;border-radius:999px}
+.links a:hover{border-color:var(--line);background:rgba(118,255,78,.08)}
+.hero{padding:58px 0 26px}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--green);font-size:13px;font-weight:700;background:rgba(118,255,78,.08);border:1px solid var(--line);border-radius:999px;padding:7px 12px}
+h1{font-size:clamp(38px,6.2vw,84px);line-height:.98;margin:18px 0 18px;letter-spacing:-.06em}
+.subtitle{font-size:clamp(16px,2vw,22px);color:var(--soft);max-width:980px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:stretch;margin-top:34px}
+.panel{background:linear-gradient(180deg,rgba(15,23,17,.88),rgba(8,13,9,.88));border:1px solid var(--line);box-shadow:var(--shadow);border-radius:28px;overflow:hidden}
+.panel-pad{padding:24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{background:linear-gradient(180deg,rgba(118,255,78,.08),rgba(255,255,255,.025));border:1px solid rgba(118,255,78,.13);border-radius:22px;padding:17px;min-height:112px}
+.kpi small{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+.kpi strong{font-size:clamp(24px,2.5vw,36px);line-height:1.1;letter-spacing:-.035em}
+.kpi .note{font-size:12px;color:var(--muted);margin-top:8px}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800;border:1px solid rgba(118,255,78,.23);background:rgba(118,255,78,.10);color:var(--green)}
+.badge.amber{border-color:rgba(255,209,102,.28);background:rgba(255,209,102,.10);color:var(--amber)}
+.badge.red{border-color:rgba(255,107,107,.28);background:rgba(255,107,107,.10);color:var(--red)}
+.badge.blue{border-color:rgba(125,211,252,.28);background:rgba(125,211,252,.10);color:var(--blue)}
+.section{padding:42px 0}
+.section-title{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px}
+h2{font-size:clamp(28px,3.4vw,46px);line-height:1.05;margin:0;letter-spacing:-.045em}
+.section-title p{max-width:720px;color:var(--muted);margin:0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:linear-gradient(180deg,rgba(16,26,19,.92),rgba(8,13,9,.88));border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:0 16px 46px rgba(0,0,0,.22)}
+.card h3{margin:0 0 10px;font-size:20px;letter-spacing:-.02em}
+.card p,.card li{color:var(--soft)}
+ul{padding-left:20px;margin:10px 0}
+.metric-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed rgba(118,255,78,.13);padding:10px 0;color:var(--soft)}
+.metric-row:last-child{border-bottom:0}
+.metric-row b{color:var(--text)}
+.table-wrap{overflow:auto;border-radius:22px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;min-width:840px;background:rgba(6,10,7,.72)}
+th,td{padding:13px 14px;border-bottom:1px solid rgba(118,255,78,.12);vertical-align:top;text-align:left}
+th{font-size:12px;color:var(--green);text-transform:uppercase;letter-spacing:.08em;background:rgba(118,255,78,.08);position:sticky;top:0}
+td{color:var(--soft);font-size:14px}
+tr:hover td{background:rgba(118,255,78,.035)}
+canvas{width:100%;height:260px;background:rgba(0,0,0,.12);border-radius:18px;border:1px solid rgba(118,255,78,.10)}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.scenario-card{position:relative;overflow:hidden}
+.scenario-card:before{content:"";position:absolute;inset:-60px auto auto -80px;width:190px;height:190px;border-radius:50%;background:rgba(118,255,78,.11);filter:blur(10px)}
+.scenario-head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.price-target{font-size:34px;font-weight:900;letter-spacing:-.045em}
+.progress{height:12px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:10px 0 4px}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,#306b34,#76ff4e);border-radius:999px}
+.heat{font-weight:800;color:#041007;text-align:right;border:1px solid rgba(255,255,255,.05)}
+.source-tag{font-size:11px;color:var(--green);border:1px solid rgba(118,255,78,.22);border-radius:999px;padding:2px 7px;white-space:nowrap}
+.callout{border:1px solid rgba(118,255,78,.24);background:linear-gradient(135deg,rgba(118,255,78,.12),rgba(255,255,255,.025));border-radius:24px;padding:22px}
+.callout strong{color:var(--green)}
+.timeline{display:grid;gap:12px}
+.timeline-item{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:start;border-left:2px solid rgba(118,255,78,.18);padding-left:16px}
+.timeline-item b{color:var(--green)}
+.footer{padding:36px 0 50px;color:var(--muted)}
+.small{font-size:12px;color:var(--muted)}
+.print-note{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:1100px){.hero-grid,.grid-2,.chart-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid-3,.grid-4{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.links{display:none}.kpi-grid,.grid-3,.grid-4{grid-template-columns:1fr}.panel-pad{padding:18px}.card{padding:17px}.timeline-item{grid-template-columns:1fr}table{min-width:720px}}
+@media print{body{background:#fff;color:#000}.nav{display:none}.panel,.card,.callout{box-shadow:none;border-color:#ccc;background:#fff;color:#000}canvas{border-color:#ccc}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="container nav-inner"><div class="brand"><span class="logo"></span>NVIDIA Research Dashboard</div><div class="links"><a href="#summary">요약</a><a href="#industry">업황</a><a href="#eps">EPS</a><a href="#valuation">밸류에이션</a><a href="#scenario">시나리오</a><a href="#reports">기관</a><a href="#risks">리스크</a><a href="#sources">출처</a></div></div></nav>
+<header class="hero container">
+  <span class="eyebrow">NASDAQ: NVDA · 데이터 기준일 2026-05-18 · USD 기준</span>
+  <h1>NVIDIA 투자 리서치 대시보드</h1>
+  <p class="subtitle">핵심 질문은 단순한 “싸다/비싸다”가 아니라, <b>EPS가 어느 방향으로 움직이고 있으며 시장이 그 EPS에 몇 배의 PER을 부여하는가</b>입니다. 본 문서는 Blackwell/Rubin 전환, CUDA 락인, 빅테크 AI CAPEX, 공급망 병목, 중국 규제를 함께 반영한 시나리오 기반 참고 자료입니다.</p>
+  <div class="hero-grid">
+    <div class="panel panel-pad">
+      <div class="kpi-grid">
+        <div class="kpi"><small>현재 주가</small><strong>$225.32</strong><div class="note">≈ ₩337,529 · S3/S10</div></div>
+        <div class="kpi"><small>시가총액</small><strong>$5.52T</strong><div class="note">market cap · S3</div></div>
+        <div class="kpi"><small>Forward EPS / PER</small><strong>$8.38 / 26.9x</strong><div class="note">FY2027E EPS 기준 · S4</div></div>
+        <div class="kpi"><small>EPS Revision</small><strong>상향</strong><div class="note">Blackwell·GB300·AI CAPEX 기대</div></div>
+        <div class="kpi"><small>Data Center FY26 매출 성장률</small><strong>+68%</strong><div class="note">$193.7B · S1/S2</div></div>
+        <div class="kpi"><small>FY26 GAAP 매출총이익률</small><strong>71.1%</strong><div class="note">Q4 GAAP GM 75.0% · S1</div></div>
+        <div class="kpi"><small>확률가중 목표주가 후보</small><strong>$264.25</strong><div class="note">≈ ₩395,846</div></div>
+        <div class="kpi"><small>현재가 대비 시나리오 기대수익률</small><strong>17.3%</strong><div class="note">투자 권유 아님</div></div>
+      </div>
+    </div>
+    <div class="panel panel-pad">
+      <h3>한 줄 결론</h3>
+      <p>NVIDIA는 여전히 <b>EPS 상향 사이클</b> 안에 있지만, 현재 주가는 이미 “AI 인프라 플랫폼 기업” 프리미엄을 상당 부분 반영하고 있습니다. 따라서 핵심 체크포인트는 PER보다 먼저 <b>FY2027~FY2028 EPS가 8~11달러 이상으로 유지·상향될 수 있는지</b>입니다.</p>
+      <div class="metric-row"><span>Trailing GAAP EPS</span><b>$4.90</b></div>
+      <div class="metric-row"><span>FY2027E EPS</span><b>$8.38</b></div>
+      <div class="metric-row"><span>FY2028E EPS</span><b>$10.51</b></div>
+      <div class="metric-row"><span>FY26 FCF Yield</span><b>1.75%</b></div>
+      <div class="print-note">환율 환산: USD/KRW 약 1,498원, 2026-05-18 시장 스냅샷 기준.</div>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="summary" class="section container">
+  <div class="section-title"><h2>투자 요약</h2><p>EPS 추세, PER 정당화, 업황 리스크를 분리해 판단합니다.</p></div>
+  <div class="grid-3">
+    <div class="card"><h3>핵심 투자 포인트</h3><ul><li>FY2026 매출 $215.9B, Data Center $193.7B로 AI 인프라 중심 회사로 재평가.</li><li>Blackwell이 FY2026 Data Center 매출의 과반으로 자리잡았고 GB300·Rubin으로 제품 주기가 이어짐.</li><li>CUDA, AI Enterprise, NIM/NeMo, NVLink·InfiniBand·Spectrum-X가 GPU 단품보다 높은 플랫폼 락인을 형성.</li><li>빅테크 AI CAPEX가 2026년에도 대규모로 유지되는 환경은 FY2027 EPS 상향의 주요 근거.</li><li>자사주 매입과 높은 FCF가 EPS 방어 요인.</li></ul></div>
+    <div class="card"><h3>핵심 리스크</h3><ul><li>중국 수출 규제로 Data Center compute 매출의 지역 확장성이 제한.</li><li>Blackwell/Rubin 전환 지연, HBM·CoWoS·전력·냉각 병목은 EPS 변동성을 확대.</li><li>Hyperscaler 자체 ASIC과 AMD, Broadcom custom silicon은 장기 PER 압축 요인.</li><li>고객 집중도와 AI CAPEX ROI 검증 논란은 주문 조정 리스크로 연결.</li><li>FY1 PER이 낮아 보여도 EPS 피크 논란이 발생하면 멀티플 해석이 왜곡될 수 있음.</li></ul></div>
+    <div class="card"><h3>EPS 추세 한 줄</h3><p><b>FY2022 $0.38 → FY2026 $4.90 → FY2027E $8.38</b>로 EPS는 AI GPU 사이클과 매출총이익률 레버리지에 의해 급증했습니다.</p><div class="callout"><strong>판단 프레임:</strong><br/>Forward EPS가 $8~10대에서 유지되면 25~35배 PER도 방어 가능하지만, CAPEX 둔화로 EPS가 $7 이하로 하향되면 현재 밸류에이션은 빠르게 부담이 됩니다.</div></div>
+  </div>
+</section>
+
+<section id="company" class="section container">
+  <div class="section-title"><h2>회사 개요와 경쟁력</h2><p>GPU 칩 회사에서 랙 스케일 AI 인프라 플랫폼으로 확장 중입니다.</p></div>
+  <div class="grid-2">
+    <div class="card"><h3>사업 영역</h3><div class="metric-row"><span>Data Center</span><b>GPU, Grace CPU, NVLink, InfiniBand, Spectrum-X, AI Enterprise</b></div><div class="metric-row"><span>Gaming</span><b>GeForce RTX, DLSS, 게임·크리에이터 생태계</b></div><div class="metric-row"><span>Professional Visualization</span><b>RTX Pro, Omniverse, DGX Spark</b></div><div class="metric-row"><span>Automotive</span><b>DRIVE, 자율주행·로보틱스</b></div><div class="metric-row"><span>OEM & Other</span><b>기타 임베디드·레거시 수요</b></div></div>
+    <div class="card"><h3>경쟁우위</h3><ul><li><b>성능 + 생태계:</b> GPU 성능뿐 아니라 CUDA, 라이브러리, 개발자 기반이 전환 비용을 높임.</li><li><b>시스템 통합:</b> GPU, CPU, 네트워킹, 랙 스케일 설계까지 묶어 데이터센터 병목을 직접 해결.</li><li><b>공급망 조달력:</b> TSMC, HBM, CoWoS 등 핵심 병목 자원을 선점하는 능력.</li><li><b>고객 범위:</b> Microsoft, Amazon, Google, Meta, Oracle, AI 스타트업, 슈퍼컴퓨팅, 엔터프라이즈.</li></ul></div>
+  </div>
+</section>
+
+<section id="industry" class="section container">
+  <div class="section-title"><h2>AI 인프라 업황 대시보드</h2><p>수요는 여전히 강하지만, 병목은 GPU 자체에서 전력·냉각·패키징·ROI 검증으로 넓어졌습니다.</p></div>
+  <div class="grid-3">
+    <div class="card"><div class="scenario-head"><h3>AI GPU</h3><span class="badge ">긍정</span></div><p>Blackwell/GB200·GB300 랙 스케일 수요가 핵심. H100/H200 잔여 수요보다 Blackwell 전환 속도가 EPS의 주된 변수.</p><div class="metric-row"><span>EPS 영향</span><b>ASP·출하량·제품 믹스가 모두 EPS 상방 요인</b></div></div><div class="card"><div class="scenario-head"><h3>Data Center Networking</h3><span class="badge ">긍정</span></div><p>NVLink, InfiniBand, Spectrum-X Ethernet 수요가 GPU 클러스터 확장과 동행. FY26 DC networking 매출은 31.4B달러.</p><div class="metric-row"><span>EPS 영향</span><b>GPU 단품보다 시스템 매출·마진 방어에 기여</b></div></div><div class="card"><div class="scenario-head"><h3>CUDA / Software</h3><span class="badge ">긍정</span></div><p>CUDA, AI Enterprise, NIM, NeMo, 개발자 생태계가 락인과 플랫폼 PER 프리미엄을 형성.</p><div class="metric-row"><span>EPS 영향</span><b>매출 규모보다 멀티플 방어 효과가 중요</b></div></div><div class="card"><div class="scenario-head"><h3>Gaming GPU</h3><span class="badge amber">중립+</span></div><p>RTX 50 시리즈와 PC 게이밍 회복으로 FY26 Gaming 매출 16.0B달러. 단 핵심 EPS 드라이버는 DC.</p><div class="metric-row"><span>EPS 영향</span><b>분산 효과는 있으나 전체 EPS 민감도는 낮음</b></div></div><div class="card"><div class="scenario-head"><h3>Automotive / Robotics</h3><span class="badge amber">중립+</span></div><p>DRIVE, Jetson, Isaac, 로보틱스가 장기 옵션. FY26 Auto 매출은 2.35B달러로 아직 비중은 작음.</p><div class="metric-row"><span>EPS 영향</span><b>장기 콜옵션, 단기 EPS 기여는 제한적</b></div></div>
+  </div>
+  <div class="grid-2" style="margin-top:18px">
+    <div class="card"><h3>상승 요인</h3><ul><li>빅테크 AI 인프라 지출이 2026년 700B달러를 초과할 것이라는 보도.</li><li>Blackwell/GB200/GB300 수요 초과와 Rubin 조기 기대감.</li><li>추론 inference 수요 확대가 학습 수요 둔화를 보완할 가능성.</li><li>GPU + networking + software의 시스템 매출화로 ASP와 마진 방어.</li></ul></div>
+    <div class="card"><h3>하락 요인</h3><ul><li>고객의 AI ROI 검증 지연, CAPEX 재조정, 과잉투자 논란.</li><li>중국향 Data Center compute 매출 차단 및 현지 대체재 확대.</li><li>HBM/CoWoS/전력·냉각 병목으로 출하가 수요를 따라가지 못하는 상황.</li><li>자체 ASIC이 추론 워크로드에서 일부 GPU 수요를 대체할 가능성.</li></ul></div>
+  </div>
+</section>
+
+<section id="financials" class="section container">
+  <div class="section-title"><h2>핵심 재무와 사업부 추이</h2><p>FY2026 실적은 Data Center와 Blackwell 전환이 대부분의 성장률을 설명합니다.</p></div>
+  <div class="chart-grid">
+    <div class="card"><h3>최근 8개 분기 매출</h3><canvas id="revenueChart" height="260"></canvas></div>
+    <div class="card"><h3>사업부별 매출 FY2024~FY2026</h3><canvas id="segmentChart" height="260"></canvas></div>
+  </div>
+  <div class="grid-4" style="margin-top:18px">
+    <div class="card"><h3>FY2026 Revenue</h3><div class="price-target">$215.9B</div><p>전년 대비 +65%</p></div>
+    <div class="card"><h3>FY2026 Net Income</h3><div class="price-target">$120.1B</div><p>GAAP 기준</p></div>
+    <div class="card"><h3>Cash + Securities</h3><div class="price-target">$62.6B</div><p>2026-01-25 기준</p></div>
+    <div class="card"><h3>Inventory</h3><div class="price-target">$21.4B</div><p>제품 전환과 공급망 확장 반영</p></div>
+  </div>
+</section>
+
+<section id="eps" class="section container">
+  <div class="section-title"><h2>EPS 추세 분석</h2><p>본 리서치의 핵심 섹션입니다. GAAP EPS와 Non-GAAP EPS를 구분하고, Forward EPS revision을 별도로 봅니다.</p></div>
+  <div class="chart-grid">
+    <div class="card"><h3>최근 5년 연간 GAAP EPS</h3><canvas id="annualEpsChart" height="260"></canvas></div>
+    <div class="card"><h3>최근 8개 분기 EPS</h3><canvas id="quarterlyEpsChart" height="260"></canvas></div>
+  </div>
+  <div class="grid-3" style="margin-top:18px">
+    <div class="card"><h3>Forward EPS</h3><div class="metric-row"><span>FY2027E</span><b>$8.38</b></div><div class="metric-row"><span>FY2028E</span><b>$10.51</b></div><div class="metric-row"><span>FY2029E</span><b>확인 필요</b></div><p class="small">컨센서스 출처 간 기준연도와 회계연도 표기가 다를 수 있어 FY3는 임의 입력하지 않았습니다.</p></div>
+    <div class="card"><h3>EPS 성장률</h3><div class="metric-row"><span>FY26 GAAP EPS YoY</span><b>+66.7%</b></div><div class="metric-row"><span>FY27E vs FY26</span><b>71.0%</b></div><div class="metric-row"><span>FY26~FY28E 2년 CAGR</span><b>46.5%</b></div><p>EPS 성장률이 높은 동안에는 25~35배 Forward PER을 설명할 수 있지만, 성장률 둔화 시 PER 압축이 동시에 발생할 수 있습니다.</p></div>
+    <div class="card"><h3>EPS Revision 상태</h3><span class="badge">상향</span><p>Q4 FY2026 EPS는 시장 예상치를 상회했고, Q1 FY2027 매출 가이던스 $78B 및 Blackwell/Rubin 코멘트가 FY2027 EPS 기대를 지지합니다. 다만 중국 매출 제한과 제품 전환 비용은 하향 리스크입니다.</p></div>
+  </div>
+  <div class="grid-2" style="margin-top:18px">
+    <div class="card"><h3>EPS Bridge: 상향 요인</h3><ul><li>Data Center GPU 출하량 증가와 AI GPU ASP 유지.</li><li>Blackwell/GB200/GB300 제품 믹스 개선.</li><li>AI networking 매출 확대와 랙 스케일 시스템 판매.</li><li>CUDA·AI Enterprise·NIM/NeMo가 고객 락인과 멀티플 프리미엄에 기여.</li><li>자사주 매입으로 분모인 주식 수 감소.</li></ul></div>
+    <div class="card"><h3>EPS Bridge: 하향 요인</h3><ul><li>HBM 가격·CoWoS 공급·전력/냉각 병목에 따른 원가 및 출하 제한.</li><li>중국 수출 규제와 중국 내 대체칩 사용 확대.</li><li>Hyperscaler 주문 조정 또는 자체 ASIC 전환.</li><li>R&D/OPEX 증가, 세율 변화, 매출총이익률 하락.</li><li>AI CAPEX ROI 논쟁으로 멀티플 압축 동반 가능성.</li></ul></div>
+  </div>
+</section>
+
+<section id="valuation" class="section container">
+  <div class="section-title"><h2>밸류에이션</h2><p>목표주가 후보는 Forward EPS × 적용 PER의 함수로 계산했습니다.</p></div>
+  <div class="grid-3">
+    <div class="card"><h3>계산 구조</h3><p><b>목표주가 = Forward EPS × 적용 PER</b></p><div class="metric-row"><span>FY2027E EPS</span><b>$8.38</b></div><div class="metric-row"><span>현재가 기준 FY1 PER</span><b>26.9x</b></div><div class="metric-row"><span>FY2028E PER</span><b>21.4x</b></div></div>
+    <div class="card"><h3>보조 지표</h3><div class="metric-row"><span>Trailing P/S</span><b>25.5x</b></div><div class="metric-row"><span>Forward P/S</span><b>14.8x</b></div><div class="metric-row"><span>FY26 FCF Yield</span><b>1.75%</b></div><div class="metric-row"><span>ROE, 평균자본 기준</span><b>101.5%</b></div></div>
+    <div class="card"><h3>PEG 해석</h3><div class="price-target">0.38</div><p>Forward PER / FY27E EPS 성장률로 단순 계산한 PEG입니다. 고성장 구간에서는 낮게 보일 수 있지만, EPS 피크 우려가 커지는 순간 성장률과 PER이 동시에 하락할 수 있습니다.</p></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>EPS × PER 민감도 매트릭스</h3><p class="small">기준 EPS $8.38에서 ±10%, ±20% 변동. 값은 목표주가 후보(USD)입니다.</p><div class="table-wrap"><table><thead><tr><th>EPS 변화</th><th>EPS</th><th>20x</th><th>25x</th><th>30x</th><th>35x</th><th>40x</th><th>45x</th></tr></thead><tbody>
+    <tr><td><b>-20%</b></td><td>$6.70</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.16), rgba(118,255,78,0.08));">$134</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.24), rgba(118,255,78,0.12));">$168</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.31), rgba(118,255,78,0.15));">$201</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.39), rgba(118,255,78,0.19));">$235</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.46), rgba(118,255,78,0.23));">$268</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.54), rgba(118,255,78,0.26));">$302</td></tr><tr><td><b>-10%</b></td><td>$7.54</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.20), rgba(118,255,78,0.10));">$151</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.28), rgba(118,255,78,0.14));">$189</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.37), rgba(118,255,78,0.18));">$226</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.45), rgba(118,255,78,0.22));">$264</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.54), rgba(118,255,78,0.26));">$302</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.62), rgba(118,255,78,0.31));">$339</td></tr><tr><td><b>Base</b></td><td>$8.38</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.24), rgba(118,255,78,0.12));">$168</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.33), rgba(118,255,78,0.16));">$210</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.43), rgba(118,255,78,0.21));">$251</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.52), rgba(118,255,78,0.25));">$293</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.61), rgba(118,255,78,0.30));">$335</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.71), rgba(118,255,78,0.35));">$377</td></tr><tr><td><b>+10%</b></td><td>$9.22</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.27), rgba(118,255,78,0.14));">$184</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.38), rgba(118,255,78,0.19));">$230</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.48), rgba(118,255,78,0.24));">$277</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.59), rgba(118,255,78,0.29));">$323</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.69), rgba(118,255,78,0.34));">$369</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.79), rgba(118,255,78,0.39));">$415</td></tr><tr><td><b>+20%</b></td><td>$10.06</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.31), rgba(118,255,78,0.15));">$201</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.43), rgba(118,255,78,0.21));">$251</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.54), rgba(118,255,78,0.26));">$302</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.65), rgba(118,255,78,0.32));">$352</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.77), rgba(118,255,78,0.37));">$402</td><td class="heat" style="background:linear-gradient(90deg, rgba(118,255,78,0.88), rgba(118,255,78,0.43));">$453</td></tr>
+  </tbody></table></div></div>
+  <div class="card" style="margin-top:18px"><h3>Peer comparison</h3><div class="table-wrap"><table><thead><tr><th>기업</th><th>티커</th><th>주가</th><th>시가총액</th><th>Trailing P/E</th><th>NVDA 산식 기준 Forward P/E</th><th>Forward P/S</th><th>AI 인프라 노출</th></tr></thead><tbody><tr><td>NVIDIA</td><td>NVDA</td><td>$225.32</td><td>$5.52T</td><td>55.2x</td><td>26.9x</td><td>14.8x</td><td>AI GPU·CUDA·networking</td></tr><tr><td>AMD</td><td>AMD</td><td>$424.10</td><td>$699.8B</td><td>139.1x</td><td>확인 필요</td><td>확인 필요</td><td>CPU/GPU, MI 시리즈</td></tr><tr><td>Broadcom</td><td>AVGO</td><td>$425.19</td><td>$2.07T</td><td>105.8x</td><td>확인 필요</td><td>확인 필요</td><td>custom ASIC·networking</td></tr><tr><td>Marvell</td><td>MRVL</td><td>$176.89</td><td>$152.8B</td><td>62.1x</td><td>확인 필요</td><td>확인 필요</td><td>custom silicon·interconnect</td></tr><tr><td>TSMC ADR</td><td>TSM</td><td>$404.35</td><td>확인 필요</td><td>확인 필요</td><td>확인 필요</td><td>확인 필요</td><td>foundry·CoWoS</td></tr></tbody></table></div><p class="small">피어의 Forward 지표는 공개 컨센서스 기준일이 상이해 임의 산식으로 보정하지 않았습니다. NVDA는 FY2027E EPS와 매출 컨센서스로 별도 계산했습니다.</p></div>
+</section>
+
+<section id="scenario" class="section container">
+  <div class="section-title"><h2>1년 후 목표주가 후보 3가지</h2><p>확률 합계 100%. 목표주가는 확정 전망이 아니라 가정 기반 산출값입니다.</p></div>
+  <div class="grid-3">
+    <div class="card scenario-card"><div class="scenario-head"><h3>Bear Case</h3><span class="badge red">25%</span></div><div class="price-target">$154</div><div class="metric-row"><span>EPS</span><b>$7.00</b></div><div class="metric-row"><span>PER</span><b>22x</b></div><div class="progress"><span style="width:25%"></span></div><p>AI CAPEX 둔화, Blackwell 전환 지연, 중국 규제 강화, 자체 ASIC 우려, EPS 컨센서스 하향.</p></div>
+    <div class="card scenario-card"><div class="scenario-head"><h3>Base Case</h3><span class="badge">50%</span></div><div class="price-target">$262.5</div><div class="metric-row"><span>EPS</span><b>$8.75</b></div><div class="metric-row"><span>PER</span><b>30x</b></div><div class="progress"><span style="width:50%"></span></div><p>AI GPU 수요 견조, Blackwell 램프업 정상화, 데이터센터 성장 지속, 마진 안정.</p></div>
+    <div class="card scenario-card"><div class="scenario-head"><h3>Bull Case</h3><span class="badge blue">25%</span></div><div class="price-target">$378</div><div class="metric-row"><span>EPS</span><b>$10.50</b></div><div class="metric-row"><span>PER</span><b>36x</b></div><div class="progress"><span style="width:25%"></span></div><p>빅테크 CAPEX 확대, GB300 초과수요, Rubin 기대, 추론 인프라 확대, CUDA 프리미엄 지속.</p></div>
+  </div>
+  <div class="grid-2" style="margin-top:18px">
+    <div class="card"><h3>확률가중 목표주가 계산</h3><p><b>$154 × 25% + $262.5 × 50% + $378 × 25% = $264.25</b></p><p>현재가 $225.32 대비 <b>17.3%</b>의 시나리오 기대수익률. 원화 환산 시 약 <b>₩395,846</b>.</p></div>
+    <div class="card"><h3>시나리오 확률 차트</h3><canvas id="scenarioChart" height="240"></canvas></div>
+  </div>
+</section>
+
+<section id="reports" class="section container">
+  <div class="section-title"><h2>글로벌 기관 리포트 비교</h2><p>공개 기사·컨센서스에 확인되는 최신 리포트만 기재하고, 세부 EPS 미공개 항목은 임의로 채우지 않았습니다.</p></div>
+  <div class="table-wrap"><table><thead><tr><th>기관</th><th>발간/보도일</th><th>투자의견</th><th>목표주가</th><th>EPS/가정</th><th>핵심 논리</th><th>Blackwell/Rubin 관점</th><th>EPS 논리·리스크</th><th>출처</th></tr></thead><tbody><tr><td><b>Bank of America</b></td><td>2026-05-13</td><td>Buy / Top Sector Pick</td><td>$320</td><td>공개 기사상 세부 EPS 미공개</td><td>AI 데이터센터 TAM 확대, 하드웨어 공급자에서 AI capacity provider로 전환</td><td>Blackwell·Rubin·랙 스케일 시스템 수요 프리미엄</td><td>고성장 기대 유지, 단 시장점유율·마진 리스크 명시</td><td><span class="source-tag">S8</span></td></tr><tr><td><b>Wells Fargo</b></td><td>2026-05-12</td><td>Overweight</td><td>$315</td><td>CY2028 EPS $14.85에 21x 적용 보도</td><td>기가와트급 AI 인프라 배치와 장기 수요</td><td>GB300/랙 스케일 전환 수혜</td><td>EPS 장기 고성장 전제, CAPEX ROI 검증 필요</td><td><span class="source-tag">S8</span></td></tr><tr><td><b>Citi</b></td><td>2026-05</td><td>Buy</td><td>$300</td><td>공개 기사상 세부 EPS 미공개</td><td>데이터센터 매출 전망 상향, GB300 램프 기대</td><td>Blackwell 후속 제품 전환을 긍정 평가</td><td>데이터센터 sales forecast 상향 논리</td><td><span class="source-tag">S9</span></td></tr><tr><td><b>Susquehanna</b></td><td>2026-05-12</td><td>Positive</td><td>$275</td><td>공개 기사상 세부 EPS 미공개</td><td>GB300 데이터센터 칩 램프와 실적 호조 기대</td><td>Blackwell/GB300 전환 정상화 가정</td><td>주문 강세가 EPS 방어 요인</td><td><span class="source-tag">S9</span></td></tr><tr><td><b>UBS</b></td><td>2026-05-14</td><td>Buy</td><td>$275</td><td>공개 기사상 세부 EPS 미공개</td><td>강한 실적·자본환원·AI 수요 지속성</td><td>Blackwell 램프 이후 실적 가시성 개선</td><td>밸류에이션 재평가 가능성</td><td><span class="source-tag">S6</span></td></tr><tr><td><b>Cantor Fitzgerald</b></td><td>2026-05-14</td><td>Overweight</td><td>$350</td><td>공개 기사상 세부 EPS 미공개</td><td>AI 인프라 수요 장기화와 NVIDIA 플랫폼 프리미엄</td><td>Rubin 기대와 네트워킹 동반 성장</td><td>프리미엄 PER 유지 논리</td><td><span class="source-tag">S6</span></td></tr><tr><td><b>Goldman Sachs</b></td><td>2026-02~05</td><td>Buy</td><td>약 $250</td><td>FY2027 revenue $382.9B, EPS $8.75, 30x P/E 보도</td><td>CY27 가시성, hyperscaler capex 지속 여부가 핵심</td><td>Blackwell/Rubin 전환으로 CY27 성장성 평가</td><td>EPS 상향은 CAPEX 지속성 확인에 좌우</td><td><span class="source-tag">S6/S9</span></td></tr><tr><td><b>TD Cowen</b></td><td>2026-05-15</td><td>Buy</td><td>$275</td><td>공개 기사상 세부 EPS 미공개</td><td>수요 강세와 제품 전환에 따른 실적 가시성</td><td>Blackwell/GB300 램프를 긍정적으로 반영</td><td>목표주가 상향</td><td><span class="source-tag">S6</span></td></tr><tr><td><b>Morgan Stanley</b></td><td>2026-02</td><td>Overweight</td><td>약 $250</td><td>공개 기사상 세부 EPS 미공개</td><td>AI 섹터 체크 강세와 데이터센터 GPU 리더십</td><td>제품 로드맵과 공급망 지위 강조</td><td>강한 매출 성장 전망</td><td><span class="source-tag">S6</span></td></tr><tr><td><b>국내 증권사</b></td><td>2026-05 확인</td><td>공개 자료 제한</td><td>확인 필요</td><td>확인 필요</td><td>미래에셋·NH·KB·삼성·한투 등 공개 웹 기준으로 세부 NVDA 리포트 전문 접근 제한</td><td>공개 자료 제한</td><td>임의 수치 미기재</td><td><span class="source-tag">확인 필요</span></td></tr></tbody></table></div>
+  <div class="grid-3" style="margin-top:18px">
+    <div class="card"><h3>보수적 구간</h3><p>공개 컨센서스 하단은 $140~$205 수준까지 존재합니다. 이는 AI CAPEX 둔화와 PER 압축, 중국 규제, 자체 ASIC 리스크를 크게 반영한 영역입니다.</p></div>
+    <div class="card"><h3>중립 구간</h3><p>평균 목표주가는 MarketBeat 약 $276.56, MarketScreener 약 $273.38로 Base Case $262.5와 근접합니다.</p></div>
+    <div class="card"><h3>낙관 구간</h3><p>Cantor $350, BofA $320, Wells Fargo $315 등은 Blackwell/GB300·Rubin·AI capacity provider 논리를 강하게 반영합니다.</p></div>
+  </div>
+</section>
+
+<section id="risks" class="section container">
+  <div class="section-title"><h2>리스크 매트릭스</h2><p>리스크는 “발생 가능성 × EPS 영향 × PER 영향”으로 봅니다.</p></div>
+  <div class="table-wrap"><table><thead><tr><th>리스크</th><th>발생 가능성</th><th>영향도</th><th>EPS 영향</th><th>대응/관찰 지표</th></tr></thead><tbody><tr><td><b>AI CAPEX 둔화</b></td><td>중</td><td>매우 큼</td><td>FY1/FY2 EPS 하향·PER 압축</td><td>MSFT/AMZN/GOOGL/META/ORCL CAPEX 가이던스</td></tr><tr><td><b>Blackwell/Rubin 전환 지연</b></td><td>중</td><td>큼</td><td>출하 지연, 마진 믹스 악화</td><td>GB200/GB300/Rubin 출하 코멘트, 리드타임</td></tr><tr><td><b>중국 수출 규제 강화</b></td><td>높음</td><td>중~큼</td><td>중국 DC compute 매출 제한</td><td>미국 BIS 규제, H20/H200 라이선스</td></tr><tr><td><b>자체 ASIC 경쟁</b></td><td>중</td><td>큼</td><td>장기 ASP·점유율 압박</td><td>TPU, Trainium, Maia, MTIA, Broadcom custom ASIC</td></tr><tr><td><b>AMD GPU 경쟁</b></td><td>중</td><td>중</td><td>가격 경쟁·고객 다변화</td><td>MI300/MI350/MI400 채택률</td></tr><tr><td><b>Hyperscaler 주문 조정</b></td><td>중</td><td>큼</td><td>재고 사이클·매출 변동성</td><td>고객 집중도, 선급금, 주문 backlog</td></tr><tr><td><b>HBM/CoWoS 병목</b></td><td>중</td><td>큼</td><td>출하량 제한 또는 원가 상승</td><td>TSMC advanced packaging, SK하이닉스/Micron/삼성 HBM 코멘트</td></tr><tr><td><b>전력·냉각·랙 병목</b></td><td>중</td><td>중~큼</td><td>랙 스케일 배치 지연</td><td>데이터센터 전력 계약, 액체냉각 도입</td></tr><tr><td><b>매출총이익률 하락</b></td><td>중</td><td>큼</td><td>EPS 레버리지 둔화</td><td>Blackwell mix, HBM 비용, 네트워킹 mix</td></tr><tr><td><b>고밸류에이션·금리</b></td><td>중</td><td>큼</td><td>PER 압축으로 목표주가 하락</td><td>10Y 금리, 성장주 멀티플, EPS revision</td></tr></tbody></table></div>
+</section>
+
+<section id="checkpoints" class="section container">
+  <div class="section-title"><h2>관찰해야 할 체크포인트</h2><p>다음 이벤트와 지표가 EPS revision과 PER 재평가를 좌우합니다.</p></div>
+  <div class="timeline">
+    <div class="timeline-item"><b>2026-05-20</b><div>다음 실적 발표 예정. Q1 FY2027 매출·EPS, Q2 가이던스, 중국 매출 제한 영향, Blackwell/GB300 출하 코멘트 확인.</div></div>
+    <div class="timeline-item"><b>매 분기</b><div>EPS 컨센서스 변화, Data Center 성장률, 매출총이익률, networking attach rate, inventory, 선급금, 고객 집중도.</div></div>
+    <div class="timeline-item"><b>제품 로드맵</b><div>GB200/GB300 램프, Rubin 생산 일정, HBM4 채택, Grace Blackwell·Vera Rubin 플랫폼 코멘트.</div></div>
+    <div class="timeline-item"><b>고객 CAPEX</b><div>Microsoft, Amazon, Google, Meta, Oracle의 AI 인프라 투자 가이던스와 ROI 코멘트.</div></div>
+    <div class="timeline-item"><b>공급망</b><div>TSMC CoWoS, SK하이닉스·Micron·삼성전자 HBM, 전력·냉각·랙 스케일 병목.</div></div>
+    <div class="timeline-item"><b>경쟁·규제</b><div>AMD, Broadcom, Marvell, 자체 ASIC, 중국 수출 규제, 금리와 성장주 밸류에이션 환경.</div></div>
+  </div>
+</section>
+
+<section id="sources" class="section container">
+  <div class="section-title"><h2>출처와 검증 메모</h2><p>확정 실적과 추정치를 구분했습니다. NVIDIA 회계연도는 1월 말 종료 기준이며, EPS/주가는 2024년 10대1 주식분할 이후 기준으로 비교했습니다.</p></div>
+  <div class="card"><h3>수치 검증 원칙</h3><ul><li>확정 실적은 NVIDIA 공식 보도자료와 FY2026 Form 10-K를 우선 사용했습니다.</li><li>Forward EPS, 목표주가, 기관 의견은 공개 컨센서스와 기사 기반이므로 업데이트에 따라 달라질 수 있습니다.</li><li>기관 리포트 전문 접근이 제한된 경우 “공개 자료 제한/확인 필요”로 표시했습니다.</li><li>원화 환산은 2026-05-18 USD/KRW 약 1,498원 기준입니다.</li></ul></div>
+  <div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>ID</th><th>출처</th><th>기준일</th><th>사용 항목</th><th>링크</th></tr></thead><tbody><tr><td><span class="source-tag">S1</span></td><td>NVIDIA FY2026 Q4 Earnings Release</td><td>2026-02-25</td><td>FY2026 매출, EPS, 가이던스, 사업부 매출</td><td><a href="https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2026" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S2</span></td><td>NVIDIA FY2026 Form 10-K / SEC</td><td>2026-02-25</td><td>재무제표, 현금흐름, 재고, 고객 집중도, 중국 수출규제, CUDA/제품 로드맵</td><td><a href="https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S3</span></td><td>Market data snapshot</td><td>2026-05-18</td><td>NVDA 현재가 225.32달러, 시가총액 약 5.52조 달러</td><td><a href="https://www.nasdaq.com/market-activity/stocks/nvda" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S4</span></td><td>Seeking Alpha Estimates</td><td>2026-05</td><td>FY2027E EPS 8.38달러, FY2027E 매출 372.99B달러 컨센서스</td><td><a href="https://seekingalpha.com/symbol/NVDA/earnings/estimates" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S5</span></td><td>MarketBeat / analyst forecast</td><td>2026-05</td><td>평균 목표주가 276.56달러, EPS 성장 전망</td><td><a href="https://www.marketbeat.com/stocks/NASDAQ/NVDA/forecast/" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S6</span></td><td>MarketScreener consensus</td><td>2026-05</td><td>61명 애널리스트 평균 목표주가 273.38달러, 최근 주요 리포트 히스토리</td><td><a href="https://www.marketscreener.com/quote/stock/NVIDIA-CORPORATION-57355629/consensus/" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S7</span></td><td>Reuters</td><td>2026-05-11</td><td>주요 빅테크 AI 인프라 지출 2026년 700B달러 초과 전망</td><td><a href="https://www.reuters.com/business/finance/alphabet-considers-first-yen-bond-sale-fund-ai-goals-2026-05-11/" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S8</span></td><td>Business Insider</td><td>2026-05-14</td><td>BofA·Wells Fargo 목표주가 상향 및 AI 데이터센터 논리</td><td><a href="https://www.businessinsider.com/nvidia-stock-price-record-high-ai-trade-jensen-huang-markets-investing-2026-5" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S9</span></td><td>Investor's Business Daily</td><td>2026-05</td><td>Susquehanna·Citi 목표주가 상향과 GB300/데이터센터 논리</td><td><a href="https://www.investors.com/news/technology/ai-stocks-nvidia-amd-broadcom-price-target-hikes/" target="_blank" rel="noopener">원문</a></td></tr><tr><td><span class="source-tag">S10</span></td><td>USD/KRW market snapshot</td><td>2026-05-18</td><td>USD/KRW 약 1,498원 기준 환산</td><td><a href="https://finance.yahoo.com/quote/KRW%3DX/" target="_blank" rel="noopener">원문</a></td></tr></tbody></table></div>
+</section>
+</main>
+
+<footer class="footer container">
+  <div class="callout"><strong>중요 고지:</strong> 본 자료는 공개 자료를 바탕으로 작성된 시나리오 기반 참고 자료이며, 특정 종목의 매수·매도·보유를 권유하지 않습니다. NVIDIA는 고성장주로 EPS 성장률과 PER이 동시에 확장 또는 압축될 수 있고, 제품 전환·고객 주문·공급망·규제에 따라 EPS 변동성이 커질 수 있습니다.<br><br><b>본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</b></div>
+</footer>
+
+<script>
+const DATA = {"annual_eps": {"labels": ["FY22", "FY23", "FY24", "FY25", "FY26"], "gaap": [0.38, 0.17, 1.19, 2.94, 4.9]}, "quarterly_eps": {"labels": ["FY25 Q1", "FY25 Q2", "FY25 Q3", "FY25 Q4", "FY26 Q1", "FY26 Q2", "FY26 Q3", "FY26 Q4"], "gaap": [0.6, 0.67, 0.78, 0.89, 0.76, 1.08, 1.3, 1.76], "nonGaap": [0.61, 0.68, 0.81, 0.89, 0.81, 1.05, 1.3, 1.62]}, "revenue_quarterly": {"labels": ["FY25 Q1", "FY25 Q2", "FY25 Q3", "FY25 Q4", "FY26 Q1", "FY26 Q2", "FY26 Q3", "FY26 Q4"], "revenue": [26.044, 30.04, 35.082, 39.331, 44.062, 46.743, 57.006, 68.127]}, "segments": {"labels": ["Data Center", "Gaming", "Pro Viz", "Automotive", "OEM & Other"], "fy24": [47.525, 10.447, 1.553, 1.091, 0.306], "fy25": [115.186, 11.35, 1.878, 1.694, 0.389], "fy26": [193.737, 16.042, 3.191, 2.349, 0.619]}, "scenario": {"labels": ["Bear", "Base", "Bull"], "targets": [154.0, 262.5, 378.0], "prob": [25, 50, 25]}, "forward_eps": {"labels": ["FY2027E", "FY2028E", "FY2029E"], "values": [8.38, 10.51, null]}};
+function fmt(v, unit=''){ return (v===null||v===undefined)?'확인 필요': unit + Number(v).toLocaleString(undefined,{maximumFractionDigits:2}); }
+function setupCanvas(canvas){ const dpr = window.devicePixelRatio || 1; const rect = canvas.getBoundingClientRect(); canvas.width = rect.width*dpr; canvas.height = rect.height*dpr; const ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr); return {ctx,w:rect.width,h:rect.height}; }
+function axis(ctx,w,h,pad){ctx.strokeStyle='rgba(118,255,78,.16)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,pad);ctx.lineTo(pad,h-pad);ctx.lineTo(w-pad,h-pad);ctx.stroke();}
+function drawBar(id, labels, series, opts={}){ const canvas=document.getElementById(id); if(!canvas) return; const {ctx,w,h}=setupCanvas(canvas); ctx.clearRect(0,0,w,h); const pad=38; axis(ctx,w,h,pad); const vals=series.flatMap(s=>s.values).filter(v=>v!==null); const max=Math.max(...vals)*1.15; const groupW=(w-pad*2)/labels.length; labels.forEach((lab,i)=>{ ctx.fillStyle='rgba(236,255,240,.72)'; ctx.font='11px system-ui'; ctx.textAlign='center'; ctx.fillText(lab, pad+groupW*i+groupW/2, h-14); }); series.forEach((s,si)=>{ const barW=Math.max(6,groupW/(series.length+1)); s.values.forEach((v,i)=>{ if(v===null) return; const x=pad+groupW*i+(si+0.5)*barW; const bh=(h-pad*2)*(v/max); const y=h-pad-bh; const grad=ctx.createLinearGradient(0,y,0,h-pad); grad.addColorStop(0,s.color||'#76ff4e'); grad.addColorStop(1,'rgba(118,255,78,.18)'); ctx.fillStyle=grad; roundRect(ctx,x,y,barW*0.82,bh,7); ctx.fill(); }); }); ctx.fillStyle='rgba(236,255,240,.75)'; ctx.font='12px system-ui'; ctx.textAlign='left'; series.forEach((s,si)=>{ctx.fillStyle=s.color; ctx.fillRect(pad+si*88,pad-22,12,12); ctx.fillStyle='rgba(236,255,240,.8)'; ctx.fillText(s.name,pad+18+si*88,pad-12)});}
+function drawLine(id, labels, series){ const canvas=document.getElementById(id); if(!canvas) return; const {ctx,w,h}=setupCanvas(canvas); ctx.clearRect(0,0,w,h); const pad=38; axis(ctx,w,h,pad); const vals=series.flatMap(s=>s.values).filter(v=>v!==null); const max=Math.max(...vals)*1.18; const min=Math.min(0,...vals); const x=(i)=>pad+(w-pad*2)*(i/(labels.length-1)); const y=(v)=>h-pad-(h-pad*2)*((v-min)/(max-min)); labels.forEach((lab,i)=>{ctx.fillStyle='rgba(236,255,240,.70)';ctx.font='11px system-ui';ctx.textAlign='center';ctx.fillText(lab,x(i),h-14);}); series.forEach((s)=>{ctx.strokeStyle=s.color;ctx.lineWidth=3;ctx.beginPath();s.values.forEach((v,i)=>{if(v===null)return; if(i===0)ctx.moveTo(x(i),y(v));else ctx.lineTo(x(i),y(v));});ctx.stroke();s.values.forEach((v,i)=>{if(v===null)return;ctx.fillStyle='#050805';ctx.strokeStyle=s.color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x(i),y(v),4,0,Math.PI*2);ctx.fill();ctx.stroke();});}); ctx.fillStyle='rgba(236,255,240,.75)'; ctx.font='12px system-ui'; series.forEach((s,si)=>{ctx.fillStyle=s.color; ctx.fillRect(pad+si*100,pad-22,12,12); ctx.fillStyle='rgba(236,255,240,.8)'; ctx.fillText(s.name,pad+18+si*100,pad-12)});}
+function drawScenario(){drawBar('scenarioChart', DATA.scenario.labels, [{name:'Target',values:DATA.scenario.targets,color:'#76ff4e'},{name:'Probability',values:DATA.scenario.prob,color:'#7dd3fc'}]);}
+function roundRect(ctx,x,y,w,h,r){const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath();}
+function renderCharts(){
+  drawBar('annualEpsChart', DATA.annual_eps.labels, [{name:'GAAP EPS',values:DATA.annual_eps.gaap,color:'#76ff4e'}]);
+  drawLine('quarterlyEpsChart', DATA.quarterly_eps.labels, [{name:'GAAP',values:DATA.quarterly_eps.gaap,color:'#76ff4e'},{name:'Non-GAAP',values:DATA.quarterly_eps.nonGaap,color:'#7dd3fc'}]);
+  drawBar('revenueChart', DATA.revenue_quarterly.labels, [{name:'Revenue $B',values:DATA.revenue_quarterly.revenue,color:'#76ff4e'}]);
+  drawBar('segmentChart', DATA.segments.labels, [{name:'FY24',values:DATA.segments.fy24,color:'#6ee7b7'},{name:'FY25',values:DATA.segments.fy25,color:'#7dd3fc'},{name:'FY26',values:DATA.segments.fy26,color:'#76ff4e'}]);
+  drawScenario();
+}
+window.addEventListener('load', renderCharts);
+window.addEventListener('resize', ()=>{clearTimeout(window.__chartTimer); window.__chartTimer=setTimeout(renderCharts,160);});
+</script>
+</body>
+</html>
