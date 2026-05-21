@@ -1,677 +1,922 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>금 투자 리서치 대시보드 | XAU/USD</title>
+  <meta name="description" content="금(Gold) XAU/USD 투자 리서치 대시보드: 매크로, 수급, 상대가치, 시나리오, 기관 전망, 투자수단 비교" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandBg: '#050814',
+            panelBg: 'rgba(18, 16, 12, 0.68)',
+            panelBorder: 'rgba(255, 255, 255, 0.09)',
+            accentGold: '#f59e0b',
+            accentAmber: '#fbbf24',
+            accentBrown: '#92400e',
+            accentBlue: '#3b82f6',
+            accentPurple: '#8b5cf6',
+            accentGreen: '#10b981',
+            accentRed: '#ef4444',
+            textPrimary: '#f8fafc',
+            textSecondary: '#a8a29e'
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Noto Sans KR', 'sans-serif'],
+          },
+          boxShadow: {
+            premium: '0 24px 70px -24px rgba(0,0,0,.75)',
+            gold: '0 0 36px rgba(245,158,11,.18)',
+            innerGlow: 'inset 0 1px 0 rgba(255,255,255,.09)'
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
-      --bg: #080603;
-      --panel: rgba(24, 18, 10, 0.78);
-      --panel-2: rgba(35, 27, 15, 0.86);
-      --line: rgba(236, 189, 94, 0.22);
-      --gold: #f3c969;
-      --gold-2: #d99b2b;
-      --gold-3: #7a5319;
-      --text: #fff8e9;
-      --muted: #b9ad97;
-      --red: #ff7a76;
-      --green: #78d99a;
-      --blue: #8bc7ff;
-      --brown: #2a1a0c;
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --gold: #f59e0b;
+      --amber: #fbbf24;
+      --bg: #050814;
+      --panel: rgba(18,16,12,.58);
+      --border: rgba(255,255,255,.09);
     }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
-      color: var(--text);
       background:
-        radial-gradient(circle at 15% 0%, rgba(246, 185, 65, .20), transparent 32%),
-        radial-gradient(circle at 85% 5%, rgba(141, 87, 17, .28), transparent 34%),
-        linear-gradient(150deg, #060402 0%, #100b06 40%, #080603 100%);
-      line-height: 1.62;
+        radial-gradient(circle at 18% 10%, rgba(245, 158, 11, 0.16), transparent 36%),
+        radial-gradient(circle at 84% 20%, rgba(120, 53, 15, 0.32), transparent 38%),
+        radial-gradient(circle at 55% 82%, rgba(59, 130, 246, 0.08), transparent 42%),
+        #050814;
+      color: #f8fafc;
+      -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--gold); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .wrap { width: min(1260px, calc(100% - 36px)); margin: 0 auto; }
-    .hero {
-      position: relative;
-      overflow: hidden;
-      padding: 56px 0 30px;
-      border-bottom: 1px solid var(--line);
+    .glass-panel {
+      background: rgba(18, 16, 12, 0.52);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
     }
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: -40% -10% auto auto;
-      width: 700px;
-      height: 700px;
-      background: radial-gradient(circle, rgba(243,201,105,.20), transparent 62%);
-      pointer-events: none;
+    .glass-panel-hover {
+      transition: all .25s cubic-bezier(.16,1,.3,1);
     }
-    .hero-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(310px, .9fr);
-      gap: 26px;
-      align-items: stretch;
-      position: relative;
-      z-index: 1;
+    .glass-panel-hover:hover {
+      transform: translateY(-3px);
+      border-color: rgba(245,158,11,.42);
+      box-shadow: 0 18px 45px rgba(0,0,0,.45), 0 0 28px rgba(245,158,11,.10);
+      background: rgba(22, 18, 13, 0.72);
     }
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255,255,255,.035);
-      color: var(--gold);
-      font-size: 13px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
+    .gold-gradient {
+      background: linear-gradient(135deg, #fff7ed 0%, #fbbf24 42%, #f59e0b 72%, #fef3c7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
-    h1 {
-      margin: 20px 0 12px;
-      font-size: clamp(38px, 6vw, 72px);
-      line-height: 1.02;
-      letter-spacing: -0.06em;
+    .section-pad { padding-top: 5.5rem; margin-top: -4.5rem; }
+    .table-wrap { overflow-x: auto; }
+    .table-wrap table { min-width: 920px; }
+    .soft-grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 42px 42px;
     }
-    .hero p.lead {
-      max-width: 760px;
-      color: var(--muted);
-      font-size: 18px;
-      margin: 0 0 24px;
+    .mini-bar {
+      height: .45rem; border-radius: 999px; background: rgba(255,255,255,.09); overflow: hidden;
     }
-    .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-    .pill {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: #fff1c8;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-    }
-    .hero-card {
-      padding: 22px;
-      border: 1px solid var(--line);
-      background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02)), var(--panel);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-    }
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-top: 26px;
-    }
-    .kpi {
-      padding: 17px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      border-radius: 22px;
-      min-height: 122px;
-    }
-    .kpi .label { color: var(--muted); font-size: 12px; letter-spacing: .02em; }
-    .kpi .value { font-size: clamp(22px, 2.7vw, 33px); font-weight: 800; margin: 8px 0 4px; letter-spacing: -0.03em; }
-    .kpi .sub { color: #d6c7a5; font-size: 12px; }
-    .section { padding: 34px 0; }
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      align-items: flex-end;
-      margin-bottom: 18px;
-    }
-    h2 { font-size: clamp(26px, 3.5vw, 42px); margin: 0; letter-spacing: -0.04em; }
-    .section-title p { max-width: 640px; margin: 0; color: var(--muted); font-size: 14px; }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .card {
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
-      border-radius: 26px;
-      padding: 20px;
-      box-shadow: 0 12px 42px rgba(0,0,0,.24);
-    }
-    .card h3 { margin: 0 0 10px; font-size: 20px; letter-spacing: -0.02em; }
-    .card p { color: var(--muted); margin: 0 0 12px; }
-    .callout {
-      border-left: 4px solid var(--gold);
-      background: rgba(243, 201, 105, .08);
-      padding: 15px 18px;
-      border-radius: 18px;
-      color: #fff0c6;
-    }
-    .list { display: grid; gap: 9px; padding: 0; margin: 0; list-style: none; }
-    .list li { display: flex; gap: 10px; color: #ddcfb1; }
-    .dot { flex: 0 0 9px; height: 9px; border-radius: 50%; background: var(--gold); margin-top: .55em; box-shadow: 0 0 18px rgba(243,201,105,.5); }
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border-radius: 999px;
-      padding: 5px 10px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid rgba(255,255,255,.1);
-      margin-bottom: 10px;
-    }
-    .positive { color: var(--green); background: rgba(120,217,154,.09); }
-    .neutral { color: var(--gold); background: rgba(243,201,105,.09); }
-    .negative { color: var(--red); background: rgba(255,122,118,.09); }
-    .mini { color: var(--muted); font-size: 12px; margin-top: 9px; }
-    .metric-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
-    .metric-row:last-child { border-bottom: 0; }
-    .metric-row span:first-child { color: var(--muted); }
-    .metric-row strong { color: var(--text); }
-    .chart-box { height: 300px; border-radius: 22px; border: 1px solid var(--line); background: rgba(0,0,0,.18); padding: 14px; }
-    canvas { width: 100%; height: 100%; display: block; }
-    .scenario-card { position: relative; overflow: hidden; }
-    .scenario-card::after {
-      content: "";
-      position: absolute;
-      right: -60px; top: -70px;
-      width: 180px; height: 180px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(243,201,105,.20), transparent 68%);
-    }
-    .scenario-card .price { font-size: 34px; font-weight: 900; letter-spacing: -0.04em; margin: 12px 0 2px; }
-    .prob-bar { height: 12px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; margin: 13px 0; }
-    .prob-fill { height: 100%; background: linear-gradient(90deg, var(--gold-3), var(--gold)); border-radius: 999px; }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 24px; background: rgba(0,0,0,.18); }
-    table { width: 100%; border-collapse: collapse; min-width: 880px; }
-    th, td { padding: 13px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(255,255,255,.07); }
-    th { color: var(--gold); font-size: 13px; font-weight: 800; background: rgba(243,201,105,.06); }
-    td { color: #dfd1b3; font-size: 13px; }
-    tr:hover td { background: rgba(255,255,255,.025); }
-    .tag { display: inline-block; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: #ffe4a6; background: rgba(243,201,105,.07); font-size: 11px; margin: 2px; }
-    .formula {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      color: #ffe6a6;
-      background: rgba(243,201,105,.08);
-      border: 1px solid var(--line);
-      padding: 14px;
-      border-radius: 18px;
-      overflow-x: auto;
-      font-size: 13px;
-    }
-    .heat {
-      display: inline-flex;
-      min-width: 66px;
-      justify-content: center;
-      padding: 5px 8px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 12px;
-    }
-    .high { background: rgba(255,122,118,.12); color: var(--red); }
-    .med { background: rgba(243,201,105,.12); color: var(--gold); }
-    .low { background: rgba(120,217,154,.10); color: var(--green); }
-    .source-list { columns: 2; column-gap: 28px; font-size: 12px; color: var(--muted); }
-    .source-list li { break-inside: avoid; margin-bottom: 8px; }
-    .footer {
-      padding: 28px 0 50px;
-      color: #d5c5a1;
-      border-top: 1px solid var(--line);
-      margin-top: 24px;
-    }
-    .sticky-nav {
-      position: sticky; top: 0; z-index: 10;
-      backdrop-filter: blur(14px);
-      background: rgba(8,6,3,.78);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav-inner { display: flex; overflow-x: auto; gap: 8px; padding: 10px 0; }
-    .nav-inner a { flex: 0 0 auto; font-size: 12px; color: #e8d7b0; padding: 7px 10px; border: 1px solid rgba(243,201,105,.15); border-radius: 999px; }
-    @media (max-width: 980px) {
-      .hero-grid, .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-      .section-title { display: block; }
-      .section-title p { margin-top: 8px; }
-      .source-list { columns: 1; }
-    }
-    @media (max-width: 560px) {
-      .wrap { width: min(100% - 22px, 1260px); }
-      .hero { padding-top: 32px; }
-      .kpi-grid { grid-template-columns: 1fr; }
-      .card, .hero-card { border-radius: 20px; padding: 16px; }
-      table { min-width: 760px; }
+    .mini-bar span {
+      display:block; height:100%; border-radius:999px; background: linear-gradient(90deg,#fbbf24,#f97316);
     }
     @media print {
-      .sticky-nav { display: none; }
-      body { background: #080603; }
-      .card, .hero-card, .kpi { break-inside: avoid; }
+      body { background: white !important; color: black !important; }
+      .no-print { display: none !important; }
+      .glass-panel { background: white !important; border: 1px solid #e2e8f0 !important; color: black !important; box-shadow: none !important; }
+      .gold-gradient { color: #92400e !important; background: none !important; }
+      a { color: #0f172a !important; }
     }
   </style>
 </head>
-<body>
-  <header class="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <span class="eyebrow">Global Macro · Precious Metals · XAU/USD</span>
-        <h1>금 투자 리서치 대시보드</h1>
-        <p class="lead">국제 금 현물 가격(XAU/USD)을 중심으로 거시 변수, 수급, 상대가치, 1년 후 가격 후보, 국내외 투자수단과 기관 전망을 한 화면에서 비교하는 단일 HTML 리서치 대시보드입니다.</p>
-        <div class="meta-row">
-          <span class="pill">데이터 기준일: 2026-05-12</span>
-          <span class="pill">기준 자산: XAU/USD</span>
-          <span class="pill">1트로이온스 = 31.1035g</span>
-          <span class="pill">투자 참고용 · 비권유 자료</span>
-        </div>
+<body class="min-h-screen selection:bg-amber-400/30 selection:text-amber-50">
+  <nav class="no-print sticky top-0 z-50 border-b border-white/10 bg-slate-950/75 backdrop-blur-xl">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+      <a href="#summary" class="flex items-center gap-2 font-extrabold tracking-tight text-slate-100">
+        <span class="grid h-8 w-8 place-items-center rounded-xl bg-amber-400/15 text-amber-300 ring-1 ring-amber-300/20"><i data-lucide="coins" class="h-4 w-4"></i></span>
+        Gold Dashboard
+      </a>
+      <div class="flex gap-3 overflow-x-auto whitespace-nowrap text-sm text-slate-300">
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#summary">요약</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#macro">매크로</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#sectors">업종</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#valuation">밸류에이션</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#scenario">시나리오</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#institutions">기관 전망</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#flows">수급</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#risks">리스크</a>
+        <a class="rounded-full px-3 py-1.5 hover:bg-white/10 hover:text-white" href="#sources">출처</a>
       </div>
-      <div class="hero-card">
-        <div class="metric-row"><span>핵심 결론</span><strong>고점 부담은 있으나 구조적 수요가 하방을 지지</strong></div>
-        <div class="metric-row"><span>주요 상승 동인</span><strong>중앙은행·ETF·지정학·실질금리 하락 기대</strong></div>
-        <div class="metric-row"><span>주요 하락 동인</span><strong>실질금리 재상승·달러 강세·위험 프리미엄 축소</strong></div>
-        <div class="metric-row"><span>금의 성격</span><strong>배당·이자·EPS 없는 비수익성 실물자산</strong></div>
-      </div>
-    </div>
-    <div class="wrap kpi-grid">
-      <div class="kpi"><div class="label">현재 금 가격</div><div class="value">$4,760.16</div><div class="sub">XAU/USD, USD/t oz · Trading Economics 2026-05-12</div></div>
-      <div class="kpi"><div class="label">원화 환산 금 가격</div><div class="value">₩226,463/g</div><div class="sub">USD/KRW 1,479.74 적용</div></div>
-      <div class="kpi"><div class="label">미 10년 실질금리</div><div class="value">1.93%</div><div class="sub">FRED DFII10, 2026-05-08</div></div>
-      <div class="kpi"><div class="label">달러인덱스 DXY</div><div class="value">97.99</div><div class="sub">Investing.com, 2026-05-12</div></div>
-      <div class="kpi"><div class="label">글로벌 금 ETF 보유량</div><div class="value">4,137t</div><div class="sub">WGC, 2026년 4월 말</div></div>
-      <div class="kpi"><div class="label">중앙은행 순매입</div><div class="value">244t</div><div class="sub">WGC Q1 2026</div></div>
-      <div class="kpi"><div class="label">확률가중 1년 후보</div><div class="value">$5,175</div><div class="sub">Bear 25% · Base 50% · Bull 25%</div></div>
-      <div class="kpi"><div class="label">현재가 대비 기대 변화</div><div class="value">+8.7%</div><div class="sub">달러 기준, 시나리오 가정</div></div>
-    </div>
-  </header>
-
-  <nav class="sticky-nav">
-    <div class="wrap nav-inner">
-      <a href="#summary">요약</a><a href="#market">시장 개요</a><a href="#macro">매크로</a><a href="#supply">수급</a><a href="#relative">상대가치</a><a href="#scenario">시나리오</a><a href="#institutions">기관 전망</a><a href="#vehicles">투자수단</a><a href="#risk">리스크</a><a href="#sources">출처</a>
     </div>
   </nav>
 
-  <main>
-    <section id="summary" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>투자 요약</h2>
-          <p>금은 기업 이익이나 배당으로 평가하기보다 실질금리, 달러, 중앙은행 매입, ETF 자금흐름, 지정학 프리미엄, 생산비용 대비 프리미엄을 함께 봐야 합니다.</p>
+  <header id="summary" class="section-pad soft-grid">
+    <div class="mx-auto max-w-7xl px-4 pb-14 pt-12 md:pt-20">
+      <div class="grid gap-8 lg:grid-cols-[1.3fr_.7fr] lg:items-center">
+        <div>
+          <div class="mb-5 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-amber-100/90">
+            <span class="rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1">Commodity · Precious Metals</span>
+            <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1">데이터 기준일: 2026-05-21</span>
+            <span class="rounded-full border border-red-300/25 bg-red-500/10 px-3 py-1 text-red-100">투자 참고용</span>
+          </div>
+          <h1 class="max-w-4xl text-4xl font-black leading-tight tracking-tight md:text-6xl">
+            금 투자 리서치 <span class="gold-gradient">대시보드</span>
+          </h1>
+          <p class="mt-5 max-w-3xl text-lg leading-8 text-stone-300">
+            XAU/USD를 중심으로 미국 실질금리, 달러, 중앙은행 매입, ETF 흐름, 지정학 리스크를 결합해
+            1년 후 금 가격 후보를 시나리오 기반으로 정리했습니다. 금은 배당·이자·EPS가 없는 자산이므로
+            주식형 PER 대신 <b class="text-amber-200">실질금리·달러·수급·위험 프리미엄</b> 프레임워크로 해석합니다.
+          </p>
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a href="#scenario" class="rounded-2xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-gold hover:bg-amber-300">1년 시나리오 보기</a>
+            <a href="#vehicles" class="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-slate-100 hover:bg-white/10">투자수단 비교</a>
+            <a href="#sources" class="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-slate-100 hover:bg-white/10">출처·검증</a>
+          </div>
         </div>
-        <div class="grid-3">
-          <div class="card">
-            <h3>핵심 투자 포인트</h3>
-            <ul class="list">
-              <li><span class="dot"></span><span>중앙은행 순매입은 Q1 2026에도 244t으로 높은 수준을 유지했습니다.</span></li>
-              <li><span class="dot"></span><span>4월 글로벌 금 ETF 보유량은 45t 증가해 4,137t으로 반등했습니다.</span></li>
-              <li><span class="dot"></span><span>미국 실질금리가 향후 완만히 낮아질 경우 무이자 자산인 금의 기회비용 부담이 줄어듭니다.</span></li>
-              <li><span class="dot"></span><span>달러 신뢰, 재정적자, 지정학 불확실성은 준비자산으로서 금의 구조적 수요를 자극합니다.</span></li>
-            </ul>
+
+        <div class="glass-panel rounded-[2rem] p-6 shadow-premium">
+          <div class="mb-5 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[.25em] text-amber-300/80">Market Snapshot</p>
+              <h2 class="mt-1 text-2xl font-black">핵심 지표</h2>
+            </div>
+            <i data-lucide="bar-chart-3" class="h-7 w-7 text-amber-300"></i>
           </div>
-          <div class="card">
-            <h3>핵심 리스크</h3>
-            <ul class="list">
-              <li><span class="dot"></span><span>실질금리와 명목금리 재상승은 금 가격에 직접적인 하방 압력입니다.</span></li>
-              <li><span class="dot"></span><span>달러 강세가 지속되면 XAU/USD 기준 가격은 압박받기 쉽습니다.</span></li>
-              <li><span class="dot"></span><span>지정학 리스크 완화와 Fed 독립성 우려 해소는 위험 프리미엄 축소 요인입니다.</span></li>
-              <li><span class="dot"></span><span>현 가격은 대형 금광기업 AISC 대비 큰 프리미엄이어서 차익실현 변동성이 커질 수 있습니다.</span></li>
-            </ul>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-white/[.045] p-4">
+              <p class="text-xs text-stone-400">XAU/USD 현물</p>
+              <p class="mt-1 text-2xl font-black text-amber-200">$4,537/oz</p>
+              <p class="mt-1 text-xs text-stone-500">Reuters, 2026-05-21 intraday</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[.045] p-4">
+              <p class="text-xs text-stone-400">원화 환산</p>
+              <p class="mt-1 text-2xl font-black text-amber-200">₩218.8k/g</p>
+              <p class="mt-1 text-xs text-stone-500">USD/KRW 1,500 가정</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[.045] p-4">
+              <p class="text-xs text-stone-400">10년 실질금리</p>
+              <p class="mt-1 text-2xl font-black">2.18%</p>
+              <p class="mt-1 text-xs text-stone-500">FRED DFII10, 2026-05-19</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[.045] p-4">
+              <p class="text-xs text-stone-400">확률가중 1년 후보</p>
+              <p class="mt-1 text-2xl font-black text-emerald-300">$5,075/oz</p>
+              <p class="mt-1 text-xs text-stone-500">현재가 대비 +11.9%</p>
+            </div>
           </div>
-          <div class="card">
-            <h3>한 줄 결론</h3>
-            <p class="callout">금은 이미 높은 가격대에 있어 단기 변동성은 커졌지만, 중앙은행·ETF·지정학·재정 리스크 수요가 유지되는 한 “조정 시 하방 지지, 완화 전환 시 재상승”의 비대칭 구조가 남아 있습니다.</p>
-            <div class="formula">현재가 대비 기대수익률 = 5,175 / 4,760.16 - 1 = +8.7%</div>
+          <div class="mt-5 rounded-2xl border border-amber-300/15 bg-amber-300/10 p-4 text-sm leading-6 text-amber-50/90">
+            <b>한 줄 결론:</b> 실질금리와 달러는 단기 부담이나, 중앙은행·투자 수요가 가격 하단을 지지하는 구조입니다. 단, 유가발 인플레이션과 고금리 재상승 국면에서는 변동성이 커질 수 있습니다.
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-4 md:grid-cols-4">
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <p class="text-sm text-stone-400">Fed Target Range</p>
+          <p class="mt-2 text-3xl font-black">3.50–3.75%</p>
+          <p class="mt-2 text-xs text-stone-500">상단 3.75%, 2026-05-20</p>
+        </div>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <p class="text-sm text-stone-400">DXY</p>
+          <p class="mt-2 text-3xl font-black">99.17</p>
+          <p class="mt-2 text-xs text-stone-500">달러 강세는 금에 부담</p>
+        </div>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <p class="text-sm text-stone-400">WGC Q1 ETF</p>
+          <p class="mt-2 text-3xl font-black text-emerald-300">+62t</p>
+          <p class="mt-2 text-xs text-stone-500">금 ETF 순유입</p>
+        </div>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <p class="text-sm text-stone-400">WGC Q1 중앙은행</p>
+          <p class="mt-2 text-3xl font-black text-amber-200">244t</p>
+          <p class="mt-2 text-xs text-stone-500">순매입, +3% y/y</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 pb-20">
+    <section class="mt-6 grid gap-6 lg:grid-cols-[.85fr_1.15fr]">
+      <div class="glass-panel rounded-[2rem] p-6">
+        <div class="flex items-start gap-3">
+          <span class="rounded-2xl bg-emerald-400/10 p-3 text-emerald-300"><i data-lucide="check-circle-2" class="h-5 w-5"></i></span>
+          <div>
+            <h2 class="text-xl font-black">핵심 투자 포인트</h2>
+            <p class="mt-1 text-sm text-stone-400">상승 요인과 방어적 역할</p>
+          </div>
+        </div>
+        <ul class="mt-5 space-y-3 text-sm leading-6 text-stone-300">
+          <li>• 중앙은행의 전략적 준비자산 매입이 가격 하단을 지지합니다.</li>
+          <li>• 지정학·재정 불확실성이 커질수록 금의 보험성 수요가 살아납니다.</li>
+          <li>• ETF·바/코인 수요가 회복될 경우 가격 민감도가 커집니다.</li>
+          <li>• 주식·채권과 다른 동인으로 움직여 포트폴리오 분산 기능이 있습니다.</li>
+        </ul>
+      </div>
+      <div class="glass-panel rounded-[2rem] p-6">
+        <div class="flex items-start gap-3">
+          <span class="rounded-2xl bg-red-400/10 p-3 text-red-300"><i data-lucide="alert-triangle" class="h-5 w-5"></i></span>
+          <div>
+            <h2 class="text-xl font-black">핵심 리스크</h2>
+            <p class="mt-1 text-sm text-stone-400">금은 현금흐름이 없는 자산입니다</p>
+          </div>
+        </div>
+        <ul class="mt-5 space-y-3 text-sm leading-6 text-stone-300">
+          <li>• 실질금리 상승은 무이자 자산인 금의 기회비용을 높입니다.</li>
+          <li>• 달러 강세는 비달러 투자자의 금 수요를 약화시킬 수 있습니다.</li>
+          <li>• 급등 이후 ETF·선물 포지션이 둔화되면 단기 조정이 깊어질 수 있습니다.</li>
+          <li>• 원화 투자자는 금 가격뿐 아니라 USD/KRW 환율 변동을 함께 부담합니다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="macro" class="section-pad">
+      <div class="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">Macro Dashboard</p>
+          <h2 class="mt-2 text-3xl font-black">금 가격을 움직이는 핵심 변수</h2>
+          <p class="mt-2 max-w-3xl text-stone-400">금 가격은 단일 변수보다 실질금리, 달러, 중앙은행, ETF 수요, 지정학 리스크의 조합으로 움직입니다.</p>
+        </div>
+      </div>
+      <div class="grid gap-4 md:grid-cols-3">
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-black">미국 10년 실질금리</h3>
+              <span class="rounded-full border border-red-300/25 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-200">부정</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">FRED 최신치 2.18%. 실질금리 상승은 금 보유의 기회비용을 높여 단기 부담입니다.</p>
+            <div class="mt-4 mini-bar"><span style="width:35%"></span></div>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-black">달러인덱스 DXY</h3>
+              <span class="rounded-full border border-red-300/25 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-200">부정</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">99선. 달러 강세는 비달러권 금 수요를 압박하고 XAU/USD에 역풍이 됩니다.</p>
+            <div class="mt-4 mini-bar"><span style="width:38%"></span></div>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-black">인플레이션 기대</h3>
+              <span class="rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-100">중립+</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">10년 BEI 2.44%. 에너지발 물가가 금 헤지 수요와 금리 부담을 동시에 만듭니다.</p>
+            <div class="mt-4 mini-bar"><span style="width:58%"></span></div>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-black">중앙은행 매입</h3>
+              <span class="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-200">긍정</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">WGC Q1 순매입 244t. 준비자산 다변화 수요는 구조적 지지 요인입니다.</p>
+            <div class="mt-4 mini-bar"><span style="width:82%"></span></div>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-black">ETF 자금흐름</h3>
+              <span class="rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-100">중립+</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">Q1 금 ETF +62t 순유입이나 미국 펀드 유출과 투자자 관심 둔화는 단기 체크포인트입니다.</p>
+            <div class="mt-4 mini-bar"><span style="width:62%"></span></div>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-black">지정학 리스크</h3>
+              <span class="rounded-full border border-purple-300/25 bg-purple-400/10 px-3 py-1 text-xs font-bold text-purple-200">긍정/변동성</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">중동 리스크는 안전자산 수요를 자극하지만 유가·금리 급등으로 역효과가 날 수도 있습니다.</p>
+            <div class="mt-4 mini-bar"><span style="width:72%"></span></div>
+          </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">매크로 민감도 레이더</h3>
+          <p class="mt-1 text-sm text-stone-400">높을수록 금 가격에 우호적인 상태로 해석</p>
+          <div class="mt-4 h-[320px]"><canvas id="macroRadar"></canvas></div>
+        </div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">시장 스냅샷 테이블</h3>
+          <p class="mt-1 text-sm text-stone-400">중요 수치는 기준일이 서로 다릅니다.</p>
+          <div class="table-wrap mt-4">
+            <table class="w-full text-left text-sm">
+              <thead class="text-xs uppercase tracking-wide text-stone-500">
+                <tr class="border-b border-white/10">
+                  <th class="py-3 pr-4">지표</th><th class="py-3 pr-4">값</th><th class="py-3 pr-4">기준일</th><th class="py-3 pr-4">금 영향</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/10 text-stone-300">
+                <tr><td class="py-3 pr-4 font-bold text-white">XAU/USD</td><td class="py-3 pr-4">$4,536.72/oz</td><td class="py-3 pr-4">2026-05-21</td><td class="py-3 pr-4">높은 가격대, 변동성 확대</td></tr>
+                <tr><td class="py-3 pr-4 font-bold text-white">USD/KRW</td><td class="py-3 pr-4">약 1,500원</td><td class="py-3 pr-4">2026-05-21</td><td class="py-3 pr-4">원화 금 가격 민감도 확대</td></tr>
+                <tr><td class="py-3 pr-4 font-bold text-white">10Y TIPS 실질금리</td><td class="py-3 pr-4">2.18%</td><td class="py-3 pr-4">2026-05-19</td><td class="py-3 pr-4">상승 시 부정적</td></tr>
+                <tr><td class="py-3 pr-4 font-bold text-white">10Y 명목금리</td><td class="py-3 pr-4">4.6%대</td><td class="py-3 pr-4">2026-05-21</td><td class="py-3 pr-4">고금리 부담</td></tr>
+                <tr><td class="py-3 pr-4 font-bold text-white">DXY</td><td class="py-3 pr-4">99.17</td><td class="py-3 pr-4">2026-05-21</td><td class="py-3 pr-4">강세 시 부정적</td></tr>
+                <tr><td class="py-3 pr-4 font-bold text-white">10Y BEI</td><td class="py-3 pr-4">2.44%</td><td class="py-3 pr-4">2026-05-20</td><td class="py-3 pr-4">완만하면 중립, 급등하면 변동성</td></tr>
+                <tr><td class="py-3 pr-4 font-bold text-white">GLD AUM</td><td class="py-3 pr-4">$149.4bn</td><td class="py-3 pr-4">2026-05-20</td><td class="py-3 pr-4">ETF 수요 지표</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="market" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>금 시장 개요</h2>
-          <p>금은 현금흐름이 없지만, 신용위험이 낮고 세계적으로 통용되는 준비자산입니다. 따라서 주식형 밸류에이션이 아니라 거시·수급·심리 프리미엄의 함수로 보는 것이 적절합니다.</p>
+    <section id="sectors" class="section-pad">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">Gold Market Structure</p>
+        <h2 class="mt-2 text-3xl font-black">금 시장 개요와 수요·공급 구조</h2>
+        <p class="mt-2 max-w-3xl text-stone-400">업종 섹션은 금의 용도별 수요와 공급 원천을 기준으로 구성했습니다.</p>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <span class="text-xs font-bold text-amber-300">Reserve Asset</span>
+          <h3 class="mt-2 text-lg font-black">중앙은행 준비자산</h3>
+          <p class="mt-3 text-sm leading-6 text-stone-400">신용위험이 없는 실물 준비자산으로, 달러 의존도 완화와 외환보유액 다변화에 쓰입니다.</p>
         </div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>투자 자산으로서의 특징</h3>
-            <ul class="list">
-              <li><span class="dot"></span><span><strong>안전자산:</strong> 금융위기·정치 리스크·통화 신뢰 훼손 시 수요 증가.</span></li>
-              <li><span class="dot"></span><span><strong>인플레이션 헤지:</strong> 장기 구매력 보전 기능이 있으나 단기에는 실질금리와 달러가 더 강하게 작용.</span></li>
-              <li><span class="dot"></span><span><strong>달러 대체자산:</strong> 달러 약세 또는 준비자산 다변화 국면에서 선호.</span></li>
-              <li><span class="dot"></span><span><strong>준비자산:</strong> 중앙은행 보유자산으로 신용위험과 제재 리스크를 줄이는 수단.</span></li>
-            </ul>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <span class="text-xs font-bold text-amber-300">Insurance Asset</span>
+          <h3 class="mt-2 text-lg font-black">위험 헤지·안전자산</h3>
+          <p class="mt-3 text-sm leading-6 text-stone-400">전쟁, 금융 불안, 재정 리스크 확대 때 보험성 프리미엄을 받을 수 있습니다.</p>
+        </div>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <span class="text-xs font-bold text-amber-300">No Yield</span>
+          <h3 class="mt-2 text-lg font-black">이자·배당 없는 자산</h3>
+          <p class="mt-3 text-sm leading-6 text-stone-400">현금흐름이 없어 실질금리 상승기에는 상대 매력이 낮아질 수 있습니다.</p>
+        </div>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <span class="text-xs font-bold text-amber-300">Physical Demand</span>
+          <h3 class="mt-2 text-lg font-black">중국·인도 실물 수요</h3>
+          <p class="mt-3 text-sm leading-6 text-stone-400">보석·바·코인 수요는 가격 민감도가 크며, 고가 구간에서는 거래량이 둔화되기 쉽습니다.</p>
+        </div>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <span class="text-xs font-bold text-amber-300">Financial Demand</span>
+          <h3 class="mt-2 text-lg font-black">ETF·선물 투자 수요</h3>
+          <p class="mt-3 text-sm leading-6 text-stone-400">자금 유입이 가격 상승을 증폭하지만, 유출 전환 시 조정도 빠르게 나타납니다.</p>
+        </div>
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+          <span class="text-xs font-bold text-amber-300">Supply</span>
+          <h3 class="mt-2 text-lg font-black">광산 생산·재활용</h3>
+          <p class="mt-3 text-sm leading-6 text-stone-400">고가에서는 재활용 공급이 늘어 상단을 제한할 수 있으나 광산 공급은 단기 탄력성이 낮습니다.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">Q1 2026 수요 구성 요약</h3>
+          <p class="mt-1 text-sm text-stone-400">WGC 공개 수치 기반. 일부 세부 항목은 근사·시각화 목적입니다.</p>
+          <div class="mt-4 h-[320px]"><canvas id="demandDoughnut"></canvas></div>
+        </div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">상승 요인 vs 하락 요인</h3>
+          <div class="mt-5 grid gap-4 md:grid-cols-2">
+            <div class="rounded-3xl border border-emerald-300/20 bg-emerald-400/10 p-5">
+              <p class="font-black text-emerald-200">상승 요인</p>
+              <ul class="mt-3 space-y-2 text-sm text-stone-300">
+                <li>• 실질금리 하락</li>
+                <li>• 달러 약세</li>
+                <li>• 중앙은행 매입 확대</li>
+                <li>• ETF·바/코인 유입</li>
+                <li>• 지정학·재정 리스크 확대</li>
+              </ul>
+            </div>
+            <div class="rounded-3xl border border-red-300/20 bg-red-400/10 p-5">
+              <p class="font-black text-red-200">하락 요인</p>
+              <ul class="mt-3 space-y-2 text-sm text-stone-300">
+                <li>• 실질금리 재상승</li>
+                <li>• 달러 강세</li>
+                <li>• ETF·선물 포지션 이탈</li>
+                <li>• 지정학 리스크 완화</li>
+                <li>• 고가에 따른 실물 수요 둔화</li>
+              </ul>
+            </div>
           </div>
-          <div class="card">
-            <h3>가격 결정 프레임워크</h3>
-            <div class="metric-row"><span>실질금리</span><strong>하락 = 금에 긍정, 상승 = 부정</strong></div>
-            <div class="metric-row"><span>달러인덱스</span><strong>대체로 역상관</strong></div>
-            <div class="metric-row"><span>중앙은행 매입</span><strong>가격 비탄력적 구조 수요</strong></div>
-            <div class="metric-row"><span>ETF 흐름</span><strong>금융투자자 심리와 유동성의 바로미터</strong></div>
-            <div class="metric-row"><span>생산비용</span><strong>AISC 대비 프리미엄은 하방 완충이 아닌 과열 판단 보조지표</strong></div>
+          <div class="mt-4 rounded-3xl border border-white/10 bg-white/[.04] p-5">
+            <p class="text-sm leading-6 text-stone-300">
+              WGC는 Q1 2026 총수요가 1,231t으로 전년 대비 2% 증가했고, ETF는 +62t, 중앙은행은 244t 순매입을 기록했다고 밝혔습니다. 반면 보석 수요 물량은 고가 영향으로 23% 감소했습니다.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="macro" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>매크로 대시보드</h2>
-          <p>상승·하락 요인을 분리해 보면, 구조적 수요는 긍정적이지만 단기 금리·달러·에너지발 인플레이션은 혼재되어 있습니다.</p>
-        </div>
-        <div class="grid-3">
-          <div class="card"><span class="status neutral">중립 · 실질금리</span><h3>10년 TIPS 1.93%</h3><p>실질금리는 아직 높은 편입니다. 향후 Fed 완화가 현실화되면 긍정적이나, 에너지발 인플레이션으로 금리인하가 지연되면 부담입니다.</p><div class="mini">관찰: FRED DFII10, CPI/PCE, Fed 커뮤니케이션</div></div>
-          <div class="card"><span class="status negative">부정 · 달러</span><h3>DXY 97.99</h3><p>달러가 반등하거나 안전통화 역할을 강화하면 XAU/USD에는 역풍입니다. 다만 장기적 탈달러·준비자산 다변화는 금에 우호적입니다.</p><div class="mini">관찰: DXY, EUR/USD, USD/KRW</div></div>
-          <div class="card"><span class="status neutral">중립 · 인플레이션 기대</span><h3>유가 리스크가 변수</h3><p>인플레이션 자체는 금의 헤지 수요를 만들지만, 유가 충격이 실질금리와 달러를 끌어올리면 단기적으로 금에는 오히려 부담이 될 수 있습니다.</p><div class="mini">관찰: WTI, Brent, 10년 BEI</div></div>
-          <div class="card"><span class="status positive">긍정 · 중앙은행</span><h3>Q1 순매입 244t</h3><p>준비자산 다변화와 제재 리스크 회피 수요가 이어지며 가격 비탄력적 수요층이 하방을 지지합니다.</p><div class="mini">관찰: WGC 월간·분기 데이터</div></div>
-          <div class="card"><span class="status positive">긍정 · ETF 흐름</span><h3>4월 +45t, 총 4,137t</h3><p>ETF 흐름이 플러스로 전환된 것은 금융투자자 수요가 살아나고 있음을 시사합니다. 단, 가격 급락 시 유동성 확보성 매도가 나올 수 있습니다.</p><div class="mini">관찰: GLD/IAU 보유량, 글로벌 ETF 플로우</div></div>
-          <div class="card"><span class="status neutral">중립 · 지정학</span><h3>리스크 프리미엄 지속</h3><p>지정학 긴장은 안전자산 수요를 만들지만, 에너지 가격 상승과 금리인하 지연을 통해 금에 역풍을 만들 수도 있습니다.</p><div class="mini">관찰: 중동, 미중, 우크라이나, 해상 물류</div></div>
-        </div>
+    <section id="valuation" class="section-pad">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">Relative Value</p>
+        <h2 class="mt-2 text-3xl font-black">밸류에이션: 금에는 PER 대신 상대가치·민감도</h2>
+        <p class="mt-2 max-w-3xl text-stone-400">금은 EPS·PER·PBR이 없는 자산입니다. 가격 밴드, 실질금리, 달러, 생산비용 대비 프리미엄, 다른 자산과의 비율로 해석합니다.</p>
       </div>
-    </section>
-
-    <section id="supply" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>수급 대시보드</h2>
-          <p>Q1 2026 금 수요·공급은 모두 1,231t 안팎입니다. 보석 수요는 가격 부담으로 위축됐지만, 투자·중앙은행 수요가 이를 보완했습니다.</p>
+      <div class="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">상대가치 비율</h3>
+          <p class="mt-1 text-sm text-stone-400">2026-05-21 전후 공개 가격 기반 근사값</p>
+          <div class="mt-4 h-[320px]"><canvas id="ratioBar"></canvas></div>
         </div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>수요 구성과 가격 영향</h3>
-            <div class="metric-row"><span>중앙은행</span><strong>243.7t · 강한 구조 수요</strong></div>
-            <div class="metric-row"><span>바·코인 투자</span><strong>474t · 전년 대비 +42%</strong></div>
-            <div class="metric-row"><span>보석</span><strong>299.7t · 전년 대비 -23%</strong></div>
-            <div class="metric-row"><span>ETF</span><strong>Q1 +62t, 4월 +45t</strong></div>
-            <div class="metric-row"><span>산업·기술</span><strong>AI·전자 수요는 보조적</strong></div>
-          </div>
-          <div class="card">
-            <h3>공급 구성과 가격 영향</h3>
-            <div class="metric-row"><span>총 공급</span><strong>1,230.9t · 전년 대비 +2%</strong></div>
-            <div class="metric-row"><span>광산 생산</span><strong>884.7t · 1분기 기준 기록적 수준</strong></div>
-            <div class="metric-row"><span>재활용</span><strong>366.0t · 전년 대비 +5%</strong></div>
-            <div class="metric-row"><span>공급 탄력성</span><strong>높은 가격에도 제한적 반응</strong></div>
-            <div class="metric-row"><span>시사점</span><strong>수요가 가격을 더 강하게 설명</strong></div>
-          </div>
-        </div>
-        <div class="grid-3" style="margin-top:16px">
-          <div class="card"><span class="status positive">긍정</span><h3>중앙은행 수요</h3><p>외환보유고 다변화와 미국 국채 대체 수요가 유지되며 가격 조정 시 매수 기반을 형성합니다.</p></div>
-          <div class="card"><span class="status neutral">중립</span><h3>중국·인도 실물 수요</h3><p>투자 수요는 강하지만 보석 수요는 가격 레벨에 민감합니다. 고가가 지속될수록 중량 기준 수요는 둔화될 수 있습니다.</p></div>
-          <div class="card"><span class="status negative">부정</span><h3>재활용 공급</h3><p>가격 상승은 구금 매각과 재활용 공급을 늘립니다. 다만 Q1 증가율은 +5%로 제한적이었습니다.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="relative" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>핵심 가격 지표와 상대가치</h2>
-          <p>상대비율은 절대적인 고평가·저평가 판정이 아니라 자산 간 선호도와 리스크 프리미엄의 변화를 보는 보조 지표입니다.</p>
-        </div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>상대가치 요약</h3>
-            <div class="metric-row"><span>금/은 비율</span><strong>54.9x</strong></div>
-            <div class="metric-row"><span>금/WTI 비율</span><strong>48.5배럴</strong></div>
-            <div class="metric-row"><span>금/S&P500 비율</span><strong>0.642</strong></div>
-            <div class="metric-row"><span>금/비트코인 비율</span><strong>0.0584 BTC</strong></div>
-            <div class="metric-row"><span>52주 가격대</span><strong>$3,181~$5,608 부근</strong></div>
-            <div class="metric-row"><span>AISC 대비</span><strong>대형사 AISC $1,708 대비 약 2.8배</strong></div>
-          </div>
-          <div class="card">
-            <h3>가격 밴드 차트</h3>
-            <div class="chart-box"><canvas id="bandChart"></canvas></div>
-          </div>
-        </div>
-        <div class="grid-3" style="margin-top:16px">
-          <div class="card"><h3>금/은</h3><p>은은 산업용·경기민감 성격이 더 강합니다. 금/은 비율이 낮아질수록 은이 금보다 상대적으로 강했다는 의미입니다.</p></div>
-          <div class="card"><h3>금/원유</h3><p>에너지 쇼크가 금리에 영향을 주는 국면에서는 원유 상승이 금에 단순히 긍정적이지 않을 수 있습니다.</p></div>
-          <div class="card"><h3>금/주식·비트코인</h3><p>성장자산 선호가 약해지면 금의 상대성과가 개선될 수 있지만, 유동성 경색기에는 금도 매도 대상이 됩니다.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="scenario" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>1년 후 금 가격 후보 3가지</h2>
-          <p>아래 수치는 목표주가가 아니라 시나리오 기반 추정 후보입니다. 확률 합계는 100%이며, 원화 환산에는 각 시나리오별 USD/KRW 가정을 반영했습니다.</p>
-        </div>
-        <div class="grid-3">
-          <div class="card scenario-card">
-            <span class="status negative">Bear Case · 25%</span>
-            <h3>실질금리 재상승·달러 강세</h3>
-            <div class="price">$4,300</div>
-            <p>₩203,225/g · USD/KRW 1,470 가정</p>
-            <div class="prob-bar"><div class="prob-fill" style="width:25%"></div></div>
-            <ul class="list"><li><span class="dot"></span><span>연준 금리인하 기대 후퇴</span></li><li><span class="dot"></span><span>ETF 자금 유출 재개</span></li><li><span class="dot"></span><span>지정학 리스크 완화</span></li></ul>
-          </div>
-          <div class="card scenario-card">
-            <span class="status neutral">Base Case · 50%</span>
-            <h3>완만한 실질금리 하락</h3>
-            <div class="price">$5,100</div>
-            <p>₩242,674/g · USD/KRW 1,480 가정</p>
-            <div class="prob-bar"><div class="prob-fill" style="width:50%"></div></div>
-            <ul class="list"><li><span class="dot"></span><span>중앙은행 매입 지속</span></li><li><span class="dot"></span><span>ETF 흐름 안정</span></li><li><span class="dot"></span><span>DXY 중립권 유지</span></li></ul>
-          </div>
-          <div class="card scenario-card">
-            <span class="status positive">Bull Case · 25%</span>
-            <h3>완화 확대·리스크 프리미엄 상승</h3>
-            <div class="price">$6,200</div>
-            <p>₩302,988/g · USD/KRW 1,520 가정</p>
-            <div class="prob-bar"><div class="prob-fill" style="width:25%"></div></div>
-            <ul class="list"><li><span class="dot"></span><span>연준 금리인하 확대</span></li><li><span class="dot"></span><span>달러 약세 또는 신뢰 저하</span></li><li><span class="dot"></span><span>ETF·중앙은행 동시 유입</span></li></ul>
-          </div>
-        </div>
-        <div class="grid-2" style="margin-top:16px">
-          <div class="card">
-            <h3>확률가중 계산</h3>
-            <div class="formula">확률가중 금 가격 = 4,300×25% + 5,100×50% + 6,200×25% = $5,175/oz<br/>현재가 대비 기대 변화 = 5,175 / 4,760.16 - 1 = +8.7%<br/>원화 기준 확률가중 가격 = ₩247,890/g, 현재 원화 환산가 대비 +9.5%</div>
-          </div>
-          <div class="card">
-            <h3>시나리오 확률 차트</h3>
-            <div class="chart-box"><canvas id="scenarioChart"></canvas></div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">가격 밴드와 생산비용 프레임</h3>
+          <div class="mt-5 space-y-4">
+            <div class="rounded-3xl border border-white/10 bg-white/[.04] p-5">
+              <div class="flex items-center justify-between text-sm"><span class="font-bold">과거 밴드 대비</span><span class="text-amber-200">고가권</span></div>
+              <p class="mt-2 text-sm leading-6 text-stone-400">WGC에 따르면 Q1 평균 LBMA PM 가격은 $4,873/oz, 1월에는 $5,405/oz 고점을 기록했습니다. 현재는 고점 대비 낮지만 장기 평균보다는 높은 영역입니다.</p>
+            </div>
+            <div class="rounded-3xl border border-white/10 bg-white/[.04] p-5">
+              <div class="flex items-center justify-between text-sm"><span class="font-bold">금광 AISC 대비</span><span class="text-amber-200">프리미엄 확대</span></div>
+              <p class="mt-2 text-sm leading-6 text-stone-400">금광 평균 AISC는 업체·지역별 편차가 커 별도 원문 확인이 필요합니다. 현재 금 가격은 일반적인 생산비용 대비 상당한 프리미엄 구간으로 해석됩니다.</p>
+            </div>
+            <div class="rounded-3xl border border-white/10 bg-white/[.04] p-5">
+              <div class="flex items-center justify-between text-sm"><span class="font-bold">실질금리 민감도</span><span class="text-red-200">상승 시 약세 압력</span></div>
+              <p class="mt-2 text-sm leading-6 text-stone-400">실질금리가 25~50bp 더 상승하면 고가권 금의 밸류에이션 부담이 커질 수 있습니다. 반대로 실질금리 하락은 Bull Case의 핵심 조건입니다.</p>
+            </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <section id="institutions" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>국내외 기관 전망 비교</h2>
-          <p>기관 전망은 발간일·기준 가격·표현 단위가 다릅니다. 아래 표는 공개 확인 가능한 최신 자료를 요약한 것이며, 원문 장문 복사는 피하고 핵심 논리만 정리했습니다.</p>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>기관</th><th>발간일</th><th>전망 방향</th><th>금 가격 전망/범위</th><th>핵심 논리</th><th>실질금리·달러·중앙은행 관점</th><th>리스크</th></tr></thead>
-            <tbody>
-              <tr><td>World Gold Council</td><td>2026-04-29 / 2026-05 ETF</td><td><span class="tag">구조적 지지</span></td><td>직접 목표가보다 수급 데이터 중심</td><td>Q1 수요 1,231t, 중앙은행 244t, 4월 ETF +45t</td><td>중앙은행과 ETF가 핵심 수요축</td><td>보석 수요 둔화, 가격 부담</td></tr>
-              <tr><td>J.P. Morgan</td><td>2026-02-25</td><td><span class="tag">강세</span></td><td>2026년 말 $6,300/oz</td><td>중앙은행과 투자자 수요가 가격을 끌어올릴 전망</td><td>준비자산 다변화와 투자수요 중시</td><td>가격 급등 후 변동성</td></tr>
-              <tr><td>Bank of America</td><td>2026-05-01</td><td><span class="tag">강세</span></td><td>12개월 $6,000/oz</td><td>미 정책·인플레이션·중동 리스크 및 달러 대체 수요</td><td>달러·실질금리·지정학 프리미엄 중요</td><td>위험 프리미엄 축소</td></tr>
-              <tr><td>ING</td><td>2026-05-11</td><td><span class="tag">건설적</span></td><td>연말 $5,000/oz</td><td>전쟁 이후 매도는 안전자산 훼손이 아니라 금리·달러 부담 때문</td><td>실질금리와 달러가 단기 제약, 중앙은행은 구조적 기둥</td><td>에너지 쇼크가 Fed 인하 지연</td></tr>
-              <tr><td>UBS CIO</td><td>2026-01-14</td><td><span class="tag">강세</span></td><td>수개월 내 $5,000/oz</td><td>헤지 수요, 정책·지정학 불확실성, 실질금리 하락 가능성</td><td>Fed 완화와 높은 부채 부담이 금에 우호적</td><td>가격 급등 후 차익실현</td></tr>
-              <tr><td>Morgan Stanley</td><td>2026-01-06</td><td><span class="tag">완만한 강세</span></td><td>Q4 2026 $4,800/oz</td><td>금리 하락, Fed 리더십 변화, 중앙은행·펀드 매입</td><td>낮은 금리 환경과 공식부문 매입 강조</td><td>상승폭 제한, 고평가 부담</td></tr>
-              <tr><td>Goldman Sachs Research</td><td>2025-09-30</td><td><span class="tag">구조적 강세</span></td><td>2026년 중반 $4,000/oz</td><td>중앙은행·ETF·투기 수요가 방향 설정</td><td>중앙은행 매입이 다년간 지속될 것으로 봄</td><td>발간 이후 가격 레벨이 크게 상승해 최신성 점검 필요</td></tr>
-              <tr><td>Citi</td><td>2025-12-08 / 2026-01-30</td><td><span class="tag">보수적</span></td><td>Base: 연중 하락, Bull: 2026년 말 $5,000</td><td>금에 반영된 위험 프리미엄 일부가 2026년에 사라질 수 있다고 평가</td><td>금리 인하와 재정 우려는 지지, 지정학 완화는 부정</td><td>Fed 독립성 회복, 이란·우크라이나 완화</td></tr>
-              <tr><td>HSBC</td><td>2026-01-08</td><td><span class="tag">고변동</span></td><td>2026 범위 $3,950~$5,050, 연말 $4,450</td><td>상반기 $5,000 가능하지만 후반 조정 위험</td><td>지정학·부채는 지지, Fed 인하 중단 시 부정</td><td>고가에 따른 깊은 조정 가능성</td></tr>
-              <tr><td>NH투자증권</td><td>2026-01-26</td><td><span class="tag">강세</span></td><td>2026 예상 범위 $4,350~$6,000, 1차 목표 $5,500</td><td>Fed 완화, 투자 수요, 중앙은행 외환보유고 다변화</td><td>완화 기조 유지 시 금 강세 사이클 유효</td><td>통화정책 경로 변화</td></tr>
-              <tr><td>KB Think</td><td>2026-01-14</td><td><span class="tag">상승 둔화</span></td><td>2026 현물 $4,610 언급</td><td>2025년 급등 이후 상승폭 둔화 가능성</td><td>금리·달러·실물수요 변수</td><td>가격 급등에 따른 수요 둔화</td></tr>
+      <div class="mt-6 glass-panel rounded-[2rem] p-6">
+        <h3 class="text-xl font-black">민감도 테이블: 금 가격 후보와 원화 환산</h3>
+        <p class="mt-1 text-sm text-stone-400">원화 기준 금 가격 = XAU/USD × 원/달러 환율 ÷ 31.1035. 아래 표는 USD/KRW 1,500원 가정입니다.</p>
+        <div class="table-wrap mt-4">
+          <table class="w-full text-left text-sm">
+            <thead class="text-xs uppercase tracking-wide text-stone-500">
+              <tr class="border-b border-white/10"><th class="py-3 pr-4">XAU/USD</th><th class="py-3 pr-4">KRW/g @1,450</th><th class="py-3 pr-4">KRW/g @1,500</th><th class="py-3 pr-4">KRW/g @1,550</th><th class="py-3 pr-4">해석</th></tr>
+            </thead>
+            <tbody class="divide-y divide-white/10 text-stone-300">
+              <tr><td class="py-3 pr-4 font-bold text-white">$3,900</td><td class="py-3 pr-4">₩181.8k</td><td class="py-3 pr-4">₩188.1k</td><td class="py-3 pr-4">₩194.3k</td><td class="py-3 pr-4">Bear Case</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">$4,537</td><td class="py-3 pr-4">₩211.4k</td><td class="py-3 pr-4">₩218.8k</td><td class="py-3 pr-4">₩226.1k</td><td class="py-3 pr-4">현재 근사</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">$5,100</td><td class="py-3 pr-4">₩237.8k</td><td class="py-3 pr-4">₩246.0k</td><td class="py-3 pr-4">₩254.2k</td><td class="py-3 pr-4">Base Case</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">$6,200</td><td class="py-3 pr-4">₩289.0k</td><td class="py-3 pr-4">₩299.0k</td><td class="py-3 pr-4">₩309.0k</td><td class="py-3 pr-4">Bull Case</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="grid-3" style="margin-top:16px">
-          <div class="card"><h3>보수적 전망</h3><p>HSBC와 Citi는 지정학 리스크 완화, Fed 독립성 우려 해소, 고가 부담을 이유로 조정 가능성을 강조합니다.</p></div>
-          <div class="card"><h3>중립적 전망</h3><p>ING·UBS·Morgan Stanley는 금리 하락과 헤지 수요를 인정하지만 단기 금리·달러 부담을 함께 봅니다.</p></div>
-          <div class="card"><h3>낙관적 전망</h3><p>J.P. Morgan, BofA, NH투자증권은 중앙은행·투자자 수요와 달러 대체 수요를 바탕으로 $6,000 안팎의 상단을 제시합니다.</p></div>
-        </div>
       </div>
     </section>
 
-    <section id="vehicles" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>금 투자수단 비교</h2>
-          <p>원화 투자자는 금 가격뿐 아니라 USD/KRW, 세금, 보관비, 운용보수, 실물 인출 비용까지 함께 고려해야 합니다.</p>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>수단</th><th>투자 방식</th><th>거래 통화</th><th>환율 노출</th><th>비용/보수</th><th>세금 구조</th><th>유동성</th><th>장점</th><th>단점</th><th>적합 투자자</th></tr></thead>
-            <tbody>
-              <tr><td>국제 금 현물 XAU/USD</td><td>현물 또는 CFD/마진 플랫폼</td><td>USD</td><td>있음</td><td>스프레드·롤오버 가능</td><td>거래국·상품 구조별 상이</td><td>높음</td><td>가장 직접적인 가격 노출</td><td>레버리지·상대방 위험</td><td>전문 투자자</td></tr>
-              <tr><td>COMEX 금 선물</td><td>표준화 선물계약</td><td>USD</td><td>있음</td><td>증거금·롤오버·수수료</td><td>해외파생 과세 규정 확인 필요</td><td>매우 높음</td><td>헤지·레버리지·가격 발견</td><td>만기·증거금·변동성 부담</td><td>헤지/트레이더</td></tr>
-              <tr><td>GLD ETF</td><td>미국 상장 금 현물 ETF</td><td>USD</td><td>있음</td><td>총보수 0.40%</td><td>해외 ETF 양도세 등 확인</td><td>매우 높음</td><td>대형·유동성·접근성</td><td>환율·해외세금·보수</td><td>달러 자산 보유자</td></tr>
-              <tr><td>IAU ETF</td><td>미국 상장 금 현물 ETF</td><td>USD</td><td>있음</td><td>스폰서 보수 0.25%</td><td>해외 ETF 양도세 등 확인</td><td>높음</td><td>GLD 대비 낮은 보수</td><td>GLD보다 거래대금 작음</td><td>장기·저비용 투자자</td></tr>
-              <tr><td>KRX 금시장</td><td>국내 금현물 1g 단위</td><td>KRW</td><td>내재 노출</td><td>증권사 수수료 약 0.3% 내외</td><td>실물 인출 전 매매차익 비과세로 알려짐</td><td>높음</td><td>세금·보관 측면 효율</td><td>국내 수급 프리미엄, 실물 인출 비용</td><td>한국 장기 투자자</td></tr>
-              <tr><td>국내 금 ETF/ETN</td><td>국내 상장 현물/선물 연동</td><td>KRW</td><td>상품별 상이</td><td>운용보수·롤오버 가능</td><td>매매차익 15.4% 배당소득세 가능</td><td>높음</td><td>주식 계좌로 간편</td><td>세금·롤오버·추적오차</td><td>간편 투자자</td></tr>
-              <tr><td>금 통장</td><td>은행 골드뱅킹</td><td>KRW</td><td>내재 노출</td><td>매매 스프레드·수수료 약 1%</td><td>매매차익 15.4% 배당소득세 가능</td><td>중간</td><td>소액 적립 쉬움</td><td>예금자보호 아님, 세금·수수료</td><td>소액 적립형</td></tr>
-              <tr><td>실물 골드바</td><td>직접 매입·보관</td><td>KRW</td><td>내재 노출</td><td>부가세·제조·매매 스프레드·보관</td><td>구매 시 VAT, 매도 구조별 확인</td><td>낮음~중간</td><td>실물 보유 만족감</td><td>도난·보관·매매비용 큼</td><td>장기 실물 보유자</td></tr>
-            </tbody>
-          </table>
-        </div>
+    <section id="scenario" class="section-pad">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">1Y Scenario</p>
+        <h2 class="mt-2 text-3xl font-black">1년 후 금 가격 후보 3가지</h2>
+        <p class="mt-2 max-w-3xl text-stone-400">아래 가격은 확정 전망이 아니라 거시 변수 가정에 따른 시나리오 추정치입니다. 확률 합계는 100%입니다.</p>
       </div>
-    </section>
 
-    <section id="risk" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>리스크 매트릭스</h2>
-          <p>금은 위기 헤지 자산이지만, 모든 위기에서 무조건 오르는 자산은 아닙니다. 특히 에너지발 인플레이션은 금리에 영향을 주어 금 가격에 역풍이 될 수 있습니다.</p>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>리스크</th><th>발생 가능성</th><th>영향도</th><th>가격 방향</th><th>대응/관찰 지표</th></tr></thead>
-            <tbody>
-              <tr><td>미국 실질금리 상승</td><td><span class="heat med">중간</span></td><td><span class="heat high">높음</span></td><td>하락</td><td>DFII10, CPI/PCE, Fed 발언</td></tr>
-              <tr><td>달러 강세</td><td><span class="heat med">중간</span></td><td><span class="heat high">높음</span></td><td>하락</td><td>DXY, EUR/USD, USD/KRW</td></tr>
-              <tr><td>ETF 자금 유출</td><td><span class="heat med">중간</span></td><td><span class="heat med">중간</span></td><td>하락</td><td>GLD/IAU 보유량, WGC ETF 플로우</td></tr>
-              <tr><td>중앙은행 매입 둔화</td><td><span class="heat low">낮음</span></td><td><span class="heat high">높음</span></td><td>하락</td><td>WGC central bank statistics, IMF IFS</td></tr>
-              <tr><td>지정학 리스크 완화</td><td><span class="heat med">중간</span></td><td><span class="heat med">중간</span></td><td>하락</td><td>중동·우크라이나·미중 뉴스</td></tr>
-              <tr><td>중국·인도 수요 둔화</td><td><span class="heat med">중간</span></td><td><span class="heat med">중간</span></td><td>하락</td><td>보석 수요, 수입량, 프리미엄</td></tr>
-              <tr><td>금광 공급 증가·재활용 확대</td><td><span class="heat med">중간</span></td><td><span class="heat low">낮음</span></td><td>하락</td><td>광산 생산, 재활용 공급</td></tr>
-              <tr><td>원화 강세</td><td><span class="heat med">중간</span></td><td><span class="heat med">중간</span></td><td>원화 수익률 하락</td><td>USD/KRW, 한국 금리·수출</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="grid-2" style="margin-top:16px">
-          <div class="card"><h3>체크포인트</h3><ul class="list"><li><span class="dot"></span><span>FOMC 일정과 점도표</span></li><li><span class="dot"></span><span>미국 CPI, PCE, 고용지표</span></li><li><span class="dot"></span><span>미국 10년 실질금리와 명목금리</span></li><li><span class="dot"></span><span>DXY, USD/KRW</span></li><li><span class="dot"></span><span>중앙은행 금 매입, WGC 분기 보고서</span></li></ul></div>
-          <div class="card"><h3>추가 관찰</h3><ul class="list"><li><span class="dot"></span><span>GLD/IAU ETF 보유량과 글로벌 ETF 플로우</span></li><li><span class="dot"></span><span>CFTC 금 선물 투기적 순포지션</span></li><li><span class="dot"></span><span>중국·인도 금 수요 및 현물 프리미엄</span></li><li><span class="dot"></span><span>지정학 리스크와 원유 가격</span></li><li><span class="dot"></span><span>금광기업 AISC와 생산 가이던스</span></li></ul></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="sources" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>출처와 검증 메모</h2>
-          <p>빠르게 변하는 가격·금리·환율 데이터는 작성 시점 기준입니다. 시장 데이터 제공자별로 지연·CFD·현물·선물 기준 차이가 있어 숫자가 소폭 다를 수 있습니다.</p>
-        </div>
-        <div class="card">
-          <ul class="source-list">
-            <li>Trading Economics, Gold price, 2026-05-12: https://tradingeconomics.com/commodity/gold</li>
-            <li>FRED DFII10, 10Y TIPS real yield, 2026-05-08: https://fred.stlouisfed.org/series/DFII10</li>
-            <li>FRED DGS10, 10Y nominal yield, 2026-05-08: https://fred.stlouisfed.org/series/DGS10</li>
-            <li>Investing.com, DXY historical data, 2026-05-12: https://www.investing.com/indices/usdollar-historical-data</li>
-            <li>Investing.com, USD/KRW, 2026-05-12: https://www.investing.com/currencies/usd-krw-historical-data</li>
-            <li>World Gold Council, Gold Demand Trends Q1 2026: https://www.gold.org/goldhub/research/gold-demand-trends/gold-demand-trends-q1-2026</li>
-            <li>World Gold Council, Central Banks Q1 2026: https://www.gold.org/goldhub/research/gold-demand-trends/gold-demand-trends-q1-2026/central-banks</li>
-            <li>World Gold Council, Global gold ETF holdings and flows, April 2026: https://www.gold.org/goldhub/data/global-gold-backed-etf-holdings-and-flows</li>
-            <li>SPDR Gold Shares GLD, SSGA, 2026-05-11: https://www.ssga.com/us/en/intermediary/etfs/spdr-gold-shares-gld</li>
-            <li>iShares Gold Trust IAU, BlackRock, 2026-05-11: https://www.ishares.com/us/products/239561/ishares-gold-trust-fund</li>
-            <li>Reuters, J.P. Morgan gold forecast, 2026-02-25: https://www.reuters.com/business/jp-morgan-sees-year-end-2026-gold-price-6300-per-ounce-2026-02-25/</li>
-            <li>ING Think, gold year-end $5,000 view, 2026-05-11: https://think.ing.com/articles/why-gold-isnt-acting-like-a-safe-haven-right-now/</li>
-            <li>Reuters, Morgan Stanley forecast, 2026-01-06: https://www.reuters.com/world/americas/morgan-stanley-forecasts-gold-4800-by-fourth-quarter-2026-2026-01-06/</li>
-            <li>Goldman Sachs Research, gold forecast, 2025-09-30: https://www.goldmansachs.com/insights/articles/gold-forecast-to-rise-by-the-middle-of-2026</li>
-            <li>Citi, Prospects for 2026: https://www.citigroup.com/global/insights/prospects-for-2026-goldilocks-performance-but-risks-linger</li>
-            <li>HSBC via Reuters/Investing.com, 2026-01-08: https://www.investing.com/news/economy-news/gold-could-hit-5000-an-ounce-in-first-half-of-2026-says-hsbc-4436601</li>
-            <li>NH투자증권 Commodity Weekly, 2026-01-26, 공개 PDF 요약</li>
-            <li>KB캐피탈/토스뱅크 금 투자수단 세금·비용 설명, 2025~2026</li>
+      <div class="grid gap-5 lg:grid-cols-3">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <span class="rounded-full border border-red-300/25 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-200">Bear Case · 25%</span>
+          <h3 class="mt-4 text-3xl font-black">$3,900/oz</h3>
+          <p class="mt-1 text-sm text-stone-400">원화 환산 약 ₩188,082/g</p>
+          <ul class="mt-5 space-y-2 text-sm leading-6 text-stone-300">
+            <li>• 실질금리 재상승, 달러 강세</li>
+            <li>• 연준 인하 기대 후퇴 또는 인상 경계</li>
+            <li>• ETF 자금 유출, 지정학 리스크 완화</li>
           </ul>
+        </div>
+        <div class="glass-panel rounded-[2rem] border-amber-300/45 p-6 shadow-gold">
+          <div class="flex items-center justify-between">
+            <span class="rounded-full border border-amber-300/30 bg-amber-400/15 px-3 py-1 text-xs font-bold text-amber-100">Base Case · 50%</span>
+            <span class="rounded-full bg-amber-300 px-2.5 py-1 text-xs font-black text-slate-950">기준</span>
+          </div>
+          <h3 class="mt-4 text-3xl font-black">$5,100/oz</h3>
+          <p class="mt-1 text-sm text-stone-400">원화 환산 약 ₩245,953/g</p>
+          <ul class="mt-5 space-y-2 text-sm leading-6 text-stone-300">
+            <li>• 실질금리 완만한 하락</li>
+            <li>• 달러 중립, 중앙은행 매입 지속</li>
+            <li>• ETF 흐름 안정, 인플레 기대 완만</li>
+          </ul>
+        </div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <span class="rounded-full border border-emerald-300/25 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-200">Bull Case · 25%</span>
+          <h3 class="mt-4 text-3xl font-black">$6,200/oz</h3>
+          <p class="mt-1 text-sm text-stone-400">원화 환산 약 ₩299,002/g</p>
+          <ul class="mt-5 space-y-2 text-sm leading-6 text-stone-300">
+            <li>• 연준 인하 재개, 실질금리 하락</li>
+            <li>• 달러 약세, ETF 유입 확대</li>
+            <li>• 중앙은행 매입 강화, 지정학 리스크 지속</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">시나리오 가격 분포</h3>
+          <div class="mt-4 h-[320px]"><canvas id="scenarioBar"></canvas></div>
+        </div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">확률가중 계산</h3>
+          <div class="mt-5 rounded-3xl border border-amber-300/20 bg-amber-300/10 p-5">
+            <p class="text-sm leading-7 text-amber-50/95">
+              확률가중 금 가격 = $3,900 × 25% + $5,100 × 50% + $6,200 × 25%
+            </p>
+            <p class="mt-3 text-4xl font-black text-amber-200">$5,075/oz</p>
+            <p class="mt-1 text-sm text-stone-400">원화 환산 약 ₩244,747/g · 현재가 대비 기대수익률 약 +11.9%</p>
+          </div>
+          <div class="mt-4 rounded-3xl border border-white/10 bg-white/[.04] p-5">
+            <p class="text-sm leading-6 text-stone-300">
+              원화 투자자의 실제 수익률은 금 가격 변화뿐 아니라 USD/KRW 환율 변화에 크게 좌우됩니다.
+              원화 강세가 나타나면 달러 기준 상승분이 일부 상쇄되고, 원화 약세는 반대로 수익률을 확대할 수 있습니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="institutions" class="section-pad">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">Institution Views</p>
+        <h2 class="mt-2 text-3xl font-black">국내외 기관 전망 비교</h2>
+        <p class="mt-2 max-w-3xl text-stone-400">확인 가능한 공개 기사·기관 자료 중심으로 정리했습니다. 일부 전망은 원문 리포트가 유료·단말기 전용일 수 있어 2차 보도 기준임을 표시합니다.</p>
+      </div>
+      <div class="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">전망 분포 차트</h3>
+          <p class="mt-1 text-sm text-stone-400">공개 보도 기준 가격 전망/후보값</p>
+          <div class="mt-4 h-[330px]"><canvas id="institutionBar"></canvas></div>
+        </div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">공통 논리와 차이점</h3>
+          <div class="mt-5 space-y-4 text-sm leading-6 text-stone-300">
+            <div class="rounded-3xl border border-white/10 bg-white/[.04] p-5">
+              <b class="text-emerald-200">공통 논리:</b> 중앙은행 수요, 준비자산 다변화, 하반기 투자 수요 회복이 중장기 강세 논리의 핵심입니다.
+            </div>
+            <div class="rounded-3xl border border-white/10 bg-white/[.04] p-5">
+              <b class="text-red-200">차이점:</b> 단기적으로는 고유가·인플레이션·고금리가 금 가격을 압박할 수 있다는 점에서 기관별 목표가가 갈립니다.
+            </div>
+            <div class="rounded-3xl border border-white/10 bg-white/[.04] p-5">
+              <b class="text-amber-200">보수/중립/낙관:</b> 보수적 관점은 $4,900대 평균, 중립~긍정은 $5,400~5,600, 낙관은 연말 $6,000 접근을 제시합니다.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 glass-panel rounded-[2rem] p-6">
+        <h3 class="text-xl font-black">기관 전망 테이블</h3>
+        <div class="table-wrap mt-4">
+          <table class="w-full text-left text-sm">
+            <thead class="text-xs uppercase tracking-wide text-stone-500">
+              <tr class="border-b border-white/10">
+                <th class="py-3 pr-4">기관/출처</th><th class="py-3 pr-4">발간/보도일</th><th class="py-3 pr-4">전망 방향</th><th class="py-3 pr-4">가격 전망</th><th class="py-3 pr-4">핵심 논리</th><th class="py-3 pr-4">리스크</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10 text-stone-300">
+              <tr><td class="py-3 pr-4 font-bold text-white">World Gold Council</td><td class="py-3 pr-4">2026-04-29</td><td class="py-3 pr-4">구조적 지지</td><td class="py-3 pr-4">목표가 미제시</td><td class="py-3 pr-4">투자·중앙은행 수요, 지정학 리스크</td><td class="py-3 pr-4">고가에 따른 보석 수요 둔화</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">J.P. Morgan</td><td class="py-3 pr-4">Reuters, 2026-05-18</td><td class="py-3 pr-4">중기 강세</td><td class="py-3 pr-4">2026 평균 $5,243, 연말 $6,000 접근</td><td class="py-3 pr-4">하반기 투자·중앙은행 수요 재강화</td><td class="py-3 pr-4">단기 투자 수요 둔화</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">ANZ</td><td class="py-3 pr-4">Reuters, 2026-05-18</td><td class="py-3 pr-4">긍정이나 하향</td><td class="py-3 pr-4">연말 $5,600</td><td class="py-3 pr-4">중장기 보험자산 수요</td><td class="py-3 pr-4">인플레 기대·고금리·달러 강세</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">Goldman Sachs</td><td class="py-3 pr-4">2차 보도, 2026-04~05</td><td class="py-3 pr-4">강세</td><td class="py-3 pr-4">연말 $5,400</td><td class="py-3 pr-4">탈달러·디베이스먼트 트레이드</td><td class="py-3 pr-4">원문 확인 필요</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">Reuters/IBTimes 설문</td><td class="py-3 pr-4">2026-04~05</td><td class="py-3 pr-4">중립</td><td class="py-3 pr-4">2026 평균 약 $4,916</td><td class="py-3 pr-4">기관 컨센서스 중간값</td><td class="py-3 pr-4">응답 시점·표본 차이</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">국내 증권사 공개 원문</td><td class="py-3 pr-4">확인 필요</td><td class="py-3 pr-4">대체로 금리·환율 연동</td><td class="py-3 pr-4">정량 목표가 미확인</td><td class="py-3 pr-4">원화 투자자는 환율·세금·상품 구조 중요</td><td class="py-3 pr-4">원문/발간일 검증 필요</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="flows" class="section-pad">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">Flows & Positioning</p>
+        <h2 class="mt-2 text-3xl font-black">수급·자금흐름 대시보드</h2>
+        <p class="mt-2 max-w-3xl text-stone-400">중앙은행은 구조적 수요, ETF·선물은 단기 가격 탄력성을 설명하는 핵심 지표입니다.</p>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div class="glass-panel rounded-3xl p-5"><h3 class="font-black">중앙은행 수요</h3><p class="mt-2 text-sm leading-6 text-stone-400">Q1 244t 순매입. 폴란드·우즈베키스탄 등이 주도, 중국도 순매입을 이어갔습니다.</p></div>
+        <div class="glass-panel rounded-3xl p-5"><h3 class="font-black">ETF 투자 수요</h3><p class="mt-2 text-sm leading-6 text-stone-400">Q1 +62t 순유입이지만 미국 펀드 유출과 투자자 관심 둔화는 모니터링 대상입니다.</p></div>
+        <div class="glass-panel rounded-3xl p-5"><h3 class="font-black">보석 수요</h3><p class="mt-2 text-sm leading-6 text-stone-400">고가 영향으로 물량 기준 -23% y/y. 다만 지출액은 증가해 심리 자체는 유지됩니다.</p></div>
+        <div class="glass-panel rounded-3xl p-5"><h3 class="font-black">산업·기술 수요</h3><p class="mt-2 text-sm leading-6 text-stone-400">AI 인프라 성장과 함께 기술 수요는 82t, +1%로 완만한 증가를 보였습니다.</p></div>
+        <div class="glass-panel rounded-3xl p-5"><h3 class="font-black">광산 공급</h3><p class="mt-2 text-sm leading-6 text-stone-400">광산 생산은 단기 탄력성이 낮아 가격 급등에 즉시 대응하기 어렵습니다.</p></div>
+        <div class="glass-panel rounded-3xl p-5"><h3 class="font-black">재활용 공급</h3><p class="mt-2 text-sm leading-6 text-stone-400">WGC는 Q1 재활용 증가가 공급 증가에 기여했다고 언급했습니다.</p></div>
+      </div>
+
+      <div id="vehicles" class="mt-6 glass-panel rounded-[2rem] p-6">
+        <h3 class="text-xl font-black">투자수단 비교</h3>
+        <p class="mt-1 text-sm text-stone-400">세금은 투자자 거주지·계좌·상품 구조에 따라 달라질 수 있어 실제 매수 전 증권사·세무 확인이 필요합니다.</p>
+        <div class="table-wrap mt-4">
+          <table class="w-full text-left text-sm">
+            <thead class="text-xs uppercase tracking-wide text-stone-500">
+              <tr class="border-b border-white/10"><th class="py-3 pr-4">수단</th><th class="py-3 pr-4">투자 방식</th><th class="py-3 pr-4">통화/환율</th><th class="py-3 pr-4">비용·세금</th><th class="py-3 pr-4">장점</th><th class="py-3 pr-4">단점</th><th class="py-3 pr-4">적합 투자자</th></tr>
+            </thead>
+            <tbody class="divide-y divide-white/10 text-stone-300">
+              <tr><td class="py-3 pr-4 font-bold text-white">국제 금 현물</td><td class="py-3 pr-4">XAU/USD 노출</td><td class="py-3 pr-4">USD</td><td class="py-3 pr-4">스프레드·플랫폼 비용</td><td class="py-3 pr-4">순수 가격 노출</td><td class="py-3 pr-4">거래 접근성·보관 구조 확인</td><td class="py-3 pr-4">전문 투자자</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">COMEX 선물</td><td class="py-3 pr-4">표준 선물계약</td><td class="py-3 pr-4">USD, 환율 노출</td><td class="py-3 pr-4">증거금·롤오버·레버리지</td><td class="py-3 pr-4">유동성, 헤지</td><td class="py-3 pr-4">레버리지 손실 위험</td><td class="py-3 pr-4">기관/고급 투자자</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">GLD ETF</td><td class="py-3 pr-4">미국 상장 금 ETF</td><td class="py-3 pr-4">USD, 환율 노출</td><td class="py-3 pr-4">총보수 0.40%</td><td class="py-3 pr-4">최대급 유동성</td><td class="py-3 pr-4">미국 세무·환율 고려</td><td class="py-3 pr-4">유동성 중시</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">IAU ETF</td><td class="py-3 pr-4">미국 상장 금 ETF</td><td class="py-3 pr-4">USD, 환율 노출</td><td class="py-3 pr-4">총보수 0.25%</td><td class="py-3 pr-4">비용 효율</td><td class="py-3 pr-4">GLD 대비 거래량 낮음</td><td class="py-3 pr-4">장기 보유</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">KRX 금시장</td><td class="py-3 pr-4">1g 단위 현물</td><td class="py-3 pr-4">KRW</td><td class="py-3 pr-4">매매차익 비과세, 실물 인출 시 부가세</td><td class="py-3 pr-4">국내 접근성·세제</td><td class="py-3 pr-4">실물 인출 비용</td><td class="py-3 pr-4">국내 장기 투자자</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">국내 금 ETF/ETN</td><td class="py-3 pr-4">상장 상품</td><td class="py-3 pr-4">KRW, 상품별 환헤지</td><td class="py-3 pr-4">보수·배당소득세 가능</td><td class="py-3 pr-4">거래 편의성</td><td class="py-3 pr-4">선물형 롤오버·괴리율</td><td class="py-3 pr-4">간편 투자자</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">금 통장</td><td class="py-3 pr-4">은행 계좌형</td><td class="py-3 pr-4">KRW 환산</td><td class="py-3 pr-4">수수료·과세 확인</td><td class="py-3 pr-4">소액 적립</td><td class="py-3 pr-4">스프레드·세금</td><td class="py-3 pr-4">초보·적립식</td></tr>
+              <tr><td class="py-3 pr-4 font-bold text-white">실물 골드바</td><td class="py-3 pr-4">실물 보유</td><td class="py-3 pr-4">KRW</td><td class="py-3 pr-4">부가세·세공비·보관비</td><td class="py-3 pr-4">직접 보유</td><td class="py-3 pr-4">매입·매도 스프레드</td><td class="py-3 pr-4">비상자산 선호</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="risks" class="section-pad">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">Risk Matrix</p>
+        <h2 class="mt-2 text-3xl font-black">리스크 매트릭스와 관찰 체크포인트</h2>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">실질금리 상승</h3><span class="rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-bold text-red-200">High</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">금은 이자·배당이 없어 실질금리 상승기에 매력 저하.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">FRED DFII10, TIPS, FOMC</p>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">달러 강세</h3><span class="rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-bold text-red-200">High</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">XAU/USD와 역상관. 비달러 수요 압박.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">DXY 100 돌파 여부</p>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">ETF 자금 유출</h3><span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-100">Medium</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">금융 투자 수요가 빠지면 조정 속도 확대.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">GLD/IAU 보유량, WGC ETF flows</p>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">중앙은행 둔화</h3><span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-100">Medium</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">구조적 매입 스토리 약화.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">WGC 분기 보고서, PBoC·폴란드</p>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">지정학 완화</h3><span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-100">Medium</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">위험 프리미엄 축소로 단기 매도 압력.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">중동·우크라이나 리스크</p>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">중국·인도 수요 둔화</h3><span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-100">Medium</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">고가 구간에서 보석·바 수요가 약화.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">수입량, 프리미엄/디스카운트</p>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">재활용 공급 증가</h3><span class="rounded-full bg-slate-500/20 px-2.5 py-1 text-xs font-bold text-slate-200">Low</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">고가가 매물 출회를 유발.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">WGC supply, scrap flows</p>
+          </div><div class="glass-panel glass-panel-hover rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black">원화 강세</h3><span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-100">Medium</span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-stone-400">원화 투자자의 금 수익률 상쇄.</p>
+            <p class="mt-4 text-xs font-bold uppercase tracking-wide text-stone-500">대응/관찰</p>
+            <p class="mt-1 text-sm text-stone-300">USD/KRW, 환헤지 여부</p>
+          </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">관찰해야 할 체크포인트 10개</h3>
+          <ol class="mt-4 grid gap-2 text-sm leading-6 text-stone-300 sm:grid-cols-2">
+            <li>1. FOMC 일정과 점도표</li><li>2. 미국 CPI·PCE·고용</li>
+            <li>3. 10년 TIPS 실질금리</li><li>4. 달러인덱스 DXY</li>
+            <li>5. 중앙은행 금 매입</li><li>6. WGC 분기 보고서</li>
+            <li>7. GLD/IAU ETF 보유량</li><li>8. CFTC 금 선물 포지션</li>
+            <li>9. 중국·인도 실물 수요</li><li>10. USD/KRW 환율</li>
+          </ol>
+        </div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">실행·리밸런싱 규칙</h3>
+          <div class="mt-4 space-y-3 text-sm leading-6 text-stone-300">
+            <p class="rounded-2xl border border-white/10 bg-white/[.04] p-4"><b>분할 진입:</b> 고가권에서는 일괄 매수보다 3~6개월 분할 접근이 변동성 관리에 유리합니다.</p>
+            <p class="rounded-2xl border border-white/10 bg-white/[.04] p-4"><b>비중 상한:</b> 금은 현금흐름이 없으므로 포트폴리오 내 전략 비중 상한을 사전에 정합니다.</p>
+            <p class="rounded-2xl border border-white/10 bg-white/[.04] p-4"><b>밴드 리밸런싱:</b> 목표 비중 대비 ±20~25% 이탈 시 일부 리밸런싱합니다.</p>
+            <p class="rounded-2xl border border-white/10 bg-white/[.04] p-4"><b>리스크 트리거:</b> 실질금리 +50bp 또는 DXY 급등 시 신규 매수 속도를 낮춥니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources" class="section-pad">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[.25em] text-amber-300">Sources & Disclaimer</p>
+        <h2 class="mt-2 text-3xl font-black">출처와 검증 메모</h2>
+      </div>
+      <div class="grid gap-6 lg:grid-cols-[1fr_.9fr]">
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">주요 출처</h3>
+          <ul class="mt-4 space-y-3 text-sm leading-6 text-stone-300">
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://www.reuters.com/world/india/gold-steady-us-iran-peace-deal-hopes-offset-inflation-fears-2026-05-21/" target="_blank" rel="noopener">Reuters, Gold eases as dollar and yields climb, 2026-05-21</a></li>
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://fred.stlouisfed.org/series/DFII10" target="_blank" rel="noopener">FRED DFII10, 10-Year TIPS real yield</a></li>
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://fred.stlouisfed.org/series/T10YIE" target="_blank" rel="noopener">FRED T10YIE, 10-Year Breakeven Inflation Rate</a></li>
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://www.gold.org/goldhub/research/gold-demand-trends/gold-demand-trends-q1-2026" target="_blank" rel="noopener">World Gold Council, Gold Demand Trends Q1 2026</a></li>
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://www.gold.org/goldhub/research/gold-demand-trends/gold-demand-trends-q1-2026/central-banks" target="_blank" rel="noopener">World Gold Council, Central Banks Q1 2026</a></li>
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://www.ssga.com/us/en/intermediary/etfs/spdr-gold-shares-gld" target="_blank" rel="noopener">SPDR Gold Shares, GLD fund data</a></li>
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://www.reuters.com/business/finance/jp-morgan-expects-gold-prices-reach-6300oz-by-end-2026-2026-05-18/" target="_blank" rel="noopener">Reuters, Brokerages stay bullish on gold, 2026-05-18</a></li>
+            <li><a class="text-amber-200 underline decoration-amber-300/40 hover:text-amber-100" href="https://regulation.krx.co.kr/contents/RGL/04/04010108/KRX_GOLD_Leaflet_20231226.pdf" target="_blank" rel="noopener">KRX 금시장 안내 자료</a></li>
+          </ul>
+        </div>
+        <div class="glass-panel rounded-[2rem] p-6">
+          <h3 class="text-xl font-black">중요 주석</h3>
+          <div class="mt-4 space-y-4 text-sm leading-6 text-stone-300">
+            <p>• 금 현물, 환율, DXY, 선물 가격은 장중 변동합니다. 본 대시보드의 숫자는 작성 시점 공개 자료 기반입니다.</p>
+            <p>• 원화 환산은 USD/KRW 1,500원 가정이며 실제 거래 가격은 스프레드·수수료·세금·환전 조건에 따라 달라집니다.</p>
+            <p>• 기관 전망은 원문·보도일·대상 기간이 다를 수 있어 단순 평균이 투자 판단의 근거가 될 수 없습니다.</p>
+            <p class="rounded-2xl border border-red-300/20 bg-red-500/10 p-4 text-red-100">본 자료는 투자 참고용이며, 매수·매도 권유가 아닙니다. 투자 판단의 책임은 투자자 본인에게 있습니다.</p>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="wrap">
-      <strong>면책 문구</strong><br/>
-      본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다. 본 대시보드는 공개자료를 기반으로 작성되었으며, 실시간 가격·세금·상품 조건은 거래 전 각 거래소·증권사·은행·운용사 공식 자료로 재확인해야 합니다.
+  <footer class="border-t border-white/10 bg-black/20">
+    <div class="mx-auto max-w-7xl px-4 py-8 text-sm text-stone-500">
+      Gold Investment Research Dashboard · Single-file HTML · Data as of 2026-05-21
     </div>
   </footer>
 
   <script>
-    const gold = 4760.16;
-    const low52 = 3181.40;
-    const high52 = 5608.35;
-    const scenarios = [
-      {name:'Bear', price:4300, prob:25},
-      {name:'Base', price:5100, prob:50},
-      {name:'Bull', price:6200, prob:25}
-    ];
-    function setupCanvas(canvas) {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      const ctx = canvas.getContext('2d');
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      return {ctx, w: rect.width, h: rect.height};
+    const chartText = '#d6d3d1';
+    const mutedText = '#a8a29e';
+    const gridColor = 'rgba(255,255,255,.08)';
+    const gold = '#f59e0b';
+    const amber = '#fbbf24';
+    const green = '#10b981';
+    const red = '#ef4444';
+    const blue = '#3b82f6';
+    const purple = '#8b5cf6';
+    const slate = '#94a3b8';
+
+    function commonOptions(extra = {}) {
+      return Object.assign({
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: mutedText, boxWidth: 10, padding: 14, font: { size: 11, weight: 'bold' } }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(2,6,23,.94)',
+            titleColor: '#fff7ed',
+            bodyColor: '#e7e5e4',
+            borderColor: 'rgba(245,158,11,.30)',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          x: { ticks: { color: mutedText }, grid: { color: gridColor } },
+          y: { ticks: { color: mutedText }, grid: { color: gridColor } }
+        }
+      }, extra);
     }
-    function drawBand() {
-      const canvas = document.getElementById('bandChart');
-      const {ctx, w, h} = setupCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      ctx.fillStyle = 'rgba(255,255,255,.035)';
-      ctx.fillRect(0,0,w,h);
-      const pad = 34;
-      const x0 = pad, x1 = w - pad, y = h * .48;
-      const min = 3000, max = 6300;
-      const sx = v => x0 + (v-min)/(max-min)*(x1-x0);
-      const grad = ctx.createLinearGradient(x0,0,x1,0);
-      grad.addColorStop(0,'#7a5319'); grad.addColorStop(.55,'#f3c969'); grad.addColorStop(1,'#ff7a76');
-      ctx.strokeStyle = grad; ctx.lineWidth = 18; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
-      function marker(v, label, color, dy=0) {
-        const x = sx(v);
-        ctx.strokeStyle = color; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(x, y-34); ctx.lineTo(x, y+34); ctx.stroke();
-        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#fff8e9'; ctx.font = '12px system-ui'; ctx.textAlign = 'center';
-        ctx.fillText(label, x, y+54+dy);
-        ctx.fillStyle = '#b9ad97'; ctx.fillText('$'+Math.round(v).toLocaleString(), x, y+70+dy);
+
+    function initializeCharts() {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js is not loaded yet. Retrying...');
+        setTimeout(initializeCharts, 200);
+        return;
       }
-      marker(low52, '52W Low', '#78d99a', 0);
-      marker(gold, 'Current', '#f3c969', -12);
-      marker(high52, 'ATH/High', '#8bc7ff', 0);
-      marker(5175, 'Weighted', '#fff8e9', 12);
-      ctx.fillStyle = '#b9ad97'; ctx.font = '12px system-ui'; ctx.textAlign='left';
-      ctx.fillText('가격 밴드: $3,000 ~ $6,300', pad, 28);
+
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch (e) { console.error(e); }
+      }
+
+      try {
+        new Chart(document.getElementById('macroRadar'), {
+          type: 'radar',
+          data: {
+            labels: ['실질금리', '달러', '인플레 기대', '중앙은행', 'ETF 흐름', '지정학'],
+            datasets: [{
+              label: '금 우호도',
+              data: [2.0, 2.1, 3.2, 4.5, 3.5, 4.0],
+              backgroundColor: 'rgba(245,158,11,.18)',
+              borderColor: gold,
+              pointBackgroundColor: amber,
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: mutedText } } },
+            scales: {
+              r: {
+                min: 0, max: 5,
+                angleLines: { color: gridColor },
+                grid: { color: gridColor },
+                pointLabels: { color: chartText, font: { size: 12, weight: 'bold' } },
+                ticks: { color: mutedText, backdropColor: 'transparent', stepSize: 1 }
+              }
+            }
+          }
+        });
+      } catch(e) { console.error('macroRadar', e); }
+
+      try {
+        new Chart(document.getElementById('demandDoughnut'), {
+          type: 'doughnut',
+          data: {
+            labels: ['바·코인 투자', '보석', '중앙은행', 'ETF', '기술/산업', '기타·OTC'],
+            datasets: [{
+              data: [474, 335, 244, 62, 82, 34],
+              backgroundColor: [gold, '#f97316', green, blue, purple, slate],
+              borderColor: '#050814',
+              borderWidth: 2,
+              hoverOffset: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+              legend: { position: 'bottom', labels: { color: mutedText, boxWidth: 9, padding: 12, font: { size: 10, weight: 'bold' } } },
+              tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed}t` } }
+            }
+          }
+        });
+      } catch(e) { console.error('demandDoughnut', e); }
+
+      try {
+        new Chart(document.getElementById('ratioBar'), {
+          type: 'bar',
+          data: {
+            labels: ['금/은', '금/WTI', '금/S&P500', '금/BTC ×1000'],
+            datasets: [{
+              label: '상대비율',
+              data: [60.0, 45.4, 0.61, 58.6],
+              backgroundColor: ['rgba(245,158,11,.75)', 'rgba(249,115,22,.75)', 'rgba(59,130,246,.75)', 'rgba(139,92,246,.75)'],
+              borderColor: [gold, '#f97316', blue, purple],
+              borderWidth: 1
+            }]
+          },
+          options: commonOptions({
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y}` } }
+            }
+          })
+        });
+      } catch(e) { console.error('ratioBar', e); }
+
+      try {
+        new Chart(document.getElementById('scenarioBar'), {
+          type: 'bar',
+          data: {
+            labels: ['Bear 25%', 'Base 50%', 'Bull 25%', '확률가중'],
+            datasets: [{
+              label: 'XAU/USD ($/oz)',
+              data: [3900, 5100, 6200, 5075],
+              backgroundColor: ['rgba(239,68,68,.65)', 'rgba(245,158,11,.72)', 'rgba(16,185,129,.68)', 'rgba(251,191,36,.9)'],
+              borderColor: [red, gold, green, amber],
+              borderWidth: 1
+            }]
+          },
+          options: commonOptions({
+            scales: {
+              x: { ticks: { color: mutedText }, grid: { color: gridColor } },
+              y: { min: 3000, max: 6600, ticks: { color: mutedText, callback: (v) => '$' + v.toLocaleString() }, grid: { color: gridColor } }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: (ctx) => '$' + ctx.parsed.y.toLocaleString() + '/oz' } }
+            }
+          })
+        });
+      } catch(e) { console.error('scenarioBar', e); }
+
+      try {
+        new Chart(document.getElementById('institutionBar'), {
+          type: 'bar',
+          data: {
+            labels: ['Reuters Survey', 'Goldman', 'ANZ', 'JPM Avg', 'JPM YE'],
+            datasets: [{
+              label: '금 가격 전망 ($/oz)',
+              data: [4916, 5400, 5600, 5243, 6000],
+              backgroundColor: ['rgba(148,163,184,.65)', 'rgba(139,92,246,.7)', 'rgba(59,130,246,.7)', 'rgba(245,158,11,.75)', 'rgba(16,185,129,.75)'],
+              borderWidth: 1
+            }]
+          },
+          options: commonOptions({
+            indexAxis: 'y',
+            scales: {
+              x: { min: 4300, max: 6300, ticks: { color: mutedText, callback: (v) => '$' + v.toLocaleString() }, grid: { color: gridColor } },
+              y: { ticks: { color: mutedText }, grid: { color: gridColor } }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: (ctx) => '$' + ctx.parsed.x.toLocaleString() + '/oz' } }
+            }
+          })
+        });
+      } catch(e) { console.error('institutionBar', e); }
     }
-    function drawScenario() {
-      const canvas = document.getElementById('scenarioChart');
-      const {ctx, w, h} = setupCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      const max = Math.max(...scenarios.map(s => s.price));
-      const pad = 34, barH = 38, gap = 28;
-      scenarios.forEach((s, i) => {
-        const y = pad + i*(barH+gap);
-        const bw = (w - pad*2) * s.price / max;
-        ctx.fillStyle = 'rgba(255,255,255,.07)';
-        roundRect(ctx, pad, y, w-pad*2, barH, 14); ctx.fill();
-        const grad = ctx.createLinearGradient(pad,0,pad+bw,0);
-        grad.addColorStop(0,'#7a5319'); grad.addColorStop(1,'#f3c969');
-        ctx.fillStyle = grad; roundRect(ctx, pad, y, bw, barH, 14); ctx.fill();
-        ctx.fillStyle = '#080603'; ctx.font='700 13px system-ui'; ctx.textAlign='left';
-        ctx.fillText(`${s.name} · ${s.prob}%`, pad+12, y+24);
-        ctx.fillStyle = '#fff8e9'; ctx.textAlign='right'; ctx.font='800 14px system-ui';
-        ctx.fillText('$'+s.price.toLocaleString(), w-pad, y+24);
-      });
-      ctx.fillStyle = '#b9ad97'; ctx.font='12px system-ui'; ctx.textAlign='left';
-      ctx.fillText('막대 길이: 가격 후보, 레이블: 발생 확률', pad, h-16);
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeCharts);
+    } else {
+      initializeCharts();
     }
-    function roundRect(ctx,x,y,w,h,r){
-      ctx.beginPath();
-      ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
-    }
-    function redraw(){ drawBand(); drawScenario(); }
-    window.addEventListener('load', redraw);
-    window.addEventListener('resize', redraw);
   </script>
 </body>
 </html>
