@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>한·미 상속세 시뮬레이터 | 한국 거주자 + 미국주식</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --paper: #fffdf8;
+      --paper-2: #fff8ec;
+      --ink: #22201b;
+      --muted: #6f675c;
+      --line: #e7ded0;
+      --strong: #3d352b;
+      --accent: #b76e35;
+      --accent-2: #2d6a67;
+      --danger: #b34343;
+      --ok: #2f7a4f;
+      --shadow: 0 16px 40px rgba(61, 53, 43, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(183,110,53,0.16), transparent 32rem),
+        radial-gradient(circle at top right, rgba(45,106,103,0.14), transparent 30rem),
+        var(--bg);
+      line-height: 1.5;
+    }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1440px; margin: 0 auto; padding: 32px 22px 56px; }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr;
+      gap: 18px;
+      margin-bottom: 18px;
+      align-items: stretch;
+    }
+    .heroCard, .panel, .resultCard, .notice {
+      background: rgba(255, 253, 248, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+    .heroCard { padding: 28px; }
+    .eyebrow { color: var(--accent); font-weight: 800; letter-spacing: .02em; font-size: 13px; }
+    h1 { margin: 8px 0 10px; font-size: clamp(28px, 4vw, 48px); letter-spacing: -0.05em; line-height: 1.08; }
+    .hero p { color: var(--muted); margin: 0; font-size: 15px; }
+    .heroSide { padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+    .pillRow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .pill { border: 1px solid var(--line); background: var(--paper-2); padding: 8px 10px; border-radius: 999px; color: var(--strong); font-size: 13px; }
+    .grid { display: grid; grid-template-columns: minmax(360px, 0.95fr) minmax(430px, 1.35fr); gap: 18px; align-items: start; }
+    .leftStack, .rightStack { display: flex; flex-direction: column; gap: 18px; }
+    .panel { padding: 20px; }
+    .panel h2 { margin: 0 0 14px; font-size: 18px; letter-spacing: -0.03em; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .sectionHint { color: var(--muted); font-size: 12px; font-weight: 500; }
+    .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: var(--strong); font-size: 13px; font-weight: 750; }
+    .desc { color: var(--muted); font-size: 12px; margin-top: -2px; }
+    input, select, textarea {
+      width: 100%; border: 1px solid var(--line); background: #fffefa; color: var(--ink);
+      border-radius: 12px; padding: 11px 12px; font-size: 14px; outline: none;
+      transition: border .15s, box-shadow .15s, background .15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: rgba(183,110,53,.55); box-shadow: 0 0 0 4px rgba(183,110,53,.12); background: #fff; }
+    input[type="checkbox"] { width: auto; transform: translateY(1px); }
+    .checkField { display: flex; gap: 9px; align-items: flex-start; border: 1px solid var(--line); background: var(--paper-2); padding: 11px; border-radius: 14px; }
+    .checkField label { margin: 0; }
+    .buttonRow { display:flex; flex-wrap:wrap; gap: 8px; margin-top: 10px; }
+    button {
+      border: 0; border-radius: 12px; padding: 10px 13px; font-weight: 800; cursor: pointer;
+      background: var(--strong); color: white; box-shadow: 0 8px 20px rgba(61,53,43,.14);
+    }
+    button.secondary { background: #eadfce; color: var(--strong); box-shadow: none; border: 1px solid var(--line); }
+    button.ghost { background: transparent; color: var(--accent-2); box-shadow: none; border: 1px solid rgba(45,106,103,.25); }
+    .resultsGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .resultCard { padding: 16px; min-height: 128px; display: flex; flex-direction: column; justify-content: space-between; }
+    .resultCard .label { font-size: 12px; color: var(--muted); font-weight: 800; }
+    .resultCard .value { font-size: 24px; letter-spacing: -0.04em; font-weight: 900; margin: 8px 0 2px; }
+    .resultCard .sub { color: var(--muted); font-size: 12px; }
+    .accent { color: var(--accent); }
+    .teal { color: var(--accent-2); }
+    .danger { color: var(--danger); }
+    .ok { color: var(--ok); }
+    .calcTable, .rateTable { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 14px; font-size: 13px; }
+    .calcTable th, .calcTable td, .rateTable th, .rateTable td { padding: 10px 11px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+    .calcTable th:first-child, .calcTable td:first-child, .rateTable th:first-child, .rateTable td:first-child { text-align: left; }
+    .calcTable thead, .rateTable thead { background: #f4eadb; }
+    .calcTable tbody tr:nth-child(even), .rateTable tbody tr:nth-child(even) { background: rgba(255,248,236,.6); }
+    .calcTable tfoot { font-weight: 900; background: #f4eadb; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .tab { background: transparent; color: var(--muted); border: 1px solid var(--line); box-shadow: none; padding: 8px 11px; }
+    .tab.active { background: var(--strong); color: white; border-color: var(--strong); }
+    .notice { padding: 15px 16px; color: var(--muted); font-size: 13px; }
+    .notice strong { color: var(--strong); }
+    .miniStats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .mini { border: 1px solid var(--line); background: var(--paper-2); border-radius: 14px; padding: 12px; }
+    .mini .k { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .mini .v { font-weight: 900; margin-top: 5px; letter-spacing: -0.02em; }
+    .barBox { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .barLabel { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-weight: 800; }
+    .barTrack { height: 12px; background: #eee4d5; border-radius: 99px; overflow: hidden; }
+    .barFill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 99px; }
+    details { border: 1px solid var(--line); border-radius: 14px; background: rgba(255,248,236,.56); padding: 12px 14px; }
+    summary { cursor: pointer; font-weight: 850; color: var(--strong); }
+    .sourceList { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .footerNote { color: var(--muted); font-size: 12px; margin-top: 14px; }
+    .twoCol { display:grid; grid-template-columns:1fr 1fr; gap: 14px; }
+    @media (max-width: 1080px) {
+      .hero, .grid, .twoCol { grid-template-columns: 1fr; }
+      .resultsGrid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .wrap { padding: 18px 12px 34px; }
+      .formGrid, .resultsGrid, .miniStats { grid-template-columns: 1fr; }
+      .heroCard { padding: 20px; }
+      .calcTable, .rateTable { font-size: 12px; }
+      .calcTable th, .calcTable td, .rateTable th, .rateTable td { padding: 8px; }
+    }
+    @media print {
+      body { background: white; }
+      .panel, .heroCard, .heroSide, .resultCard, .notice { box-shadow: none; background: white; }
+      button, .tabs { display: none !important; }
+      .grid, .hero { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useMemo, useState, useEffect } = React;
+
+    const KR_RATE_TABLE = [
+      { upTo: 100_000_000, rate: 0.10, deduction: 0, label: '1억원 이하' },
+      { upTo: 500_000_000, rate: 0.20, deduction: 10_000_000, label: '1억 초과 ~ 5억원 이하' },
+      { upTo: 1_000_000_000, rate: 0.30, deduction: 60_000_000, label: '5억 초과 ~ 10억원 이하' },
+      { upTo: 3_000_000_000, rate: 0.40, deduction: 160_000_000, label: '10억 초과 ~ 30억원 이하' },
+      { upTo: Infinity, rate: 0.50, deduction: 460_000_000, label: '30억원 초과' },
+    ];
+
+    const US_RATE_TABLE = [
+      { upTo: 10_000, base: 0, rate: 0.18, over: 0, label: '$10,000 이하' },
+      { upTo: 20_000, base: 1_800, rate: 0.20, over: 10_000, label: '$10,000 초과 ~ $20,000 이하' },
+      { upTo: 40_000, base: 3_800, rate: 0.22, over: 20_000, label: '$20,000 초과 ~ $40,000 이하' },
+      { upTo: 60_000, base: 8_200, rate: 0.24, over: 40_000, label: '$40,000 초과 ~ $60,000 이하' },
+      { upTo: 80_000, base: 13_000, rate: 0.26, over: 60_000, label: '$60,000 초과 ~ $80,000 이하' },
+      { upTo: 100_000, base: 18_200, rate: 0.28, over: 80_000, label: '$80,000 초과 ~ $100,000 이하' },
+      { upTo: 150_000, base: 23_800, rate: 0.30, over: 100_000, label: '$100,000 초과 ~ $150,000 이하' },
+      { upTo: 250_000, base: 38_800, rate: 0.32, over: 150_000, label: '$150,000 초과 ~ $250,000 이하' },
+      { upTo: 500_000, base: 70_800, rate: 0.34, over: 250_000, label: '$250,000 초과 ~ $500,000 이하' },
+      { upTo: 750_000, base: 155_800, rate: 0.37, over: 500_000, label: '$500,000 초과 ~ $750,000 이하' },
+      { upTo: 1_000_000, base: 248_300, rate: 0.39, over: 750_000, label: '$750,000 초과 ~ $1,000,000 이하' },
+      { upTo: Infinity, base: 345_800, rate: 0.40, over: 1_000_000, label: '$1,000,000 초과' },
+    ];
+
+    const STORAGE_KEY = 'kr-us-estate-tax-sim-v2';
+    const PRESET_US_STOCK_KRW = {
+      small: 100_000_000,
+      middle: 500_000_000,
+      large: 1_000_000_000,
+    };
+
+    const DEFAULT = {
+      fx: 1500,
+      scenarioName: '한국 거주자 / 미국 비거주자·비시민권자 / 미국주식 보유',
+      nrncMode: true,
+      totalAssetsKRW: 2_000_000_000,
+      estateDebtsKRW: 0,
+      funeralAdminKRW: 15_000_000,
+      priorGiftsKRW: 0,
+      krDeductionsKRW: 500_000_000,
+      appraisalFeeKRW: 0,
+      generationSkipSharePct: 0,
+      generationSkipSurchargePct: 30,
+      otherKrCreditsKRW: 0,
+      returnCreditPct: 3,
+      usStocksUSD: 333_333,
+      usEtfUSD: 0,
+      usOtherSitusUSD: 0,
+      usExcludedUSD: 0,
+      usAdjustedTaxableGiftsUSD: 0,
+      usDirectDeductionsUSD: 0,
+      worldwideGrossEstateUSD: 1_333_333,
+      globalExpenseForUSUSD: 0,
+      usCharitableMaritalDeductionUSD: 0,
+      usStateDeathTaxUSD: 0,
+      usUnifiedCreditUSD: 13_000,
+      usTreatyCreditUSD: 0,
+      usOtherCreditsUSD: 0,
+      koreaFtcMode: 'auto',
+      foreignPropertyForFtcKRW: 500_000_000,
+      foreignTaxPaidMode: 'usTax',
+      manualForeignTaxPaidKRW: 0,
+      manualFtcLimitKRW: 0,
+      showAdvanced: true,
+    };
+
+    function clamp(n, min, max) { return Math.min(Math.max(n, min), max); }
+    function num(v) { const n = Number(String(v ?? '').replace(/,/g, '')); return Number.isFinite(n) ? n : 0; }
+    function moneyKRW(v) { return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(Math.round(v || 0)) + '원'; }
+    function moneyUSD(v) { return '$' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.round(v || 0)); }
+    function pct(v, digits=1) { return (Number.isFinite(v) ? v * 100 : 0).toFixed(digits) + '%'; }
+    function shortKRW(v) {
+      const abs = Math.abs(v || 0);
+      if (abs >= 100_000_000) return (v / 100_000_000).toLocaleString('ko-KR', { maximumFractionDigits: 2 }) + '억원';
+      if (abs >= 10_000) return (v / 10_000).toLocaleString('ko-KR', { maximumFractionDigits: 1 }) + '만원';
+      return moneyKRW(v);
+    }
+    function shortUSD(v) {
+      if (Math.abs(v || 0) >= 1_000_000) return '$' + (v / 1_000_000).toLocaleString('en-US', { maximumFractionDigits: 2 }) + 'M';
+      if (Math.abs(v || 0) >= 1_000) return '$' + (v / 1_000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'K';
+      return moneyUSD(v);
+    }
+
+    function calcUsTentativeTax(amount) {
+      const taxable = Math.max(0, amount || 0);
+      const row = US_RATE_TABLE.find(r => taxable <= r.upTo) || US_RATE_TABLE[US_RATE_TABLE.length - 1];
+      return row.base + (taxable - row.over) * row.rate;
+    }
+    function usBracket(amount) {
+      const taxable = Math.max(0, amount || 0);
+      return US_RATE_TABLE.find(r => taxable <= r.upTo) || US_RATE_TABLE[US_RATE_TABLE.length - 1];
+    }
+    function calcKrTax(base) {
+      const taxable = Math.max(0, base || 0);
+      const row = KR_RATE_TABLE.find(r => taxable <= r.upTo) || KR_RATE_TABLE[KR_RATE_TABLE.length - 1];
+      return Math.max(0, taxable * row.rate - row.deduction);
+    }
+    function krBracket(base) {
+      const taxable = Math.max(0, base || 0);
+      return KR_RATE_TABLE.find(r => taxable <= r.upTo) || KR_RATE_TABLE[KR_RATE_TABLE.length - 1];
+    }
+
+    function NumberField({ label, value, set, suffix, desc, step = 1000, full = false, min = 0 }) {
+      return <div className={"field " + (full ? 'full' : '')}>
+        <label>{label}</label>
+        {desc && <div className="desc">{desc}</div>}
+        <input type="number" min={min} step={step} value={value} onChange={e => set(num(e.target.value))} />
+        {suffix && <div className="desc">{suffix}</div>}
+      </div>;
+    }
+
+    function ResultCard({ label, value, sub, tone }) {
+      return <div className="resultCard">
+        <div className="label">{label}</div>
+        <div className={'value ' + (tone || '')}>{value}</div>
+        <div className="sub">{sub}</div>
+      </div>;
+    }
+
+    function App() {
+      const [v, setV] = useState(() => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          return saved ? { ...DEFAULT, ...JSON.parse(saved) } : DEFAULT;
+        } catch { return DEFAULT; }
+      });
+      const [tab, setTab] = useState('summary');
+
+      useEffect(() => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch {}
+      }, [v]);
+
+      const set = (key) => (value) => setV(prev => ({ ...prev, [key]: value }));
+      const patch = (obj) => setV(prev => ({ ...prev, ...obj }));
+
+      const c = useMemo(() => {
+        const fx = Math.max(1, num(v.fx));
+        const usSitusGrossUSD = num(v.usStocksUSD) + num(v.usEtfUSD) + num(v.usOtherSitusUSD);
+        const usFilingThresholdUSD = 60_000;
+        const usEntireGrossUSD = Math.max(num(v.worldwideGrossEstateUSD), usSitusGrossUSD + num(v.usExcludedUSD));
+        const allocationRatio = usEntireGrossUSD > 0 ? clamp(usSitusGrossUSD / usEntireGrossUSD, 0, 1) : 0;
+        const proratedGlobalDeductionsUSD = num(v.globalExpenseForUSUSD) * allocationRatio;
+        const usAllowedDeductionsUSD = num(v.usDirectDeductionsUSD) + proratedGlobalDeductionsUSD + num(v.usCharitableMaritalDeductionUSD) + num(v.usStateDeathTaxUSD);
+        const usTaxableBeforeGiftsUSD = Math.max(0, usSitusGrossUSD - usAllowedDeductionsUSD);
+        const usTentativeBaseUSD = Math.max(0, usTaxableBeforeGiftsUSD + num(v.usAdjustedTaxableGiftsUSD));
+        const usTentativeTaxUSD = calcUsTentativeTax(usTentativeBaseUSD);
+        const maxUnified = Math.max(0, num(v.usUnifiedCreditUSD) + num(v.usTreatyCreditUSD));
+        const usUnifiedCreditUsedUSD = Math.min(usTentativeTaxUSD, maxUnified);
+        const usCreditsUSD = usUnifiedCreditUsedUSD + Math.max(0, num(v.usOtherCreditsUSD));
+        const usEstateTaxUSD = Math.max(0, usTentativeTaxUSD - usCreditsUSD);
+        const usBracketInfo = usBracket(usTentativeBaseUSD);
+        const usEffectiveRate = usSitusGrossUSD > 0 ? usEstateTaxUSD / usSitusGrossUSD : 0;
+        const usTaxKRW = usEstateTaxUSD * fx;
+
+        const krGrossTaxableValue = num(v.totalAssetsKRW) + num(v.priorGiftsKRW) - num(v.estateDebtsKRW) - num(v.funeralAdminKRW);
+        const krTaxBase = Math.max(0, krGrossTaxableValue - num(v.krDeductionsKRW) - num(v.appraisalFeeKRW));
+        const krCalculatedTax = calcKrTax(krTaxBase);
+        const generationSkipSurcharge = krCalculatedTax * clamp(num(v.generationSkipSharePct) / 100, 0, 1) * clamp(num(v.generationSkipSurchargePct) / 100, 0, 1);
+        const krPreCreditTax = krCalculatedTax + generationSkipSurcharge;
+        const krBracketInfo = krBracket(krTaxBase);
+        const foreignPropertyAutoKRW = usTaxableBeforeGiftsUSD * fx;
+        const foreignPropertyForFtcKRW = v.koreaFtcMode === 'auto' ? foreignPropertyAutoKRW : num(v.foreignPropertyForFtcKRW);
+        const autoFtcLimitKRW = krTaxBase > 0 ? krPreCreditTax * clamp(foreignPropertyForFtcKRW / krTaxBase, 0, 1) : 0;
+        const ftcLimitKRW = v.koreaFtcMode === 'manualLimit' ? Math.max(0, num(v.manualFtcLimitKRW)) : autoFtcLimitKRW;
+        const foreignTaxPaidKRW = v.foreignTaxPaidMode === 'usTax' ? usTaxKRW : Math.max(0, num(v.manualForeignTaxPaidKRW));
+        const ftcUsedKRW = Math.min(foreignTaxPaidKRW, ftcLimitKRW, krPreCreditTax);
+        const afterForeignCredit = Math.max(0, krPreCreditTax - ftcUsedKRW - num(v.otherKrCreditsKRW));
+        const returnCreditKRW = afterForeignCredit * clamp(num(v.returnCreditPct) / 100, 0, 1);
+        const krFinalTaxKRW = Math.max(0, afterForeignCredit - returnCreditKRW);
+        const totalTaxKRW = usTaxKRW + krFinalTaxKRW;
+        const totalEstateNetKRW = Math.max(0, num(v.totalAssetsKRW) - num(v.estateDebtsKRW));
+        const totalEffectiveRate = totalEstateNetKRW > 0 ? totalTaxKRW / totalEstateNetKRW : 0;
+        const krEffectiveRate = totalEstateNetKRW > 0 ? krFinalTaxKRW / totalEstateNetKRW : 0;
+
+        // 비교 기준: 같은 전체 상속재산가액을 유지하되 미국주식/미국 소재 재산이 전혀 없고
+        // 모두 한국 소재 자산이라고 가정합니다. 따라서 미국 상속세와 외국납부세액공제는 0입니다.
+        const noUsAfterCredits = Math.max(0, krPreCreditTax - num(v.otherKrCreditsKRW));
+        const noUsReturnCreditKRW = noUsAfterCredits * clamp(num(v.returnCreditPct) / 100, 0, 1);
+        const noUsKrFinalTaxKRW = Math.max(0, noUsAfterCredits - noUsReturnCreditKRW);
+        const noUsTotalTaxKRW = noUsKrFinalTaxKRW;
+        const extraVsNoUsKRW = totalTaxKRW - noUsTotalTaxKRW;
+        const extraVsNoUsEffectiveRate = totalEstateNetKRW > 0 ? extraVsNoUsKRW / totalEstateNetKRW : 0;
+        const extraVsUsAssetsRate = usSitusGrossUSD > 0 ? extraVsNoUsKRW / (usSitusGrossUSD * fx) : 0;
+
+        return {
+          fx,
+          usSitusGrossUSD, usFilingThresholdUSD, usEntireGrossUSD, allocationRatio,
+          proratedGlobalDeductionsUSD, usAllowedDeductionsUSD, usTaxableBeforeGiftsUSD,
+          usTentativeBaseUSD, usTentativeTaxUSD, usUnifiedCreditUsedUSD, usCreditsUSD,
+          usEstateTaxUSD, usTaxKRW, usBracketInfo, usEffectiveRate,
+          krGrossTaxableValue, krTaxBase, krCalculatedTax, generationSkipSurcharge,
+          krPreCreditTax, krBracketInfo, foreignPropertyAutoKRW, foreignPropertyForFtcKRW,
+          autoFtcLimitKRW, ftcLimitKRW, foreignTaxPaidKRW, ftcUsedKRW,
+          afterForeignCredit, returnCreditKRW, krFinalTaxKRW, totalTaxKRW, totalEstateNetKRW,
+          totalEffectiveRate, krEffectiveRate,
+          noUsReturnCreditKRW, noUsKrFinalTaxKRW, noUsTotalTaxKRW,
+          extraVsNoUsKRW, extraVsNoUsEffectiveRate, extraVsUsAssetsRate,
+          needsUsFiling: usSitusGrossUSD + num(v.usAdjustedTaxableGiftsUSD) > usFilingThresholdUSD,
+        };
+      }, [v]);
+
+      const sample = (type) => {
+        const fx = Math.max(1, num(v.fx));
+        const usStockKRW = PRESET_US_STOCK_KRW[type] || PRESET_US_STOCK_KRW.middle;
+        const usStocksUSD = Math.round(usStockKRW / fx);
+        if (type === 'small') patch({
+          scenarioName: '소액 미국주식 1억 보유',
+          totalAssetsKRW: 1_000_000_000,
+          usStocksUSD, usEtfUSD: 0, usOtherSitusUSD: 0,
+          worldwideGrossEstateUSD: Math.round(1_000_000_000 / fx),
+          krDeductionsKRW: 500_000_000,
+          foreignPropertyForFtcKRW: usStockKRW,
+        });
+        if (type === 'middle') patch({
+          scenarioName: '중간 미국주식 5억 보유',
+          totalAssetsKRW: 2_000_000_000,
+          usStocksUSD, usEtfUSD: 0, usOtherSitusUSD: 0,
+          worldwideGrossEstateUSD: Math.round(2_000_000_000 / fx),
+          krDeductionsKRW: 500_000_000,
+          foreignPropertyForFtcKRW: usStockKRW,
+        });
+        if (type === 'large') patch({
+          scenarioName: '고액 미국주식 10억 보유',
+          totalAssetsKRW: 5_000_000_000,
+          usStocksUSD, usEtfUSD: 0, usOtherSitusUSD: 0,
+          worldwideGrossEstateUSD: Math.round(5_000_000_000 / fx),
+          krDeductionsKRW: 1_000_000_000,
+          foreignPropertyForFtcKRW: usStockKRW,
+        });
+      };
+
+      const copySummary = async () => {
+        const text = [
+          `시나리오: ${v.scenarioName}`,
+          `환율: ${c.fx} KRW/USD`,
+          `전체 상속재산가액: ${moneyKRW(num(v.totalAssetsKRW))} (${moneyUSD(num(v.totalAssetsKRW) / c.fx)})`,
+          `미국 과세대상: ${moneyUSD(c.usSitusGrossUSD)} / 미국 상속세: ${moneyUSD(c.usEstateTaxUSD)} (${moneyKRW(c.usTaxKRW)})`,
+          `한국 과세표준: ${moneyKRW(c.krTaxBase)} / 한국 산출세액: ${moneyKRW(c.krPreCreditTax)}`,
+          `외국납부세액공제 사용: ${moneyKRW(c.ftcUsedKRW)} = min(외국납부세액, 공제한도)`,
+          `한국 최종 납부세액: ${moneyKRW(c.krFinalTaxKRW)}`,
+          `한미 합산 세부담: ${moneyKRW(c.totalTaxKRW)} / 실효세율: ${pct(c.totalEffectiveRate)}`,
+          `미국주식 없이 모두 한국 자산인 경우: ${moneyKRW(c.noUsTotalTaxKRW)}`,
+          `미국주식 보유에 따른 추가 세부담: ${moneyKRW(c.extraVsNoUsKRW)} / 미국자산 대비 ${pct(c.extraVsUsAssetsRate)}`,
+        ].join('\n');
+        try { await navigator.clipboard.writeText(text); alert('요약을 클립보드에 복사했습니다.'); }
+        catch { alert(text); }
+      };
+
+      return <div className="wrap">
+        <div className="hero">
+          <div className="heroCard">
+            <div className="eyebrow">React CDN · Single HTML · KR/US Estate Tax Simulator</div>
+            <h1>한국 거주자가 미국주식을 보유한 상태로 사망한 경우의 한·미 상속세 계산기</h1>
+            <p>미국 비거주자·비시민권자(NRNC)의 미국 소재 재산 과세, 한국 상속세 산출세액, 외국납부세액공제액·한도, 신고세액공제, 세율표를 한 화면에서 조정합니다.</p>
+            <div className="pillRow">
+              <span className="pill">미국 706-NA 기준 시뮬레이션</span>
+              <span className="pill">한국 상속세 5단계 누진세율</span>
+              <span className="pill">외국납부세액공제 자동/수동</span>
+              <span className="pill">환율 반영</span>
+            </div>
+          </div>
+          <div className="heroSide heroCard">
+            <div className="miniStats">
+              <div className="mini"><div className="k">미국 신고 필요 가능성</div><div className={'v ' + (c.needsUsFiling ? 'danger' : 'ok')}>{c.needsUsFiling ? '있음' : '낮음'}</div></div>
+              <div className="mini"><div className="k">미국 한계세율</div><div className="v">{pct(c.usBracketInfo.rate, 0)}</div></div>
+              <div className="mini"><div className="k">한국 한계세율</div><div className="v">{pct(c.krBracketInfo.rate, 0)}</div></div>
+              <div className="mini"><div className="k">합산 실효세율</div><div className="v teal">{pct(c.totalEffectiveRate)}</div></div>
+            </div>
+            <div className="buttonRow">
+              <button onClick={copySummary}>결과 복사</button>
+              <button className="secondary" onClick={() => window.print()}>인쇄/PDF</button>
+              <button className="ghost" onClick={() => { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem('kr-us-estate-tax-sim-v1'); setV(DEFAULT); }}>초기화</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="resultsGrid" style={{ marginBottom: 18 }}>
+          <ResultCard label="미국 상속세" value={shortUSD(c.usEstateTaxUSD)} sub={moneyKRW(c.usTaxKRW)} tone="accent" />
+          <ResultCard label="한국 산출세액" value={shortKRW(c.krPreCreditTax)} sub={`과세표준 ${shortKRW(c.krTaxBase)}`} />
+          <ResultCard label="한국 외국납부세액공제" value={shortKRW(c.ftcUsedKRW)} sub={`min(외국세 ${shortKRW(c.foreignTaxPaidKRW)}, 한도 ${shortKRW(c.ftcLimitKRW)})`} tone="teal" />
+          <ResultCard label="한미 합산 최종 세부담" value={shortKRW(c.totalTaxKRW)} sub={`총 실효세율 ${pct(c.totalEffectiveRate)}`} tone="danger" />
+          <ResultCard label="전부 한국 자산 대비 추가 세부담" value={shortKRW(c.extraVsNoUsKRW)} sub={`미국자산 대비 ${pct(c.extraVsUsAssetsRate)}`} tone={c.extraVsNoUsKRW >= 0 ? 'danger' : 'ok'} />
+        </div>
+
+        <div className="grid">
+          <div className="leftStack">
+            <div className="panel">
+              <h2>1. 기본 설정 <span className="sectionHint">통화·시나리오</span></h2>
+              <div className="formGrid">
+                <div className="field full">
+                  <label>시나리오 이름</label>
+                  <input value={v.scenarioName} onChange={e => set('scenarioName')(e.target.value)} />
+                </div>
+                <NumberField label="환율 KRW/USD" value={v.fx} set={set('fx')} step={1} desc="미국 세액을 원화로 환산할 때 사용" />
+                <div className="field">
+                  <label>미국 납세자 유형</label>
+                  <div className="checkField">
+                    <input type="checkbox" checked={v.nrncMode} onChange={e => set('nrncMode')(e.target.checked)} />
+                    <div>
+                      <label>미국 비거주자·비시민권자(NRNC) 모드</label>
+                      <div className="desc">한국 거주 한국인 일반 사례. 해제하면 계산식은 참고용으로만 보세요.</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="field full">
+                  <label>샘플 입력</label>
+                  <div className="buttonRow">
+                    <button className="secondary" onClick={() => sample('small')}>소액 미국주식 1억</button>
+                    <button className="secondary" onClick={() => sample('middle')}>중간 미국주식 5억</button>
+                    <button className="secondary" onClick={() => sample('large')}>고액 미국주식 10억</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="panel">
+              <h2>2. 미국 과세대상 입력 <span className="sectionHint">USD</span></h2>
+              <div className="formGrid">
+                <NumberField label="미국 개별주식" value={v.usStocksUSD} set={set('usStocksUSD')} step={1000} desc="미국 법인 주식. 한국 증권사 보유분도 여기에 입력" />
+                <NumberField label="미국 ETF/RIC" value={v.usEtfUSD} set={set('usEtfUSD')} step={1000} desc="상장 ETF 등. 세부 유형은 전문가 확인 필요" />
+                <NumberField label="기타 미국 소재 재산" value={v.usOtherSitusUSD} set={set('usOtherSitusUSD')} step={1000} desc="미국 부동산, 미국 사업지분 등" />
+                <NumberField label="미국 상속세 제외 가능 자산" value={v.usExcludedUSD} set={set('usExcludedUSD')} step={1000} desc="예: 일정 예금·보험금 등. 세액에는 더하지 않음" />
+                <NumberField label="미국 과세 사전증여" value={v.usAdjustedTaxableGiftsUSD} set={set('usAdjustedTaxableGiftsUSD')} step={1000} desc="1977년 이후 미국 소재 증여 등 해당 시" />
+                <NumberField label="미국 직접 공제/부채" value={v.usDirectDeductionsUSD} set={set('usDirectDeductionsUSD')} step={1000} desc="미국 소재 재산에 직접 연결된 공제" />
+                <NumberField label="전세계 총 유산가액" value={v.worldwideGrossEstateUSD} set={set('worldwideGrossEstateUSD')} step={1000} desc="미국 공제 배분비율 계산용" />
+                <NumberField label="전세계 공통비용/채무" value={v.globalExpenseForUSUSD} set={set('globalExpenseForUSUSD')} step={1000} desc="미국 소재 비율만큼 배분" />
+                <NumberField label="미국 자선/혼인 등 특수공제" value={v.usCharitableMaritalDeductionUSD} set={set('usCharitableMaritalDeductionUSD')} step={1000} desc="QDOT 등 요건 주의" />
+                <NumberField label="미국 주/지방 사망세 공제" value={v.usStateDeathTaxUSD} set={set('usStateDeathTaxUSD')} step={1000} desc="해당 시만 입력" />
+                <NumberField label="미국 unified credit" value={v.usUnifiedCreditUSD} set={set('usUnifiedCreditUSD')} step={100} desc="NRNC 기본값 $13,000" />
+                <NumberField label="조약/기타 추가 credit" value={v.usTreatyCreditUSD} set={set('usTreatyCreditUSD')} step={100} desc="한국은 별도 estate/gift treaty가 없는 것으로 보아 보통 0" />
+                <NumberField label="기타 미국 세액공제" value={v.usOtherCreditsUSD} set={set('usOtherCreditsUSD')} step={100} full />
+              </div>
+            </div>
+
+            <div className="panel">
+              <h2>3. 한국 상속세 입력 <span className="sectionHint">KRW</span></h2>
+              <div className="formGrid">
+                <NumberField label="전체 상속재산가액" value={v.totalAssetsKRW} set={set('totalAssetsKRW')} step={10_000_000} desc="한국 거주자 기준 국내외 모든 상속재산" />
+                <NumberField label="채무/공과금" value={v.estateDebtsKRW} set={set('estateDebtsKRW')} step={1_000_000} />
+                <NumberField label="장례·관리비 등" value={v.funeralAdminKRW} set={set('funeralAdminKRW')} step={1_000_000} />
+                <NumberField label="사전증여 가산액" value={v.priorGiftsKRW} set={set('priorGiftsKRW')} step={10_000_000} />
+                <NumberField label="상속공제 합계" value={v.krDeductionsKRW} set={set('krDeductionsKRW')} step={10_000_000} desc="일괄공제, 배우자공제, 금융재산공제 등 직접 입력" />
+                <NumberField label="감정평가수수료 등" value={v.appraisalFeeKRW} set={set('appraisalFeeKRW')} step={1_000_000} />
+                <NumberField label="세대생략 대상 비율(%)" value={v.generationSkipSharePct} set={set('generationSkipSharePct')} step={1} desc="없으면 0" />
+                <NumberField label="세대생략 할증률(%)" value={v.generationSkipSurchargePct} set={set('generationSkipSurchargePct')} step={1} desc="보통 30%, 일부 40%" />
+                <NumberField label="기타 한국 세액공제" value={v.otherKrCreditsKRW} set={set('otherKrCreditsKRW')} step={1_000_000} />
+                <NumberField label="신고세액공제율(%)" value={v.returnCreditPct} set={set('returnCreditPct')} step={0.1} desc="기한 내 신고 가정 기본 3%" />
+              </div>
+            </div>
+
+            <div className="panel">
+              <h2>4. 외국납부세액공제 <span className="sectionHint">한국 세액에서 차감</span></h2>
+              <div className="formGrid">
+                <div className="field full">
+                  <label>공제한도 계산 방식</label>
+                  <select value={v.koreaFtcMode} onChange={e => set('koreaFtcMode')(e.target.value)}>
+                    <option value="auto">자동: 한국 산출세액 × 국외재산 / 한국 과세표준</option>
+                    <option value="manualProperty">수동: 공제대상 국외재산가액 직접 입력</option>
+                    <option value="manualLimit">수동: 외국납부세액공제 한도 직접 입력</option>
+                  </select>
+                </div>
+                <NumberField label="공제대상 외국 과세표준" value={v.koreaFtcMode === 'auto' ? Math.round(c.foreignPropertyAutoKRW) : v.foreignPropertyForFtcKRW} set={set('foreignPropertyForFtcKRW')} step={1_000_000} desc="자동 모드는 미국 taxable estate(공제 후, 증여 전) × 환율. 신고 시 수동 확인 권장" />
+                <NumberField label="수동 공제한도" value={v.manualFtcLimitKRW} set={set('manualFtcLimitKRW')} step={1_000_000} desc="수동 한도 모드에서만 사용" />
+                <div className="field full">
+                  <label>외국납부세액 입력 방식</label>
+                  <select value={v.foreignTaxPaidMode} onChange={e => set('foreignTaxPaidMode')(e.target.value)}>
+                    <option value="usTax">미국 상속세 계산액을 외국납부세액으로 사용</option>
+                    <option value="manual">수동 입력</option>
+                  </select>
+                </div>
+                <NumberField label="수동 외국납부세액" value={v.manualForeignTaxPaidKRW} set={set('manualForeignTaxPaidKRW')} step={1_000_000} desc="미국 실제 납부세액이 계산값과 다를 때" full />
+              </div>
+            </div>
+          </div>
+
+          <div className="rightStack">
+            <div className="panel">
+              <div className="tabs">
+                <button className={'tab ' + (tab === 'summary' ? 'active' : '')} onClick={() => setTab('summary')}>계산 요약</button>
+                <button className={'tab ' + (tab === 'us' ? 'active' : '')} onClick={() => setTab('us')}>미국 계산</button>
+                <button className={'tab ' + (tab === 'kr' ? 'active' : '')} onClick={() => setTab('kr')}>한국 계산</button>
+                <button className={'tab ' + (tab === 'rates' ? 'active' : '')} onClick={() => setTab('rates')}>세율표</button>
+                <button className={'tab ' + (tab === 'notes' ? 'active' : '')} onClick={() => setTab('notes')}>주의사항</button>
+              </div>
+
+              {tab === 'summary' && <div>
+                <h2>핵심 결과</h2>
+                <table className="calcTable">
+                  <tbody>
+                    <tr><td>전체 상속재산가액</td><td>{moneyUSD(num(v.totalAssetsKRW) / c.fx)}</td><td>{moneyKRW(num(v.totalAssetsKRW))}</td></tr>
+                    <tr><td>미국 과세대상 gross estate</td><td>{moneyUSD(c.usSitusGrossUSD)}</td><td>{moneyKRW(c.usSitusGrossUSD * c.fx)}</td></tr>
+                    <tr><td>미국 상속세</td><td>{moneyUSD(c.usEstateTaxUSD)}</td><td>{moneyKRW(c.usTaxKRW)}</td></tr>
+                    <tr><td>한국 상속세 산출세액+할증</td><td>-</td><td>{moneyKRW(c.krPreCreditTax)}</td></tr>
+                    <tr><td>한국 외국납부세액공제 사용액</td><td>-</td><td className="teal">-{moneyKRW(c.ftcUsedKRW)}</td></tr>
+                    <tr><td>한국 신고세액공제</td><td>-</td><td>-{moneyKRW(c.returnCreditKRW)}</td></tr>
+                    <tr><td>한국 최종 납부세액</td><td>-</td><td>{moneyKRW(c.krFinalTaxKRW)}</td></tr>
+                    <tr><td>비교: 미국주식 없이 전부 한국 자산인 경우</td><td>-</td><td>{moneyKRW(c.noUsTotalTaxKRW)}</td></tr>
+                    <tr><td>미국주식 보유에 따른 추가 세부담</td><td>{moneyUSD(c.extraVsNoUsKRW / c.fx)}</td><td className={c.extraVsNoUsKRW >= 0 ? 'danger' : 'ok'}>{moneyKRW(c.extraVsNoUsKRW)}</td></tr>
+                  </tbody>
+                  <tfoot>
+                    <tr><td>한미 합산 최종 세부담</td><td>{moneyUSD(c.totalTaxKRW / c.fx)}</td><td>{moneyKRW(c.totalTaxKRW)}</td></tr>
+                  </tfoot>
+                </table>
+
+                <div className="barBox">
+                  <div className="barLabel"><span>미국 세액 비중</span><span>{pct(c.totalTaxKRW ? c.usTaxKRW / c.totalTaxKRW : 0)}</span></div>
+                  <div className="barTrack"><div className="barFill" style={{ width: pct(c.totalTaxKRW ? c.usTaxKRW / c.totalTaxKRW : 0) }} /></div>
+                  <div className="barLabel"><span>한국 세액 비중</span><span>{pct(c.totalTaxKRW ? c.krFinalTaxKRW / c.totalTaxKRW : 0)}</span></div>
+                  <div className="barTrack"><div className="barFill" style={{ width: pct(c.totalTaxKRW ? c.krFinalTaxKRW / c.totalTaxKRW : 0) }} /></div>
+                </div>
+
+                <div className="notice" style={{ marginTop: 14 }}>
+                  <strong>해석:</strong> 계산 순서는 <code>미국 상속세 납부 + 한국 상속세</code>입니다. 다만 한국 상속세 계산 시 미국에 실제 낸 상속세를 <code>min(외국납부세액, 한국 공제한도)</code>만큼 한국 산출세액에서 공제합니다. “전부 한국 자산” 비교는 같은 전체 상속재산가액에서 미국 소재 재산과 미국 상속세가 0인 경우로 보며, 외국납부세액공제와 신고세액공제 변화까지 함께 반영합니다.
+                </div>
+              </div>}
+
+              {tab === 'us' && <div>
+                <h2>미국 상속세 계산</h2>
+                <table className="calcTable">
+                  <tbody>
+                    <tr><td>미국 개별주식</td><td>{moneyUSD(num(v.usStocksUSD))}</td></tr>
+                    <tr><td>미국 ETF/RIC</td><td>{moneyUSD(num(v.usEtfUSD))}</td></tr>
+                    <tr><td>기타 미국 소재 재산</td><td>{moneyUSD(num(v.usOtherSitusUSD))}</td></tr>
+                    <tr><td>미국 소재 gross estate</td><td>{moneyUSD(c.usSitusGrossUSD)}</td></tr>
+                    <tr><td>전세계 gross estate</td><td>{moneyUSD(c.usEntireGrossUSD)}</td></tr>
+                    <tr><td>공통비용 배분비율</td><td>{pct(c.allocationRatio, 2)}</td></tr>
+                    <tr><td>공제 합계</td><td>-{moneyUSD(c.usAllowedDeductionsUSD)}</td></tr>
+                    <tr><td>미국 taxable estate</td><td>{moneyUSD(c.usTaxableBeforeGiftsUSD)}</td></tr>
+                    <tr><td>Adjusted taxable gifts</td><td>{moneyUSD(num(v.usAdjustedTaxableGiftsUSD))}</td></tr>
+                    <tr><td>세율 적용 기준금액</td><td>{moneyUSD(c.usTentativeBaseUSD)}</td></tr>
+                    <tr><td>미국 tentative tax</td><td>{moneyUSD(c.usTentativeTaxUSD)}</td></tr>
+                    <tr><td>Unified/treaty credit 사용</td><td>-{moneyUSD(c.usUnifiedCreditUsedUSD)}</td></tr>
+                    <tr><td>기타 credit</td><td>-{moneyUSD(num(v.usOtherCreditsUSD))}</td></tr>
+                  </tbody>
+                  <tfoot><tr><td>미국 상속세</td><td>{moneyUSD(c.usEstateTaxUSD)}</td></tr></tfoot>
+                </table>
+                <div className="notice" style={{ marginTop: 14 }}>
+                  <strong>미국 신고 기준:</strong> 미국 소재 재산과 관련 조정액이 $60,000을 넘으면 Form 706-NA 신고 필요 가능성이 큽니다. 현재 입력값은 <strong>{c.needsUsFiling ? '초과' : '미만'}</strong>입니다.
+                </div>
+              </div>}
+
+              {tab === 'kr' && <div>
+                <h2>한국 상속세 및 외국납부세액공제</h2>
+                <table className="calcTable">
+                  <tbody>
+                    <tr><td>전체 상속재산가액</td><td>{moneyKRW(num(v.totalAssetsKRW))}</td></tr>
+                    <tr><td>사전증여 가산액</td><td>+{moneyKRW(num(v.priorGiftsKRW))}</td></tr>
+                    <tr><td>채무/공과금</td><td>-{moneyKRW(num(v.estateDebtsKRW))}</td></tr>
+                    <tr><td>장례·관리비</td><td>-{moneyKRW(num(v.funeralAdminKRW))}</td></tr>
+                    <tr><td>상속공제 합계</td><td>-{moneyKRW(num(v.krDeductionsKRW))}</td></tr>
+                    <tr><td>감정평가수수료 등</td><td>-{moneyKRW(num(v.appraisalFeeKRW))}</td></tr>
+                    <tr><td>한국 과세표준</td><td>{moneyKRW(c.krTaxBase)}</td></tr>
+                    <tr><td>기본 산출세액</td><td>{moneyKRW(c.krCalculatedTax)}</td></tr>
+                    <tr><td>세대생략 할증</td><td>+{moneyKRW(c.generationSkipSurcharge)}</td></tr>
+                    <tr><td>공제 전 한국 세액</td><td>{moneyKRW(c.krPreCreditTax)}</td></tr>
+                    <tr><td>공제대상 외국 과세표준</td><td>{moneyKRW(c.foreignPropertyForFtcKRW)}</td></tr>
+                    <tr><td>한도 공식</td><td>{moneyKRW(c.krPreCreditTax)} × {pct(c.krTaxBase ? c.foreignPropertyForFtcKRW / c.krTaxBase : 0, 2)}</td></tr>
+                    <tr><td>외국납부세액</td><td>{moneyKRW(c.foreignTaxPaidKRW)}</td></tr>
+                    <tr><td>외국납부세액공제 한도</td><td>{moneyKRW(c.ftcLimitKRW)}</td></tr>
+                    <tr><td>외국납부세액공제 사용액</td><td className="teal">-{moneyKRW(c.ftcUsedKRW)}</td></tr>
+                    <tr><td>기타 한국 세액공제</td><td>-{moneyKRW(num(v.otherKrCreditsKRW))}</td></tr>
+                    <tr><td>신고세액공제</td><td>-{moneyKRW(c.returnCreditKRW)}</td></tr>
+                  </tbody>
+                  <tfoot><tr><td>한국 최종 납부세액</td><td>{moneyKRW(c.krFinalTaxKRW)}</td></tr></tfoot>
+                </table>
+                <div className="notice" style={{ marginTop: 14 }}>
+                  <strong>공제한도 메모:</strong> 한국에서 빼는 금액은 <code>min(외국납부세액, 공제한도)</code>입니다. 공제한도는 <code>상속세 산출세액 × 외국 법령상 상속세가 부과된 상속재산의 과세표준 / 한국 상속세 과세표준</code>으로 단순화했습니다. 즉 ‘한도에서 미국세를 빼는 것’이 아니라, 한국 산출세액에서 실제 공제액을 차감합니다.
+                </div>
+              </div>}
+
+              {tab === 'rates' && <div className="twoCol">
+                <div>
+                  <h2>미국 unified rate schedule</h2>
+                  <table className="rateTable">
+                    <thead><tr><th>기준금액</th><th>세율</th><th>기본세액</th></tr></thead>
+                    <tbody>{US_RATE_TABLE.map((r, i) => <tr key={i}>
+                      <td>{r.label}</td><td>{pct(r.rate, 0)}</td><td>{moneyUSD(r.base)}</td>
+                    </tr>)}</tbody>
+                  </table>
+                </div>
+                <div>
+                  <h2>한국 상속세 세율</h2>
+                  <table className="rateTable">
+                    <thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead>
+                    <tbody>{KR_RATE_TABLE.map((r, i) => <tr key={i}>
+                      <td>{r.label}</td><td>{pct(r.rate, 0)}</td><td>{moneyKRW(r.deduction)}</td>
+                    </tr>)}</tbody>
+                  </table>
+                </div>
+              </div>}
+
+              {tab === 'notes' && <div>
+                <h2>계산 전제와 주의사항</h2>
+                <div className="notice">
+                  이 파일은 세무 검토 전 사전 시뮬레이션용입니다. 실제 신고에서는 사망 당시 세법, 피상속인·상속인의 거주자 판정, 상속재산 평가일, 미국 transfer certificate, 증권사/예탁기관 절차, 사전증여, 채무·비용 공제, 배우자공제, 조약 적용 여부, 주별 세금, 환율 기준일 등을 별도로 확인해야 합니다.
+                </div>
+                <details style={{ marginTop: 14 }} open>
+                  <summary>기본 전제</summary>
+                  <ul className="sourceList">
+                    <li>한국 세법상 피상속인이 거주자이면 국내외 모든 상속재산을 한국 상속세 계산에 포함하는 전제로 설계했습니다.</li>
+                    <li>미국 계산은 피상속인이 미국 시민권자 또는 미국 domicile 보유자가 아닌 NRNC인 일반 사례를 기본으로 합니다.</li>
+                    <li>미국 법에 따라 설립된 회사의 주식은 원칙적으로 미국 소재 재산으로 입력합니다.</li>
+                    <li>한국 외국납부세액공제는 미국 상속세 납부액과 한국 내 공제한도 중 작은 금액을 한국 산출세액에서 차감하는 구조로 단순화했습니다.</li>
+                  </ul>
+                </details>
+                <details style={{ marginTop: 12 }}>
+                  <summary>공식 참고 링크</summary>
+                  <ul className="sourceList">
+                    <li><a href="https://www.irs.gov/businesses/small-businesses-self-employed/estate-tax-for-nonresidents-not-citizens-of-the-united-states" target="_blank">IRS: Estate tax for nonresidents not citizens</a></li>
+                    <li><a href="https://www.irs.gov/instructions/i706na" target="_blank">IRS: Instructions for Form 706-NA</a></li>
+                    <li><a href="https://www.irs.gov/businesses/small-businesses-self-employed/estate-gift-tax-treaties-international" target="_blank">IRS: Estate & gift tax treaties</a></li>
+                    <li><a href="https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7718&mi=2324" target="_blank">국세청: 상속세 개요</a></li>
+                    <li><a href="https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7957&mi=6529" target="_blank">국세청: 상속세 세율</a></li>
+                    <li><a href="https://www.law.go.kr/법령/상속세및증여세법/제29조" target="_blank">국가법령정보센터: 상속세 및 증여세법 제29조</a></li>
+                    <li><a href="https://www.law.go.kr/법령/상속세및증여세법시행령/제21조" target="_blank">국가법령정보센터: 시행령 제21조 외국납부세액공제</a></li>
+                  </ul>
+                </details>
+              </div>}
+            </div>
+
+            <div className="panel">
+              <h2>현재 입력값 진단 <span className="sectionHint">자동 체크</span></h2>
+              <div className="notice">
+                <strong>{c.needsUsFiling ? '미국 신고 임계값 초과:' : '미국 신고 임계값 미만:'}</strong> 미국 소재 재산과 미국 과세 사전증여 합계가 {moneyUSD(c.usSitusGrossUSD + num(v.usAdjustedTaxableGiftsUSD))}입니다. Form 706-NA 기준 $60,000 초과 여부를 먼저 확인하세요.
+              </div>
+              <div className="notice" style={{ marginTop: 10 }}>
+                <strong>외국납부세액공제:</strong> 납부 외국세액 {shortKRW(c.foreignTaxPaidKRW)} 중 {shortKRW(c.ftcUsedKRW)}을 한국 산출세액에서 차감합니다. 공제한도 초과 등으로 한국에서 못 빼는 금액은 {shortKRW(Math.max(0, c.foreignTaxPaidKRW - c.ftcUsedKRW))}입니다.
+              </div>
+              {!v.nrncMode && <div className="notice" style={{ marginTop: 10, borderColor: 'rgba(179,67,67,.35)' }}>
+                <strong className="danger">주의:</strong> NRNC 모드를 해제했습니다. 미국 시민권자·미국 domicile 보유자는 전세계 재산, 기본공제액, 배우자공제, 과거 증여, 주세 등 계산 구조가 달라 이 파일만으로 계산하면 안 됩니다.
+              </div>}
+            </div>
+          </div>
+        </div>
+        <div className="footerNote">
+          데이터 기준: 2026-05-29 확인 기준. v3: 외국납부세액공제 계산식 설명 보강. 세법과 환율은 변동될 수 있습니다. 이 HTML은 로컬 브라우저에서 입력값을 localStorage에 저장합니다.
+        </div>
+      </div>;
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
