@@ -4,1109 +4,277 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SK하이닉스 투자 리서치 대시보드</title>
-  <meta name="description" content="SK하이닉스 000660.KS 투자 리서치 대시보드 - EPS 추세, 메모리 업황, HBM, 밸류에이션, 기관 전망, 리스크" />
   <style>
-    :root {
-      --bg: #07080d;
-      --bg2: #100b0d;
-      --panel: rgba(22, 24, 32, 0.72);
-      --panel2: rgba(31, 24, 25, 0.82);
-      --border: rgba(255,255,255,0.10);
-      --muted: #9ca3af;
-      --text: #f8fafc;
-      --sub: #cbd5e1;
-      --red: #e11d48;
-      --deep-red: #991b1b;
-      --orange: #f97316;
-      --amber: #f59e0b;
-      --green: #10b981;
-      --cyan: #06b6d4;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
-      --danger: #ef4444;
-      --shadow: 0 24px 70px rgba(0,0,0,.45);
+    :root{
+      --bg:#07080c;--bg2:#0d1119;--panel:rgba(22,24,32,.72);--panel2:rgba(34,38,48,.78);--line:rgba(255,255,255,.09);
+      --text:#f4f5f7;--muted:#a6adbb;--dim:#70798b;--red:#e31b23;--deepred:#9f1118;--orange:#ff7a1a;--gold:#ffb547;--green:#23d18b;--blue:#4ea8ff;--purple:#a78bfa;--danger:#ff4d5b;
+      --shadow:0 22px 60px rgba(0,0,0,.45);--radius:22px;
     }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 12% 10%, rgba(225, 29, 72, 0.22), transparent 38%),
-        radial-gradient(circle at 83% 18%, rgba(249, 115, 22, 0.16), transparent 40%),
-        radial-gradient(circle at 75% 78%, rgba(239, 68, 68, 0.10), transparent 42%),
-        linear-gradient(140deg, #050509 0%, #0a0c13 50%, #12090b 100%);
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.55;
-    }
-    a { color: inherit; text-decoration: none; }
-    .container { width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: rgba(7,8,13,.78);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 13px 0;
-    }
-    .brand {
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      white-space: nowrap;
-    }
-    .brand-mark {
-      width: 34px; height: 34px; border-radius: 12px;
-      background: linear-gradient(135deg, var(--red), var(--orange));
-      box-shadow: 0 0 24px rgba(249,115,22,.25);
-      display:grid; place-items:center; font-weight:900;
-    }
-    .nav-links {
-      display:flex;
-      gap: 8px;
-      overflow-x:auto;
-      white-space: nowrap;
-      scrollbar-width: thin;
-      padding-bottom: 2px;
-    }
-    .nav-links a {
-      padding: 8px 11px;
-      border: 1px solid transparent;
-      border-radius: 999px;
-      color: #cbd5e1;
-      font-size: 13px;
-    }
-    .nav-links a:hover {
-      border-color: rgba(249,115,22,.35);
-      background: rgba(249,115,22,.10);
-      color: white;
-    }
-    section { scroll-margin-top: 88px; }
-    .hero {
-      position: relative;
-      padding: 70px 0 36px;
-    }
-    .hero-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
-      gap: 24px;
-      align-items: stretch;
-    }
-    .eyebrow {
-      display:flex; flex-wrap:wrap; gap: 8px; align-items:center; margin-bottom: 18px;
-    }
-    .badge {
-      display:inline-flex; align-items:center; gap:6px;
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 999px;
-      padding: 6px 10px;
-      background: rgba(255,255,255,.05);
-      color: #e5e7eb;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .badge.red { background: rgba(225,29,72,.14); border-color: rgba(225,29,72,.35); color: #fecdd3; }
-    .badge.orange { background: rgba(249,115,22,.14); border-color: rgba(249,115,22,.35); color: #fed7aa; }
-    .badge.green { background: rgba(16,185,129,.13); border-color: rgba(16,185,129,.35); color: #bbf7d0; }
-    .badge.blue { background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.35); color: #bfdbfe; }
-    .headline {
-      font-size: clamp(40px, 6vw, 80px);
-      line-height: 1.02;
-      letter-spacing: -0.065em;
-      margin: 0 0 18px;
-    }
-    .headline .grad {
-      background: linear-gradient(90deg, #fff, #fecaca 32%, #fb923c 78%, #fbbf24);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .lead {
-      font-size: clamp(16px, 2vw, 20px);
-      color: var(--sub);
-      max-width: 820px;
-      margin: 0;
-    }
-    .quick-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top: 26px; }
-    .btn {
-      display:inline-flex; align-items:center; gap: 8px;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-weight: 800;
-      font-size: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      color: white;
-    }
-    .btn.primary { background: linear-gradient(135deg, rgba(225,29,72,.92), rgba(249,115,22,.88)); box-shadow: 0 16px 40px rgba(225,29,72,.18); }
-    .btn:hover { transform: translateY(-1px); border-color: rgba(249,115,22,.5); transition: .2s ease; }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-    .panel.pad { padding: 22px; }
-    .panel.hover { transition: all .25s cubic-bezier(.16,1,.3,1); }
-    .panel.hover:hover {
-      transform: translateY(-3px);
-      border-color: rgba(249,115,22,.35);
-      background: rgba(31, 24, 25, 0.86);
-    }
-    .summary-card {
-      min-height: 100%;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      position:relative;
-      overflow:hidden;
-    }
-    .summary-card:before {
-      content:"";
-      position:absolute; inset:-40px -40px auto auto; width:190px; height:190px;
-      background: radial-gradient(circle, rgba(249,115,22,.25), transparent 68%);
-      pointer-events:none;
-    }
-    .summary-card h2 { margin:0 0 10px; font-size: 22px; letter-spacing:-.03em; }
-    .kpi-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin: 16px 0; }
-    .kpi {
-      padding: 14px;
-      border:1px solid rgba(255,255,255,.09);
-      background: rgba(255,255,255,.045);
-      border-radius: 18px;
-    }
-    .kpi .label { color: var(--muted); font-size: 12px; font-weight: 800; }
-    .kpi .value { font-size: 20px; font-weight: 900; letter-spacing:-.03em; margin-top: 4px; }
-    .kpi .note { color: #94a3b8; font-size: 11px; margin-top: 3px; }
-    .section-head {
-      margin: 54px 0 18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:end;
-      gap: 18px;
-    }
-    .section-head h2 { margin:0; font-size: clamp(26px, 3vw, 40px); line-height:1.1; letter-spacing:-.045em; }
-    .section-head p { margin: 8px 0 0; color: var(--muted); max-width: 770px; }
-    .grid-4 { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
-    .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
-    .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
-    .metric-card h3, .thesis-card h3 { margin:0 0 8px; font-size: 17px; }
-    .metric-card .big { font-size: 27px; font-weight: 950; letter-spacing:-.04em; margin: 8px 0 3px; }
-    .metric-card p, .thesis-card p, .risk-card p { margin: 0; color: var(--muted); font-size: 13px; }
-    .subtle { color: var(--muted); }
-    .list { margin: 12px 0 0; padding: 0; list-style: none; display:grid; gap: 8px; }
-    .list li { color: #d1d5db; font-size: 13px; display:flex; gap:8px; }
-    .list li:before { content:""; width:7px; height:7px; border-radius:99px; background: linear-gradient(135deg,var(--red),var(--orange)); flex: 0 0 auto; margin-top:.55em; }
-    .chart-grid { display:grid; grid-template-columns: 1.2fr .8fr; gap: 16px; }
-    .chart-box { height: 330px; position: relative; }
-    .chart-box.tall { height: 390px; }
-    canvas { width: 100%; height: 100%; display:block; }
-    .table-wrap { overflow-x: auto; border-radius: 22px; border: 1px solid rgba(255,255,255,.09); }
-    table { border-collapse: collapse; width: 100%; min-width: 760px; background: rgba(255,255,255,.025); }
-    th, td { padding: 12px 13px; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; text-align:left; font-size: 13px; }
-    th { color: #f8fafc; background: rgba(255,255,255,.055); font-weight: 900; }
-    td { color: #d1d5db; }
-    tr:last-child td, tr:last-child th { border-bottom: none; }
-    .scenario-card { position:relative; overflow:hidden; }
-    .scenario-card.reco { border-color: rgba(249,115,22,.55); box-shadow: 0 24px 80px rgba(249,115,22,.16); }
-    .scenario-card .tag {
-      position:absolute; top:18px; right:18px;
-    }
-    .scenario-title { display:flex; align-items:center; gap: 10px; margin-bottom:14px; }
-    .dot { width: 10px; height:10px; border-radius:99px; background: var(--orange); box-shadow: 0 0 18px rgba(249,115,22,.65); }
-    .calc {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
-      padding: 12px;
-      color: #fed7aa;
-      font-size: 12px;
-      margin-top: 12px;
-    }
-    .heat td, .heat th { text-align:center; }
-    .heat-cell { font-weight:900; color:white; }
-    .level-1 { background: rgba(30,64,175,.22); }
-    .level-2 { background: rgba(6,182,212,.18); }
-    .level-3 { background: rgba(16,185,129,.18); }
-    .level-4 { background: rgba(249,115,22,.20); }
-    .level-5 { background: rgba(225,29,72,.25); }
-    .risk-matrix { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
-    .risk-card {
-      border:1px solid rgba(255,255,255,.09);
-      background: rgba(255,255,255,.04);
-      border-radius: 20px;
-      padding: 16px;
-    }
-    .risk-row { display:flex; justify-content:space-between; gap:10px; align-items:start; margin-bottom:10px; }
-    .risk-row h3 { margin:0; font-size:16px; }
-    .risk-level { font-size: 11px; padding: 4px 8px; border-radius: 99px; border:1px solid rgba(255,255,255,.12); white-space:nowrap; }
-    .risk-level.high { color:#fecaca; background:rgba(239,68,68,.14); border-color:rgba(239,68,68,.35); }
-    .risk-level.mid { color:#fed7aa; background:rgba(249,115,22,.14); border-color:rgba(249,115,22,.35); }
-    .risk-level.low { color:#bbf7d0; background:rgba(16,185,129,.12); border-color:rgba(16,185,129,.35); }
-    .source-list { display:grid; gap: 10px; margin: 0; padding: 0; list-style:none; }
-    .source-list li { padding: 14px; border-radius: 16px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color: #d1d5db; font-size: 13px; }
-    .disclaimer {
-      margin-top: 18px;
-      border: 1px solid rgba(249,115,22,.28);
-      background: rgba(249,115,22,.10);
-      color: #fed7aa;
-      border-radius: 20px;
-      padding: 16px;
-      font-weight: 800;
-    }
-    .footer-space { height: 36px; }
-    .mini-label { font-size: 11px; color: var(--muted); font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
-    .progress { height: 8px; background: rgba(255,255,255,.07); border-radius: 99px; overflow:hidden; margin-top:10px; }
-    .progress span { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--red),var(--orange)); }
-    .note-box { border-left: 3px solid var(--orange); padding: 12px 14px; background: rgba(249,115,22,.08); border-radius: 14px; color:#fed7aa; font-size:13px; }
-    .compact { font-size: 12px; color: var(--muted); }
-    @media (max-width: 980px) {
-      .hero-grid, .chart-grid, .grid-4, .grid-3, .grid-2, .risk-matrix { grid-template-columns: 1fr; }
-      .nav-inner { align-items:flex-start; flex-direction:column; }
-      .nav-links { width:100%; }
-      .section-head { align-items:flex-start; flex-direction:column; }
-      .chart-box { height: 290px; }
-    }
-    @media print {
-      body { background: white !important; color: #111827 !important; }
-      .nav, .quick-actions { display:none !important; }
-      .panel { background: white !important; color: #111827 !important; box-shadow:none !important; border:1px solid #e5e7eb !important; }
-      .subtle, td, p { color: #374151 !important; }
-      .badge { color: #111827 !important; border-color:#d1d5db !important; background:#f9fafb !important; }
-      section { break-inside: avoid; }
-    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;background:radial-gradient(circle at 15% 8%,rgba(227,27,35,.19),transparent 35%),radial-gradient(circle at 86% 22%,rgba(255,122,26,.13),transparent 38%),radial-gradient(circle at 55% 95%,rgba(120,30,30,.16),transparent 42%),var(--bg);color:var(--text);line-height:1.58;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none} .wrap{width:min(1240px,calc(100% - 32px));margin:0 auto}.sticky{position:sticky;top:0;z-index:50;background:rgba(7,8,12,.78);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+    nav .inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 0}.brand{font-weight:900;letter-spacing:-.03em;display:flex;align-items:center;gap:10px}.brand i{width:12px;height:12px;border-radius:999px;background:linear-gradient(135deg,var(--red),var(--orange));box-shadow:0 0 20px rgba(227,27,35,.6)}.links{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;padding-bottom:1px}.links a{font-size:13px;color:#c9ced9;padding:8px 11px;border:1px solid transparent;border-radius:999px}.links a:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:white}
+    header{padding:54px 0 30px}.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:24px;align-items:stretch}.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(255,255,255,.055);border-radius:999px;padding:7px 10px;color:#d9deea;font-size:12px;font-weight:700}.badge.red{background:rgba(227,27,35,.14);border-color:rgba(227,27,35,.28);color:#ffd7da}.badge.green{background:rgba(35,209,139,.12);border-color:rgba(35,209,139,.25);color:#b9ffe1}.badge.orange{background:rgba(255,122,26,.13);border-color:rgba(255,122,26,.26);color:#ffe0c4}.badge.blue{background:rgba(78,168,255,.12);border-color:rgba(78,168,255,.24);color:#d6ecff}.badge.gray{background:rgba(148,163,184,.12);color:#d8deea}
+    h1{font-size:clamp(38px,7vw,78px);line-height:1.02;margin:0 0 16px;letter-spacing:-.07em}.grad{background:linear-gradient(135deg,#fff 12%,#ffb547 42%,#ff4d5b 78%);-webkit-background-clip:text;background-clip:text;color:transparent}.lead{font-size:18px;color:#c7cedb;max-width:780px;margin:0 0 22px}.hero-actions{display:flex;flex-wrap:wrap;gap:10px}.btn{border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:rgba(255,255,255,.06);font-weight:800;color:#f4f5f7}.btn.primary{border-color:rgba(227,27,35,.42);background:linear-gradient(135deg,rgba(227,27,35,.32),rgba(255,122,26,.2));box-shadow:0 0 0 1px rgba(255,122,26,.06),0 18px 50px rgba(227,27,35,.15)}
+    .panel{background:linear-gradient(180deg,rgba(28,31,41,.78),rgba(15,17,24,.72));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(18px)}.p24{padding:24px}.p20{padding:20px}.p16{padding:16px}.hero-card{position:relative;overflow:hidden}.hero-card:before{content:"";position:absolute;inset:-1px;background:radial-gradient(circle at 80% 0,rgba(255,122,26,.25),transparent 35%);pointer-events:none}.hero-card>*{position:relative}.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.kpi{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.045)}.kpi .label{font-size:12px;color:var(--muted);font-weight:800}.kpi .value{font-size:24px;font-weight:950;letter-spacing:-.04em;margin-top:4px}.kpi .sub{font-size:12px;color:var(--dim);margin-top:4px}.value.red{color:#ff6b74}.value.green{color:#66f0b6}.value.orange{color:#ffb06a}.value.blue{color:#8ccaff}
+    section{scroll-margin-top:84px;padding:34px 0}.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}.eyebrow{font-size:12px;color:var(--orange);font-weight:950;letter-spacing:.12em;text-transform:uppercase}.section-head h2{font-size:clamp(26px,4vw,42px);margin:4px 0 0;letter-spacing:-.05em}.section-head p{margin:0;color:var(--muted);max-width:520px}.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.card-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}.card-title h3{margin:0;font-size:18px;letter-spacing:-.03em}.small{font-size:13px;color:var(--muted)}.muted{color:var(--muted)}.dim{color:var(--dim)}.big{font-size:30px;font-weight:950;letter-spacing:-.05em}.mini{font-size:12px;color:var(--dim)}.quote{border-left:3px solid var(--orange);padding-left:14px;color:#d7deeb;background:rgba(255,255,255,.03);border-radius:0 14px 14px 0}.list{margin:10px 0 0;padding-left:18px;color:#c7cedb}.list li{margin:6px 0}.tag{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid var(--line);color:#dbe1ec;background:rgba(255,255,255,.05)}.tag.up{color:#bdffd9;border-color:rgba(35,209,139,.28);background:rgba(35,209,139,.10)}.tag.mid{color:#ffe2b9;border-color:rgba(255,181,71,.28);background:rgba(255,181,71,.10)}.tag.down{color:#ffc0c6;border-color:rgba(255,77,91,.28);background:rgba(255,77,91,.10)}
+    .table-wrap{overflow:auto;border-radius:18px;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;min-width:760px;background:rgba(255,255,255,.035)}th,td{padding:12px 13px;text-align:left;border-bottom:1px solid rgba(255,255,255,.075);vertical-align:top}th{font-size:12px;color:#f3c1c5;background:rgba(227,27,35,.12);font-weight:950}td{font-size:13px;color:#d5dae5}tr:last-child td{border-bottom:none}.num{text-align:right;font-variant-numeric:tabular-nums}.chartbox{height:320px;position:relative;padding:10px}.chartbox canvas{width:100%;height:100%;display:block}.chart-caption{font-size:12px;color:var(--dim);padding:0 14px 12px}.status-grid{display:grid;grid-template-columns:1fr auto;gap:7px 12px;align-items:center;margin-top:12px}.bar-track{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}.bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--deepred),var(--orange),var(--gold))}.scenario{position:relative;overflow:hidden}.scenario.reco{border-color:rgba(255,122,26,.55);box-shadow:0 0 0 1px rgba(255,122,26,.14),0 28px 70px rgba(227,27,35,.22)}.scenario .case{font-size:28px;font-weight:950;letter-spacing:-.05em}.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:14px;padding:12px;color:#ffd6bc;overflow:auto}.risk-matrix{display:grid;grid-template-columns:1.2fr .7fr .7fr 1fr 1.5fr;gap:1px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.08)}.risk-matrix div{padding:12px;background:rgba(20,22,30,.9);font-size:13px}.risk-matrix .head{background:rgba(227,27,35,.16);font-weight:950;color:#ffd6d8}.prob{font-weight:950}.prob.high{color:#ff7b84}.prob.mid{color:#ffd28c}.prob.low{color:#7df0b3}.flow-card{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:flex-start}.dot{width:12px;height:12px;border-radius:50%;margin-top:6px}.dot.red{background:var(--red)}.dot.orange{background:var(--orange)}.dot.green{background:var(--green)}.dot.blue{background:var(--blue)}
+    .matrix{display:grid;gap:1px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:18px;overflow:hidden}.matrix .cell{padding:11px 10px;min-height:46px;background:rgba(14,16,23,.92);font-size:12px}.matrix .head{font-weight:950;background:rgba(227,27,35,.16);color:#ffd2d5}.matrix .val{font-weight:950;font-size:14px;color:white}.source-list{display:grid;gap:10px}.source-item{padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.04)}.source-item b{color:#fff}.source-item a{color:#ffbd77;text-decoration:underline;text-underline-offset:3px}.footer-note{border-top:1px solid var(--line);padding:22px 0 48px;color:#b3bac8;font-size:13px}.pillrow{display:flex;gap:8px;flex-wrap:wrap}.print-only{display:none}.highlight{color:#ffc273;font-weight:900}.warn{color:#ffadb4;font-weight:850}.good{color:#7df0b3;font-weight:850}.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}.mini-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.mini-kpis .kpi .value{font-size:20px}.progress-label{display:flex;justify-content:space-between;font-size:12px;color:#c8ceda;margin-top:10px}
+    @media (max-width:980px){.hero,.g2,.g3,.g4,.split{grid-template-columns:1fr}.mini-kpis{grid-template-columns:repeat(2,1fr)}.risk-matrix{grid-template-columns:1fr}.risk-matrix .head:not(:first-child){display:none}.links{max-width:100%}nav .inner{align-items:flex-start;flex-direction:column}.chartbox{height:285px}.hero{gap:16px}}
+    @media (max-width:560px){.wrap{width:min(100% - 22px,1240px)}header{padding-top:32px}.kpi-grid,.mini-kpis{grid-template-columns:1fr}h1{font-size:40px}.section-head{display:block}.panel{border-radius:18px}.links a{padding:8px 10px}.risk-matrix div{font-size:12px}.matrix .cell{font-size:11px;padding:9px 7px}}
+    @media print{body{background:white;color:#111}.sticky,.no-print{display:none!important}.panel{box-shadow:none;background:white;border:1px solid #ddd;color:#111}.muted,.small,.dim{color:#333}section{page-break-inside:avoid}.print-only{display:block}}
   </style>
 </head>
 <body>
-  <nav class="nav no-print">
-    <div class="container nav-inner">
-      <a href="#summary" class="brand"><span class="brand-mark">H</span><span>SK hynix Research</span></a>
-      <div class="nav-links" aria-label="상단 메뉴">
-        <a href="#summary">요약</a>
-        <a href="#macro">매크로</a>
-        <a href="#sectors">업종</a>
-        <a href="#valuation">밸류에이션</a>
-        <a href="#scenario">시나리오</a>
-        <a href="#institutions">기관 전망</a>
-        <a href="#flows">수급</a>
-        <a href="#risks">리스크</a>
-        <a href="#sources">출처</a>
+  <nav class="sticky no-print">
+    <div class="wrap inner">
+      <a href="#summary" class="brand"><i></i><span>SK hynix Research Dashboard</span></a>
+      <div class="links" aria-label="페이지 내비게이션">
+        <a href="#summary">요약</a><a href="#macro">매크로</a><a href="#sectors">업종</a><a href="#valuation">밸류에이션</a><a href="#scenario">시나리오</a><a href="#institutions">기관 전망</a><a href="#flows">수급</a><a href="#risks">리스크</a><a href="#sources">출처</a>
       </div>
     </div>
   </nav>
 
-  <main>
-    <section id="summary" class="hero">
-      <div class="container hero-grid">
-        <div>
-          <div class="eyebrow">
-            <span class="badge red">000660.KS · 보통주</span>
-            <span class="badge orange">데이터 기준일: 2026-05-21</span>
-            <span class="badge">투자 참고용</span>
-            <span class="badge green">EPS Revision: 상향</span>
-          </div>
-          <h1 class="headline">SK하이닉스<br><span class="grad">투자 리서치 대시보드</span></h1>
-          <p class="lead">
-            핵심은 “HBM만 잘 파는 회사”에서 “DRAM·NAND·eSSD까지 가격과 믹스가 동시에 개선되는 회사”로 시장의 인식이 확장되고 있다는 점입니다.
-            다만 현재 주가는 이미 강한 EPS 상향 기대를 상당 부분 반영하고 있어, 목표주가는 EPS와 적용 PER의 동시 변화에 민감합니다.
-          </p>
-          <div class="quick-actions">
-            <a class="btn primary" href="#valuation">EPS × PER 보기</a>
-            <a class="btn" href="#scenario">목표주가 시나리오</a>
-            <a class="btn" href="#risks">핵심 리스크</a>
-            <a class="btn" href="#sources">출처·가정</a>
-          </div>
+  <header id="summary" class="wrap">
+    <div class="hero">
+      <div class="panel p24">
+        <div class="badge-row">
+          <span class="badge red">SK하이닉스 보통주 · 000660.KS</span>
+          <span class="badge orange">데이터 기준일: 2026-06-16</span>
+          <span class="badge gray">K-IFRS · 원화 기준</span>
+          <span class="badge green">EPS Revision: 상향</span>
+          <span class="badge blue">투자 참고용</span>
         </div>
-
-        <aside class="panel pad summary-card">
-          <div>
-            <h2>Executive Snapshot</h2>
-            <p class="subtle">주가·시총은 Google Finance 2026-05-21 15:30 KST 기준. Forward PER은 Yahoo Finance 2026-05-20 공개값을 별도 표기.</p>
-            <div class="kpi-grid">
-              <div class="kpi">
-                <div class="label">현재 주가</div>
-                <div class="value">₩1,940,000</div>
-                <div class="note">+11.17% / 1D</div>
-              </div>
-              <div class="kpi">
-                <div class="label">시가총액</div>
-                <div class="value">₩1,382.64조</div>
-                <div class="note">Google Finance</div>
-              </div>
-              <div class="kpi">
-                <div class="label">Forward PER</div>
-                <div class="value">6.17x</div>
-                <div class="note">Yahoo Finance 공개값</div>
-              </div>
-              <div class="kpi">
-                <div class="label">Forward EPS</div>
-                <div class="value">₩314,425</div>
-                <div class="note">주가 ÷ Forward PER 역산</div>
-              </div>
-              <div class="kpi">
-                <div class="label">확률가중 목표주가</div>
-                <div class="value">₩2,275,500</div>
-                <div class="note">가정 기반 후보값</div>
-              </div>
-              <div class="kpi">
-                <div class="label">현재가 대비</div>
-                <div class="value">+17.3%</div>
-                <div class="note">시나리오 확률가중</div>
-              </div>
-            </div>
-          </div>
-          <div class="note-box">
-            한 줄 결론: EPS 상향 방향은 우호적이나, 초고속 주가 상승 이후에는 “EPS가 얼마나 더 올라갈지”와 “시장이 몇 배 PER을 허용할지”를 분리해 봐야 합니다.
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="container">
-      <div class="grid-4">
-        <div class="panel pad hover metric-card">
-          <span class="mini-label">1Q26 실적</span>
-          <div class="big">매출 52.58조</div>
-          <p>영업이익 37.61조, 영업이익률 72%. 역대 최대 분기 실적.</p>
-        </div>
-        <div class="panel pad hover metric-card">
-          <span class="mini-label">HBM / AI Memory</span>
-          <div class="big">공급 우위</div>
-          <p>AI 서버, GPU, 데이터센터 증설이 고부가 메모리 수요를 견인.</p>
-        </div>
-        <div class="panel pad hover metric-card">
-          <span class="mini-label">밸류에이션</span>
-          <div class="big">EPS 의존도 ↑</div>
-          <p>현재 가격대에서는 EPS 상향 지속 여부가 PER 재평가보다 더 중요.</p>
-        </div>
-        <div class="panel pad hover metric-card">
-          <span class="mini-label">핵심 리스크</span>
-          <div class="big">사이클·가격</div>
-          <p>메모리 가격 둔화, 고객 주문 조정, HBM4 수율/경쟁이 주요 변수.</p>
+        <h1>SK하이닉스 투자 리서치 <span class="grad">대시보드</span></h1>
+        <p class="lead">핵심 질문은 단순한 “비싼가/싼가”가 아니라, <b>EPS가 얼마나 빨리 올라가고 있으며 시장이 그 EPS에 얼마의 PER을 줄 수 있는가</b>입니다. HBM·서버 DRAM·eSSD가 EPS 레벨을 끌어올리는 반면, 현재 주가는 이미 강한 업황과 리레이팅 일부를 선반영하고 있습니다.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#eps">EPS 추세 보기</a>
+          <a class="btn" href="#valuation">PER 민감도</a>
+          <a class="btn" href="#scenario">목표주가 후보</a>
+          <a class="btn" href="#institutions">기관 리포트</a>
         </div>
       </div>
-    </section>
-
-    <section id="macro" class="container">
-      <div class="section-head">
-        <div>
-          <h2>매크로 · 메모리 사이클</h2>
-          <p>AI 인프라 투자가 범용 DRAM·NAND 가격까지 밀어 올리는 국면입니다. 단, CAPEX와 신규 공급은 2027년 이후 사이클의 변곡점이 될 수 있습니다.</p>
+      <aside class="panel p24 hero-card">
+        <div class="card-title"><h3>핵심 스냅샷</h3><span class="tag up">HBM 주도</span></div>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="label">현재 주가</div><div class="value">₩2,382,000</div><div class="sub">2026-06-16 종가 기준</div></div>
+          <div class="kpi"><div class="label">시가총액</div><div class="value orange">약 ₩1,690.9조</div><div class="sub">데이터 제공처별 차이 가능</div></div>
+          <div class="kpi"><div class="label">Forward PER</div><div class="value green">7.6x</div><div class="sub">시장 데이터 기준</div></div>
+          <div class="kpi"><div class="label">Forward EPS</div><div class="value blue">약 ₩313k</div><div class="sub">주가 ÷ Forward PER 역산</div></div>
+          <div class="kpi"><div class="label">확률가중 목표주가 후보</div><div class="value orange">₩2.88m</div><div class="sub">시나리오 가정 기반</div></div>
+          <div class="kpi"><div class="label">현재가 대비 기대수익률</div><div class="value green">+20.7%</div><div class="sub">2.88m ÷ 2.382m - 1</div></div>
         </div>
-        <span class="badge orange">업황 판단: 긍정 우위</span>
-      </div>
-      <div class="grid-4">
-        <div class="panel pad hover thesis-card">
-          <h3>AI 서버 CAPEX</h3>
-          <p>GPU/AI 가속기 확산은 HBM뿐 아니라 서버 DRAM, eSSD, 고용량 SSD까지 수요를 넓힙니다.</p>
+      </aside>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <div class="section-head"><div><div class="eyebrow">Investment Summary</div><h2>투자 요약 카드</h2></div><p>메모리 사이클의 전통적 변동성보다 AI 인프라 수요가 EPS 추정치 상향을 더 강하게 밀어 올리는 구간입니다.</p></div>
+      <div class="grid g3">
+        <article class="panel p20">
+          <div class="card-title"><h3>핵심 투자 포인트</h3><span class="tag up">긍정</span></div>
           <ul class="list">
-            <li>CSP와 AI 연구소의 인프라 경쟁 지속</li>
-            <li>추론·Agentic AI 단계에서 메모리 사용량 증가</li>
-            <li>수요 둔화 시 EPS 민감도도 큼</li>
+            <li>HBM 선도 지위와 Nvidia향 공급 레퍼런스가 프리미엄의 핵심.</li>
+            <li>HBM 전환이 범용 DRAM 공급을 압박해 메모리 가격 방어에 기여.</li>
+            <li>eSSD·서버 DRAM 수요가 NAND 회복의 질을 개선.</li>
+            <li>장기공급계약·선불금·용량 확보 경쟁이 이익 가시성 향상.</li>
           </ul>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <h3>DRAM 가격</h3>
-          <p>1Q26 DRAM ASP는 중반 60%대 상승으로 보도되었습니다. 범용 메모리까지 가격 상승이 확산되는 점이 중요합니다.</p>
-          <div class="progress"><span style="width:88%"></span></div>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <h3>NAND · eSSD</h3>
-          <p>eSSD 수요와 NAND 가격 상승이 Solidigm 및 NAND 부문 수익성 개선을 보강합니다.</p>
-          <div class="progress"><span style="width:82%"></span></div>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <h3>환율·금리·CAPEX</h3>
-          <p>원/달러, EUV·HBM 투자 규모, 감가상각 부담은 EPS 브릿지에서 반드시 추적해야 할 변수입니다.</p>
-          <div class="progress"><span style="width:68%"></span></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="sectors" class="container">
-      <div class="section-head">
-        <div>
-          <h2>업종 · 사업부별 EPS 드라이버</h2>
-          <p>SK하이닉스의 EPS는 HBM 프리미엄, 범용 DRAM 가격, NAND/eSSD 회복, 환율과 CAPEX의 조합으로 결정됩니다.</p>
-        </div>
-      </div>
-      <div class="grid-4">
-        <div class="panel pad hover thesis-card">
-          <span class="badge green">긍정</span>
-          <h3>HBM / HBM3E / HBM4</h3>
-          <p>고객 맞춤형 공급·장기 계약 성격이 강해 가격 방어력이 높고, HBM4 전환이 프리미엄 밸류에이션의 핵심입니다.</p>
+        </article>
+        <article class="panel p20">
+          <div class="card-title"><h3>핵심 리스크</h3><span class="tag down">관리 필요</span></div>
           <ul class="list">
-            <li>AI GPU 공급망 핵심 메모리</li>
-            <li>경쟁 심화와 수율 변수가 리스크</li>
+            <li>HBM4/HBM4E 수율·검증 지연 또는 고객사 주문 조정.</li>
+            <li>삼성전자·Micron의 HBM 추격과 가격 경쟁 재개.</li>
+            <li>AI CAPEX 둔화, CSP 재고 조정, 패키징 병목 완화에 따른 ASP 압력.</li>
+            <li>EPS와 PER이 동시에 하락할 수 있는 메모리 업종 특유의 사이클.</li>
           </ul>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <span class="badge green">긍정</span>
-          <h3>Server DRAM / DDR5</h3>
-          <p>HBM 전환으로 범용 DRAM 공급이 제약되고 서버 DRAM ASP가 상승하면 전사 마진이 동반 개선됩니다.</p>
-          <ul class="list"><li>가격 상승이 이익 레버리지로 직결</li><li>고객 재고 조정 시 변동성 확대</li></ul>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <span class="badge orange">긍정·중립</span>
-          <h3>NAND / eSSD</h3>
-          <p>서버 SSD 수요는 우호적이나 NAND는 과거 공급 과잉 이력이 있어 회복 지속성을 확인해야 합니다.</p>
-          <ul class="list"><li>eSSD 고용량화 수혜</li><li>가격 피크아웃 여부 관찰</li></ul>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <span class="badge">중립</span>
-          <h3>모바일·PC·Consumer</h3>
-          <p>AI 서버 대비 우선순위는 낮지만, 범용 DRAM 공급 제약이 소비자 제품 가격에도 파급될 수 있습니다.</p>
-          <ul class="list"><li>단가 상승은 긍정</li><li>수요 탄력성 저하는 부정</li></ul>
-        </div>
-      </div>
-
-      <div class="chart-grid" style="margin-top:16px">
-        <div class="panel pad">
-          <div class="section-head" style="margin:0 0 12px">
-            <div><h2 style="font-size:22px">연간 실적 추이</h2><p>조원 기준. 2025년은 회사 발표, 2026~2027년은 리서치 추정치.</p></div>
-          </div>
-          <div class="chart-box"><canvas id="annualFinancialChart"></canvas></div>
-        </div>
-        <div class="panel pad">
-          <div class="section-head" style="margin:0 0 12px">
-            <div><h2 style="font-size:22px">EPS 영향도 브릿지</h2><p>정량 회계분해가 아닌 리서치 관점의 영향도 가중치.</p></div>
-          </div>
-          <div class="chart-box"><canvas id="epsBridgeChart"></canvas></div>
-        </div>
+        </article>
+        <article class="panel p20">
+          <div class="card-title"><h3>한 줄 결론</h3><span class="tag mid">시나리오</span></div>
+          <p class="quote">EPS 방향은 아직 <span class="good">상향</span>이나, 현재가는 컨센서스 평균 목표주가에 근접했습니다. 신규 진입은 “EPS 추가 상향 여부”와 “PER 8~12배 밴드 유지 가능성”을 함께 확인하는 접근이 합리적입니다.</p>
+          <div class="progress-label"><span>EPS 모멘텀</span><b class="good">강함</b></div><div class="bar-track"><div class="bar-fill" style="width:88%"></div></div>
+          <div class="progress-label"><span>밸류에이션 선반영</span><b class="warn">높음</b></div><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div>
+        </article>
       </div>
     </section>
 
-    <section id="eps" class="container">
-      <div class="section-head">
-        <div>
-          <h2>EPS 추세 분석</h2>
-          <p>메모리 업종은 EPS가 사이클 저점에서 급격히 흑자 전환하고, 피크 구간에서는 EPS와 PER이 동시에 흔들릴 수 있습니다.</p>
-        </div>
-        <span class="badge green">Revision: 상향</span>
+    <section id="macro">
+      <div class="section-head"><div><div class="eyebrow">Macro & Market</div><h2>매크로·메모리 업황 스냅샷</h2></div><p>AI 데이터센터 CAPEX, 메모리 공급 제약, 고성능 패키징 병목이 EPS 추세의 상단과 하단을 결정합니다.</p></div>
+      <div class="grid g4">
+        <div class="panel p20"><div class="small">AI 데이터센터 CAPEX</div><div class="big">구조적 확대</div><p class="small">대형 CSP·GPU 로드맵이 HBM 및 서버 DRAM 수요를 견인.</p></div>
+        <div class="panel p20"><div class="small">HBM 시장 지위</div><div class="big">58% share</div><p class="small">2026년 1분기 HBM 시장 점유율 보도 기준.</p></div>
+        <div class="panel p20"><div class="small">공급 제약</div><div class="big">2028~30 관찰</div><p class="small">증설에는 시간·패키징·수율 병목이 존재.</p></div>
+        <div class="panel p20"><div class="small">원/달러 환율</div><div class="big">₩1,508/$</div><p class="small">수출·원화 실적에는 우호, 비용·CAPEX에는 부담.</p></div>
       </div>
-
-      <div class="grid-3">
-        <div class="panel pad metric-card">
-          <span class="mini-label">과거 EPS</span>
-          <div class="big">2023 저점 → 2025 급반등</div>
-          <p>2023년 적자 이후 2024~2025년 HBM·가격 회복으로 EPS가 빠르게 정상화.</p>
-        </div>
-        <div class="panel pad metric-card">
-          <span class="mini-label">Forward EPS</span>
-          <div class="big">₩314,425</div>
-          <p>Yahoo Forward PER 6.17x와 현재가 기준 역산값. 직접 컨센서스 EPS는 유료 데이터 확인 필요.</p>
-        </div>
-        <div class="panel pad metric-card">
-          <span class="mini-label">투자 해석</span>
-          <div class="big">방향은 우상향, 가격은 선반영</div>
-          <p>EPS 상향은 긍정이나, 주가 상승 속도와 목표가 상향 속도의 괴리도 점검 필요.</p>
-        </div>
-      </div>
-
-      <div class="chart-grid" style="margin-top:16px">
-        <div class="panel pad">
-          <h3 style="margin:0 0 6px">최근 5년 연간 EPS</h3>
-          <p class="compact">2021~2022 EPS는 순이익/보통주수 기반 근사치, 2023~2025는 리서치·회사자료 기반.</p>
-          <div class="chart-box"><canvas id="annualEpsChart"></canvas></div>
-        </div>
-        <div class="panel pad">
-          <h3 style="margin:0 0 6px">최근 분기 EPS/OP 흐름</h3>
-          <p class="compact">공개 웹에서 교차 확인 가능한 2025Q1~2026Q1 중심. 8개 분기 원자료는 IR PDF 원문 재확인 필요.</p>
-          <div class="chart-box"><canvas id="quarterlyChart"></canvas></div>
-        </div>
-      </div>
-
-      <div class="panel pad" style="margin-top:16px">
-        <h3 style="margin-top:0">EPS Bridge: 상향 요인과 하향 요인</h3>
-        <div class="grid-2">
-          <div>
-            <span class="badge green">상향 요인</span>
-            <ul class="list">
-              <li>HBM 출하량 증가와 ASP 프리미엄 유지</li>
-              <li>DRAM·NAND ASP 동반 상승 및 공급 절제</li>
-              <li>eSSD 수요 확대와 NAND 수익성 회복</li>
-              <li>원/달러 환율 상승 시 원화 실적 환산 효과</li>
-              <li>수율 개선과 제품 믹스 고도화</li>
-            </ul>
+      <div class="grid g2" style="margin-top:16px">
+        <article class="panel p20">
+          <div class="card-title"><h3>전략적 해석</h3><span class="tag up">EPS 상향 요인 우세</span></div>
+          <p class="muted">HBM은 웨이퍼와 패키징 리소스를 많이 사용합니다. 이 때문에 HBM 생산능력 확대가 범용 DRAM 공급을 압박해, 기존 메모리 사이클보다 ASP 하락 압력이 늦게 나타날 수 있습니다. 다만 가격이 너무 빠르게 오르면 AI 생태계의 지속 가능성을 훼손할 수 있어 고객사 재협상 리스크도 같이 커집니다.</p>
+        </article>
+        <article class="panel p20">
+          <div class="card-title"><h3>주요 숫자</h3><span class="tag mid">확정/시장 데이터 혼재</span></div>
+          <div class="mini-kpis">
+            <div class="kpi"><div class="label">Q1 2026 매출</div><div class="value">₩52.58T</div></div>
+            <div class="kpi"><div class="label">Q1 2026 영업이익</div><div class="value green">₩37.61T</div></div>
+            <div class="kpi"><div class="label">Q1 2026 순이익</div><div class="value orange">₩40.35T</div></div>
+            <div class="kpi"><div class="label">Q1 2026 OPM</div><div class="value blue">72%</div></div>
           </div>
-          <div>
-            <span class="badge red">하향 요인</span>
-            <ul class="list">
-              <li>고객사 주문 조정 또는 AI CAPEX 속도 조절</li>
-              <li>HBM4 수율 지연, 경쟁사 인증 통과로 가격 경쟁 심화</li>
-              <li>NAND 회복 지연 또는 eSSD 가격 피크아웃</li>
-              <li>CAPEX 확대에 따른 감가상각 및 비용 부담</li>
-              <li>원화 강세 및 지정학·규제 리스크</li>
-            </ul>
-          </div>
-        </div>
+        </article>
       </div>
     </section>
 
-    <section id="valuation" class="container">
-      <div class="section-head">
-        <div>
-          <h2>밸류에이션 · EPS × PER</h2>
-          <p>목표주가는 단순히 PER을 높이는 문제가 아니라, Forward EPS가 어느 수준까지 올라가고 그 EPS가 얼마나 지속 가능한지의 함수입니다.</p>
-        </div>
-      </div>
-
-      <div class="grid-3">
-        <div class="panel pad metric-card">
-          <span class="mini-label">계산 구조</span>
-          <div class="big">Target = EPS × PER</div>
-          <p>예: Base Case ₩190,000 × 11.5배 = ₩2,185,000</p>
-        </div>
-        <div class="panel pad metric-card">
-          <span class="mini-label">현재 밸류에이션</span>
-          <div class="big">18.37x TTM PER</div>
-          <p>Google Finance EPS ₩105,627 기준. Forward PER 공개값은 6.17x.</p>
-        </div>
-        <div class="panel pad metric-card">
-          <span class="mini-label">해석</span>
-          <div class="big">EPS 피크 여부가 핵심</div>
-          <p>사이클 피크에서 PER은 낮아 보일 수 있으므로 지속 가능 EPS를 보수적으로 봐야 합니다.</p>
-        </div>
-      </div>
-
-      <div class="panel pad" style="margin-top:16px">
-        <h3 style="margin-top:0">EPS × PER 민감도 매트릭스</h3>
-        <p class="compact">단위: 목표주가 만원. EPS는 Base 190,000원을 중심으로 -20%~-10%~+20% 조정.</p>
-        <div class="table-wrap">
-          <table class="heat">
-            <thead><tr><th>Forward EPS</th><th>8x</th><th>10x</th><th>12x</th><th>14x</th><th>16x</th></tr></thead>
-            <tbody>
-              <tr><th>152,000원</th><td class="heat-cell level-2">122만원</td><td class="heat-cell level-2">152만원</td><td class="heat-cell level-3">182만원</td><td class="heat-cell level-3">213만원</td><td class="heat-cell level-4">243만원</td></tr>
-<tr><th>171,000원</th><td class="heat-cell level-2">137만원</td><td class="heat-cell level-2">171만원</td><td class="heat-cell level-3">205만원</td><td class="heat-cell level-3">239만원</td><td class="heat-cell level-4">274만원</td></tr>
-<tr><th>190,000원</th><td class="heat-cell level-2">152만원</td><td class="heat-cell level-3">190만원</td><td class="heat-cell level-3">228만원</td><td class="heat-cell level-4">266만원</td><td class="heat-cell level-5">304만원</td></tr>
-<tr><th>209,000원</th><td class="heat-cell level-2">167만원</td><td class="heat-cell level-3">209만원</td><td class="heat-cell level-4">251만원</td><td class="heat-cell level-4">293만원</td><td class="heat-cell level-5">334만원</td></tr>
-<tr><th>228,000원</th><td class="heat-cell level-3">182만원</td><td class="heat-cell level-3">228만원</td><td class="heat-cell level-4">274만원</td><td class="heat-cell level-5">319만원</td><td class="heat-cell level-5">365만원</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="panel pad" style="margin-top:16px">
-        <h3 style="margin-top:0">Peer / Reference Comparison</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>구분</th><th>주요 포인트</th><th>밸류에이션 해석</th><th>확인 필요 항목</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>SK하이닉스</td><td>HBM 선도, DRAM·NAND 가격 동반 상승</td><td>Forward PER 6.17x 공개값은 매우 낮아 보이나 EPS 피크성 점검 필요</td><td>최신 컨센서스 EPS, FY2/FY3 revision</td></tr>
-              <tr><td>삼성전자</td><td>메모리 회복 + 파운드리/시스템 LSI 회복 여부</td><td>메모리 레버리지와 사업부 복합 할인/프리미엄 혼재</td><td>HBM 인증·수율·파운드리 손익</td></tr>
-              <tr><td>Micron</td><td>미국 상장 메모리 피어, DRAM/NAND 가격 민감</td><td>글로벌 투자자 비교 기준. HBM 점유율과 공급계약이 프리미엄 결정</td><td>미국 회계 기준 EPS와 환율 비교</td></tr>
-            </tbody>
-          </table>
-        </div>
+    <section id="sectors">
+      <div class="section-head"><div><div class="eyebrow">Industry Dashboard</div><h2>업황 대시보드: DRAM · NAND · HBM · eSSD</h2></div><p>각 제품군이 SK하이닉스 EPS에 미치는 방향성을 분리했습니다.</p></div>
+      <div class="grid g4">
+        <article class="panel p20"><div class="card-title"><h3>HBM</h3><span class="tag up">긍정</span></div><p class="small">수요: AI 가속기 로드맵에 연동 · 공급: 수율/패키징 병목 · EPS 영향: ASP와 마진 동시 개선.</p><ul class="list"><li>HBM4 전환 속도가 Bull Case의 핵심.</li><li>고객사 인증 실패 시 하방 리스크 큼.</li></ul></article>
+        <article class="panel p20"><div class="card-title"><h3>DRAM</h3><span class="tag up">긍정</span></div><p class="small">수요: 서버·AI 메모리 중심 · 공급: HBM 전환으로 범용 공급 제약 · EPS 영향: 가격 레버리지 큼.</p><ul class="list"><li>범용 DRAM 가격이 EPS Bridge의 가장 큰 변수.</li><li>중국 수요 둔화는 감시 필요.</li></ul></article>
+        <article class="panel p20"><div class="card-title"><h3>NAND</h3><span class="tag mid">중립~긍정</span></div><p class="small">수요: eSSD가 견인 · 공급: 구조조정 이후 회복 · EPS 영향: 적자 축소/흑자 확대 여부.</p><ul class="list"><li>AI 서버 저장장치 수요가 개선 요인.</li><li>소비자 SSD/모바일 회복은 상대적으로 더딤.</li></ul></article>
+        <article class="panel p20"><div class="card-title"><h3>eSSD</h3><span class="tag up">긍정</span></div><p class="small">수요: 데이터센터 스토리지 고성장 · 공급: 고용량 제품 중심 · EPS 영향: NAND 믹스 개선.</p><ul class="list"><li>서버 스토리지 확장 사이클의 직접 수혜.</li><li>가격 급등 후 주문 조정 가능성은 존재.</li></ul></article>
       </div>
     </section>
 
-    <section id="scenario" class="container">
-      <div class="section-head">
-        <div>
-          <h2>1년 후 목표주가 후보 3가지</h2>
-          <p>아래 값은 매수·매도 의견이 아니라 EPS와 적용 PER 가정에 따른 시나리오 산출값입니다. 확률 합계는 100%입니다.</p>
-        </div>
-        <span class="badge orange">확률가중: ₩2,275,500</span>
+    <section id="eps">
+      <div class="section-head"><div><div class="eyebrow">EPS Core Section</div><h2>EPS 추세 분석</h2></div><p>이 대시보드의 핵심은 Forward EPS의 방향과 시장 PER의 결합입니다.</p></div>
+      <div class="grid g2">
+        <article class="panel"><div class="p20"><div class="card-title"><h3>최근 5년 연간 EPS</h3><span class="tag up">흑자 전환 후 급등</span></div></div><div class="chartbox"><canvas id="annualEpsChart"></canvas></div><div class="chart-caption">단위: 원/주. 2023년 메모리 다운사이클 적자 후 2024~2025년 AI 메모리 수요로 회복.</div></article>
+        <article class="panel"><div class="p20"><div class="card-title"><h3>최근 8개 분기 EPS</h3><span class="tag up">Q1 2026 레벨 점프</span></div></div><div class="chartbox"><canvas id="quarterEpsChart"></canvas></div><div class="chart-caption">단위: 원/주. 일부 분기는 순이익/평균 주식수 기반 계산 추정, Q1 2026 EPS는 공개 시장 데이터 반영.</div></article>
       </div>
-
-      <div class="grid-3">
-        <div class="panel pad scenario-card">
-          <span class="badge red tag">Bear 25%</span>
-          <div class="scenario-title"><span class="dot" style="background:var(--danger)"></span><h3>Bear Case</h3></div>
-          <div class="kpi-grid">
-            <div class="kpi"><div class="label">EPS</div><div class="value">₩145,000</div></div>
-            <div class="kpi"><div class="label">PER</div><div class="value">9.0x</div></div>
-            <div class="kpi"><div class="label">목표주가 후보</div><div class="value">₩1,305,000</div></div>
-            <div class="kpi"><div class="label">현재가 대비</div><div class="value">-32.7%</div></div>
-          </div>
-          <ul class="list">
-            <li>메모리 가격 상승 둔화</li>
-            <li>HBM 경쟁 심화와 고객 주문 조정</li>
-            <li>NAND 회복 지연 및 밸류에이션 할인</li>
-          </ul>
-          <div class="calc">145,000 × 9.0 = 1,305,000원</div>
-        </div>
-
-        <div class="panel pad scenario-card reco">
-          <span class="badge orange tag">Base 45% · 기준</span>
-          <div class="scenario-title"><span class="dot"></span><h3>Base Case</h3></div>
-          <div class="kpi-grid">
-            <div class="kpi"><div class="label">EPS</div><div class="value">₩190,000</div></div>
-            <div class="kpi"><div class="label">PER</div><div class="value">11.5x</div></div>
-            <div class="kpi"><div class="label">목표주가 후보</div><div class="value">₩2,185,000</div></div>
-            <div class="kpi"><div class="label">현재가 대비</div><div class="value">+12.6%</div></div>
-          </div>
-          <ul class="list">
-            <li>HBM 수요 견조, DRAM 업황 정상화</li>
-            <li>NAND/eSSD 완만한 회복</li>
-            <li>컨센서스 유지 또는 완만한 상향</li>
-          </ul>
-          <div class="calc">190,000 × 11.5 = 2,185,000원</div>
-        </div>
-
-        <div class="panel pad scenario-card">
-          <span class="badge green tag">Bull 30%</span>
-          <div class="scenario-title"><span class="dot" style="background:var(--green)"></span><h3>Bull Case</h3></div>
-          <div class="kpi-grid">
-            <div class="kpi"><div class="label">EPS</div><div class="value">₩230,000</div></div>
-            <div class="kpi"><div class="label">PER</div><div class="value">14.0x</div></div>
-            <div class="kpi"><div class="label">목표주가 후보</div><div class="value">₩3,220,000</div></div>
-            <div class="kpi"><div class="label">현재가 대비</div><div class="value">+66.0%</div></div>
-          </div>
-          <ul class="list">
-            <li>AI 서버 투자 확대와 HBM4 프리미엄</li>
-            <li>DRAM 공급 부족 장기화</li>
-            <li>EPS 컨센서스 추가 상향</li>
-          </ul>
-          <div class="calc">230,000 × 14.0 = 3,220,000원</div>
-        </div>
+      <div class="grid g3" style="margin-top:16px">
+        <article class="panel"><div class="p20"><div class="card-title"><h3>FY1/FY2/FY3 Forward EPS 비교</h3><span class="tag mid">컨센서스·가정</span></div></div><div class="chartbox"><canvas id="forwardEpsChart"></canvas></div><div class="chart-caption">FY1은 시장 Forward PER 역산. FY2/FY3는 공개 리포트의 상향 흐름과 EPS CAGR 자료를 반영한 시나리오 가정.</div></article>
+        <article class="panel p20"><div class="card-title"><h3>EPS 성장률 요약</h3><span class="tag up">상향</span></div><div class="kpi"><div class="label">2025 EPS YoY</div><div class="value green">+117%</div><div class="sub">2024 27.2k → 2025 59.0k 기준</div></div><div class="kpi" style="margin-top:10px"><div class="label">FY1 Forward EPS vs 2025</div><div class="value orange">+432%</div><div class="sub">약 313k / 59k - 1</div></div><div class="kpi" style="margin-top:10px"><div class="label">2026~2028 EPS CAGR</div><div class="value blue">약 22%</div><div class="sub">LSEG 컨센서스 보도 기준</div></div></article>
+        <article class="panel p20"><div class="card-title"><h3>EPS Bridge</h3><span class="tag mid">요인 분해</span></div><div class="status-grid">
+          <span>HBM 출하량/ASP/마진</span><b class="good">+ 강함</b><span>DRAM 가격</span><b class="good">+ 강함</b><span>NAND/eSSD</span><b class="good">+ 개선</b><span>원/달러 환율</span><b class="good">+ 우호</b><span>CAPEX·감가상각</span><b class="warn">- 부담</b><span>고객 주문 조정</span><b class="warn">- 리스크</b><span>경쟁 심화</span><b class="warn">- 리스크</b>
+          </div></article>
       </div>
+      <div class="panel p20" style="margin-top:16px"><div class="card-title"><h3>EPS 추세에 따른 투자 해석</h3><span class="tag up">Revision 상향</span></div><p class="muted">EPS Revision은 상향으로 판단합니다. 근거는 2026년 들어 주요 증권사의 영업이익·목표주가 상향이 반복됐고, 12개월 EPS 컨센서스가 주가보다 빠르게 상승했다는 시장 보도가 존재하기 때문입니다. 다만 메모리 업종은 EPS가 높아지는 국면에서 PER이 낮아지고, 사이클 피크 우려가 커지면 EPS와 PER이 동시에 꺾일 수 있습니다.</p></div>
+    </section>
 
-      <div class="chart-grid" style="margin-top:16px">
-        <div class="panel pad">
-          <h3 style="margin:0 0 6px">목표주가 시나리오 바 차트</h3>
-          <div class="chart-box"><canvas id="scenarioChart"></canvas></div>
-        </div>
-        <div class="panel pad">
-          <h3 style="margin:0 0 6px">확률가중 계산식</h3>
-          <p class="subtle">Bear 25%, Base 45%, Bull 30%</p>
-          <div class="calc" style="font-size:13px">
-            1,305,000 × 25% + 2,185,000 × 45% + 3,220,000 × 30% = <strong>2,275,500원</strong><br>
-            기대수익률 = 2,275,500 / 1,940,000 - 1 = <strong>+17.3%</strong>
-          </div>
-          <div class="note-box" style="margin-top:14px">
-            이 값은 “가정 기반 후보값”입니다. 실제 주가는 EPS, PER, 수급, 시장금리, KOSPI 위험선호에 따라 크게 벗어날 수 있습니다.
-          </div>
-        </div>
+    <section id="valuation">
+      <div class="section-head"><div><div class="eyebrow">Valuation & Sensitivity</div><h2>밸류에이션: Forward EPS × 적용 PER</h2></div><p>목표주가는 단정값이 아니라 EPS와 PER 조합의 후보값입니다.</p></div>
+      <div class="grid g2">
+        <article class="panel p20">
+          <div class="card-title"><h3>계산 구조</h3><span class="tag mid">가정 기반</span></div>
+          <div class="formula">목표주가 후보 = Forward EPS × 적용 PER<br>확률가중 목표주가 = Bear TP×25% + Base TP×50% + Bull TP×25%<br>기대수익률 = 확률가중 TP / 현재가 ₩2,382,000 - 1</div>
+          <p class="small" style="margin-top:14px">현재 Forward EPS는 “현재가 ₩2,382,000 ÷ Forward PER 7.6배”로 역산한 약 ₩313,000입니다. 컨센서스 EPS 원자료와 실제 브로커 추정치는 제공처별로 다를 수 있습니다.</p>
+        </article>
+        <article class="panel p20">
+          <div class="card-title"><h3>현재 주가의 선반영 정도</h3><span class="tag down">높음</span></div>
+          <p class="muted">애널리스트 평균 목표주가가 약 ₩2.69m인 반면 현재가는 ₩2.382m으로 평균 목표주가 대비 여력은 두 자릿수 초반입니다. 반면, Bull Case에 가까운 3.8m 리포트도 존재해 시장은 EPS 추가 상향과 밸류에이션 리레이팅 가능성을 함께 가격에 반영하고 있습니다.</p>
+          <div class="progress-label"><span>컨센서스 평균 대비 위치</span><b>약 89%</b></div><div class="bar-track"><div class="bar-fill" style="width:89%"></div></div>
+        </article>
+      </div>
+      <div class="grid g2" style="margin-top:16px">
+        <article class="panel p20">
+          <div class="card-title"><h3>EPS × PER 민감도 매트릭스</h3><span class="tag mid">자동 계산</span></div>
+          <div id="sensitivityMatrix" class="matrix" aria-label="EPS PER 민감도 표"></div>
+          <p class="mini">기준 EPS 313,421원. 단위: 원/주. 색이 밝을수록 목표주가 후보가 높습니다.</p>
+        </article>
+        <article class="panel p20">
+          <div class="card-title"><h3>Peer comparison</h3><span class="tag gray">확인 필요 병행</span></div>
+          <div class="table-wrap"><table><thead><tr><th>회사</th><th>핵심 노출</th><th class="num">Forward PER</th><th class="num">PBR/비고</th><th>해석</th></tr></thead><tbody>
+            <tr><td>SK하이닉스</td><td>HBM·DRAM·NAND·eSSD</td><td class="num">7.6x</td><td class="num">8.9~12.3x</td><td>EPS 상향 속도가 빠르지만 PBR은 이미 높은 구간.</td></tr>
+            <tr><td>삼성전자</td><td>메모리·파운드리·모바일</td><td class="num">약 5.9x</td><td class="num">확인 필요</td><td>HBM 회복 여부가 할인 축소의 핵심.</td></tr>
+            <tr><td>Micron</td><td>DRAM·NAND·HBM</td><td class="num">약 9.4x</td><td class="num">확인 필요</td><td>미국 상장 메모리 프리미엄과 AI 수혜 반영.</td></tr>
+          </tbody></table></div>
+        </article>
       </div>
     </section>
 
-    <section id="institutions" class="container">
-      <div class="section-head">
-        <div>
-          <h2>기관 전망 · 목표주가 분포</h2>
-          <p>최근 리포트는 대체로 메모리 가격 상승, HBM4, eSSD, 공급 제약을 근거로 목표주가를 상향했습니다. 일부 수치는 기사 기반 요약이므로 원문 리포트 재확인이 필요합니다.</p>
-        </div>
+    <section id="scenario">
+      <div class="section-head"><div><div class="eyebrow">Target Price Scenarios</div><h2>1년 후 목표주가 후보 3가지</h2></div><p>세 시나리오의 확률 합계는 100%이며, 계산식은 EPS × PER 방식입니다.</p></div>
+      <div class="grid g3">
+        <article class="panel p20 scenario"><div class="card-title"><div><div class="case">Bear</div><span class="small">메모리 가격 둔화·HBM 경쟁 심화</span></div><span class="tag down">25%</span></div><div class="kpi"><div class="label">예상 EPS</div><div class="value">₩220k</div></div><div class="kpi" style="margin-top:10px"><div class="label">적용 PER</div><div class="value">9.1x</div></div><div class="kpi" style="margin-top:10px"><div class="label">목표주가 후보</div><div class="value red">₩2.00m</div></div><ul class="list"><li>HBM ASP 하락 또는 고객 주문 조정.</li><li>NAND 회복 지연, EPS 컨센서스 하향.</li><li>프리미엄 밸류에이션 할인.</li></ul></article>
+        <article class="panel p20 scenario reco"><div class="card-title"><div><div class="case">Base</div><span class="small">HBM 견조·DRAM 정상화·eSSD 성장</span></div><span class="tag up">50% · 추천 기준</span></div><div class="kpi"><div class="label">예상 EPS</div><div class="value">₩300k</div></div><div class="kpi" style="margin-top:10px"><div class="label">적용 PER</div><div class="value">9.5x</div></div><div class="kpi" style="margin-top:10px"><div class="label">목표주가 후보</div><div class="value orange">₩2.85m</div></div><ul class="list"><li>컨센서스 수준 실적 달성.</li><li>DRAM·NAND 가격 강세 유지.</li><li>EPS 완만한 추가 상향 가능.</li></ul></article>
+        <article class="panel p20 scenario"><div class="card-title"><div><div class="case">Bull</div><span class="small">AI CAPEX 재가속·HBM4 프리미엄</span></div><span class="tag up">25%</span></div><div class="kpi"><div class="label">예상 EPS</div><div class="value">₩360k</div></div><div class="kpi" style="margin-top:10px"><div class="label">적용 PER</div><div class="value">10.6x</div></div><div class="kpi" style="margin-top:10px"><div class="label">목표주가 후보</div><div class="value green">₩3.80m</div></div><ul class="list"><li>HBM 점유율·마진 개선.</li><li>DRAM 공급 부족 장기화.</li><li>EPS 추가 상향과 리레이팅 동시 발생.</li></ul></article>
       </div>
-
-      <div class="panel pad">
-        <div class="chart-box"><canvas id="institutionChart"></canvas></div>
-      </div>
-
-      <div class="panel pad" style="margin-top:16px">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>기관/매체 확인</th><th>발간·보도일</th><th>투자의견/목표주가</th><th>EPS·실적 가정</th><th>핵심 논리</th><th>리스크</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>미래에셋증권</td><td>2026-01-30</td><td>Buy / 1,370,000원</td><td>2026F EPS 170,736원, OP 147.9조</td><td>강한 가격 모멘텀, DRAM/NAND ASP 상향, 2026F ROE 70.3%</td><td>보고서 발간 후 주가 급등으로 시차 존재</td></tr>
-              <tr><td>다올투자증권</td><td>2026-04-24 보도</td><td>2,100,000원</td><td>상세 EPS 원문 확인 필요</td><td>범용 메모리 가격 상승, 공급 제약, AI 서비스 고도화</td><td>고객 주문 조정, 가격 피크아웃</td></tr>
-              <tr><td>한국투자증권</td><td>2026-04-27 보도</td><td>2,050,000원</td><td>원문 확인 필요</td><td>1Q26 이후 실적 눈높이 상향</td><td>목표가 상향 후 주가 선반영</td></tr>
-              <tr><td>KB증권</td><td>2026-04~05 보도</td><td>2,000,000~2,800,000원</td><td>2026년 DRAM/NAND 가격 상승 가정</td><td>1Q 서프라이즈, 2Q 이후 이익 가속</td><td>초고속 목표가 상향의 변동성</td></tr>
-              <tr><td>NH투자·신한·교보·하나</td><td>2026-04-27 보도</td><td>1,750,000~1,900,000원</td><td>원문 확인 필요</td><td>HBM과 범용 메모리 동반 개선</td><td>리포트별 EPS 가정 차이 큼</td></tr>
-              <tr><td>Meritz / IBK / SK / LS</td><td>2026-04-21 보도</td><td>1,500,000~2,000,000원</td><td>1Q26 OP 35~40조 예상</td><td>강한 1Q 실적, 주주환원 기대</td><td>중동·지정학, 시장 변동성</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="grid g2" style="margin-top:16px">
+        <article class="panel"><div class="p20"><div class="card-title"><h3>시나리오별 목표주가 후보</h3><span class="tag mid">Bar chart</span></div></div><div class="chartbox"><canvas id="scenarioChart"></canvas></div><div class="chart-caption">단위: 백만원/주. Bull Case는 최신 낙관 리포트 상단과 유사한 수준으로 설정.</div></article>
+        <article class="panel p20"><div class="card-title"><h3>확률가중 계산</h3><span class="tag up">₩2.875m</span></div><div class="formula">₩2.00m × 25% + ₩2.85m × 50% + ₩3.80m × 25% = ₩2.875m<br>₩2.875m / ₩2.382m - 1 = +20.7%</div><div class="status-grid"><span>Bear 확률</span><b>25%</b><span>Base 확률</span><b class="good">50%</b><span>Bull 확률</span><b>25%</b></div><p class="mini">위 값은 시나리오 추정치이며 투자 권유나 보장 수익이 아닙니다.</p></article>
       </div>
     </section>
 
-    <section id="flows" class="container">
-      <div class="section-head">
-        <div>
-          <h2>수급 · 주주환원 · 이벤트</h2>
-          <p>주가 레벨이 높아질수록 실적뿐 아니라 외국인 수급, KOSPI 내 비중, ADR/해외 접근성, 주주환원 정책이 멀티플에 영향을 줍니다.</p>
-        </div>
+    <section id="institutions">
+      <div class="section-head"><div><div class="eyebrow">Institution View</div><h2>국내외 기관 리포트 비교</h2></div><p>최근 리포트는 HBM·DRAM·NAND 공급 부족과 EPS 상향에 초점을 맞추고 있습니다. 일부 오래된 리포트는 현재 주가 대비 의미가 낮아 발간일을 함께 표시했습니다.</p></div>
+      <div class="panel p20">
+        <div class="table-wrap"><table><thead><tr><th>기관</th><th>발간일</th><th>의견</th><th class="num">목표주가</th><th>EPS/실적 가정</th><th>방식</th><th>핵심 논리·리스크</th></tr></thead><tbody>
+          <tr><td>Investing.com 컨센서스</td><td>2026-06</td><td>적극 매수</td><td class="num">평균 ₩2,690,121<br>고 ₩4,000,000 / 저 ₩1,030,000</td><td>38명 애널리스트</td><td>컨센서스 집계</td><td>현재가 대비 약 +12.94% 여력. 분산이 커서 EPS·PER 가정 차이가 큼.</td></tr>
+          <tr><td>미래에셋증권</td><td>2026-05-27</td><td>Buy</td><td class="num">₩3,800,000</td><td>2026~2028 수급 부족, ROE 상향</td><td>P/B 리레이팅</td><td>메모리 업종 밸류에이션 상향, DRAM·NAND 수요 초과 전망. 가격 급등의 지속 가능성은 리스크.</td></tr>
+          <tr><td>KB증권</td><td>2026-05-29</td><td>Buy</td><td class="num">₩3,800,000</td><td>2028년까지 공급 부족 전망</td><td>이익 상향·멀티플 조정</td><td>AI 확산에 따른 메모리 공급 부족 장기화. 고객사 주문 조정과 경쟁 심화 감시.</td></tr>
+          <tr><td>KB증권</td><td>2026-03-13</td><td>Buy</td><td class="num">₩1,700,000</td><td>12M Fwd EPS ₩217,662<br>2026 OP ₩177T</td><td>Forward EPS 기반</td><td>DRAM/NAND ASP 상향. 이후 주가·전망 변화가 커 최신성은 낮음.</td></tr>
+          <tr><td>대신증권</td><td>2026-02-20</td><td>Buy</td><td class="num">₩1,450,000</td><td>2026 OP ₩174T</td><td>BPS/PB 계열</td><td>범용 메모리 가격 상향을 반영. 현재 주가 대비 과거 리포트 성격.</td></tr>
+          <tr><td>SK증권</td><td>2026-01-28</td><td>Buy</td><td class="num">₩1,500,000</td><td>2026 EPS ₩160,368</td><td>Target P/E 9.0x</td><td>EPS 추정 상향 초기 국면. 이후 시장 컨센서스가 크게 변동.</td></tr>
+          <tr><td>해외/글로벌 보도</td><td>2026-06</td><td>긍정</td><td class="num">개별 목표가 상이</td><td>AI 메모리 수요·공급 병목</td><td>Peer 리레이팅</td><td>HBM 리더십과 미국 ADR 가능성은 투자자 저변 확대 요인이나, 높은 기대치가 리스크.</td></tr>
+        </tbody></table></div>
       </div>
-      <div class="grid-3">
-        <div class="panel pad hover thesis-card">
-          <span class="badge blue">외국인·기관</span>
-          <h3>외국인 보유와 KOSPI 집중도</h3>
-          <p>미래에셋 보고서 기준 2026-01-29 외국인 보유율은 53.4%. 최신 수치는 별도 확인 필요.</p>
-          <ul class="list"><li>KOSPI AI 반도체 랠리의 핵심 종목</li><li>대형 ETF/패시브 수급 영향 확대</li></ul>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <span class="badge green">재무상태</span>
-          <h3>순현금 전환</h3>
-          <p>1Q26 말 현금성 자산 54.3조, 이자부채 19.3조, 순현금 35조원으로 발표되었습니다.</p>
-          <ul class="list"><li>CAPEX 확대 여력</li><li>다운사이클 방어력 개선</li></ul>
-        </div>
-        <div class="panel pad hover thesis-card">
-          <span class="badge orange">주주환원</span>
-          <h3>배당 정책</h3>
-          <p>FY2025~2027 고정 배당은 주당 1,500원으로 상향. 현 주가 대비 배당수익률 자체는 낮습니다.</p>
-          <ul class="list"><li>FCF가 커질 경우 추가 환원 검토</li><li>주가 모멘텀은 배당보다 EPS가 주도</li></ul>
-        </div>
+      <div class="grid g3" style="margin-top:16px">
+        <div class="panel p20"><h3>가장 보수적</h3><p class="small">낮은 목표주가는 EPS 피크아웃과 멀티플 할인을 강하게 반영합니다. 오래된 리포트일수록 현재 컨센서스와 괴리가 큽니다.</p></div>
+        <div class="panel p20"><h3>중립적</h3><p class="small">컨센서스 평균 ₩2.69m은 현 주가 대비 제한적 여력을 가리키며, Base Case와 비슷한 영역입니다.</p></div>
+        <div class="panel p20"><h3>낙관적</h3><p class="small">₩3.8m 이상은 HBM 프리미엄 지속, DRAM/NAND 공급 부족 장기화, PER 리레이팅을 동시에 요구합니다.</p></div>
       </div>
     </section>
 
-    <section id="risks" class="container">
-      <div class="section-head">
-        <div>
-          <h2>리스크 매트릭스 · 체크포인트</h2>
-          <p>가장 큰 리스크는 “실적이 나빠지는 것”보다 “좋은 실적이 이미 너무 많이 반영된 상태에서 기대가 낮아지는 것”입니다.</p>
-        </div>
+    <section id="flows">
+      <div class="section-head"><div><div class="eyebrow">Flows & Ownership</div><h2>수급·소유구조·시장 포지셔닝</h2></div><p>주가 급등 구간에서는 펀더멘털과 함께 레버리지 ETF·외국인·기관 수급의 변동성이 커질 수 있습니다.</p></div>
+      <div class="grid g4">
+        <article class="panel p20 flow-card"><span class="dot red"></span><div><h3>대형주 쏠림</h3><p class="small">삼성전자·SK하이닉스가 KOSPI 시가총액 비중을 크게 끌어올리며 지수 영향력이 확대.</p></div></article>
+        <article class="panel p20 flow-card"><span class="dot orange"></span><div><h3>레버리지 ETF</h3><p class="small">단일종목·반도체 레버리지 상품의 수급이 단기 변동성을 증폭할 수 있음.</p></div></article>
+        <article class="panel p20 flow-card"><span class="dot green"></span><div><h3>ADR 가능성</h3><p class="small">미국 상장 추진 보도는 글로벌 투자자 저변 확대 가능성을 제공.</p></div></article>
+        <article class="panel p20 flow-card"><span class="dot blue"></span><div><h3>외국인/기관</h3><p class="small">업황 확신 구간에서는 매수세가 강하지만, 기대치 하향 시 포지션 청산도 빠를 수 있음.</p></div></article>
       </div>
+    </section>
 
+    <section id="risks">
+      <div class="section-head"><div><div class="eyebrow">Risk Matrix & Checklist</div><h2>리스크 매트릭스와 관찰 체크포인트</h2></div><p>메모리 업종은 “EPS 상향”과 “PER 하락”이 동시에 벌어질 수 있어 리스크를 수치화해 추적해야 합니다.</p></div>
       <div class="risk-matrix">
-        <div class="risk-card">
-          <div class="risk-row"><h3>HBM 경쟁 심화</h3><span class="risk-level high">High</span></div>
-          <p>삼성전자·Micron의 HBM 인증/공급 확대가 프리미엄과 점유율에 영향을 줄 수 있습니다.</p>
-          <ul class="list"><li>관찰: HBM4 수율, 고객 인증, 장기계약 가격</li><li>EPS 영향: 고마진 제품 믹스 하락</li></ul>
-        </div>
-        <div class="risk-card">
-          <div class="risk-row"><h3>메모리 가격 피크아웃</h3><span class="risk-level high">High</span></div>
-          <p>DRAM/NAND ASP 상승세가 둔화되면 EPS 상향 속도와 PER이 동시에 압박받을 수 있습니다.</p>
-          <ul class="list"><li>관찰: DRAMeXchange, eSSD 계약가, 고객 재고</li><li>EPS 영향: 영업 레버리지 역회전</li></ul>
-        </div>
-        <div class="risk-card">
-          <div class="risk-row"><h3>AI CAPEX 둔화</h3><span class="risk-level mid">Medium</span></div>
-          <p>클라우드·AI 기업의 서버 투자 속도 조절은 HBM과 서버 DRAM 수요에 직접적입니다.</p>
-          <ul class="list"><li>관찰: Nvidia/AMD/CSP capex 코멘트</li><li>EPS 영향: 출하량 및 ASP 하향</li></ul>
-        </div>
-        <div class="risk-card">
-          <div class="risk-row"><h3>CAPEX·감가상각 부담</h3><span class="risk-level mid">Medium</span></div>
-          <p>Yongin·M15X·EUV 등 대규모 투자 확대는 중장기 성장 기반이지만, 과잉 투자 시 이익률을 훼손합니다.</p>
-          <ul class="list"><li>관찰: EUV 발주, 웨이퍼 투입량, 가동률</li><li>EPS 영향: 비용 증가와 공급 증가</li></ul>
-        </div>
-        <div class="risk-card">
-          <div class="risk-row"><h3>환율 및 지정학</h3><span class="risk-level mid">Medium</span></div>
-          <p>원화 강세, 대중 규제, 수출 통제, 중동 리스크는 수요·비용·멀티플에 영향을 줍니다.</p>
-          <ul class="list"><li>관찰: USD/KRW, 미국 수출규제, 중국 수요</li><li>EPS 영향: 원화 환산 이익과 리스크 프리미엄</li></ul>
-        </div>
-        <div class="risk-card">
-          <div class="risk-row"><h3>고객사 주문 조정</h3><span class="risk-level high">High</span></div>
-          <p>대형 고객의 재고 축적 이후 주문 조정이 오면 가격과 출하량이 동시에 흔들릴 수 있습니다.</p>
-          <ul class="list"><li>관찰: 선불금, LTA, CSP 재고 발언</li><li>EPS 영향: 매출 인식 및 ASP 압박</li></ul>
-        </div>
+        <div class="head">리스크</div><div class="head">발생 가능성</div><div class="head">영향도</div><div class="head">EPS 영향</div><div class="head">대응/관찰 지표</div>
+        <div>HBM 경쟁 심화</div><div class="prob mid">중</div><div class="prob high">상</div><div>ASP·마진 하락</div><div>삼성/Micron 인증, 고객사 듀얼소싱, HBM4 계약 조건</div>
+        <div>HBM4 수율·패키징 지연</div><div class="prob mid">중</div><div class="prob high">상</div><div>출하량·마진 하향</div><div>CoWoS/2.5D 패키징 증설, 고객 검증 일정</div>
+        <div>AI CAPEX 둔화</div><div class="prob low">저~중</div><div class="prob high">상</div><div>Forward EPS 하향</div><div>Nvidia/AMD/CSP CAPEX 코멘트, GPU 리드타임</div>
+        <div>NAND 회복 지연</div><div class="prob mid">중</div><div class="prob mid">중</div><div>eSSD 믹스 개선 제한</div><div>NAND ASP, eSSD 주문, Solidigm 실적</div>
+        <div>공급 과잉 재발</div><div class="prob low">저</div><div class="prob high">상</div><div>PER·EPS 동시 하락</div><div>웨이퍼 투입량, CAPEX 가이던스, 재고 일수</div>
+        <div>환율·지정학·규제</div><div class="prob mid">중</div><div class="prob mid">중</div><div>원화 실적·비용 변동</div><div>USD/KRW, 수출통제, 대중 규제, 대만 패키징 공급망</div>
       </div>
-
-      <div class="panel pad" style="margin-top:16px">
-        <h3 style="margin-top:0">향후 체크포인트</h3>
-        <div class="grid-2">
-          <ul class="list">
-            <li>다음 실적 발표에서 2Q26 매출·영업이익률·출하량 가이던스</li>
-            <li>EPS 컨센서스 3개월·6개월 revision 방향</li>
-            <li>DRAM/NAND 계약가, eSSD 가격 지표</li>
-            <li>HBM4/HBM4E 전환 일정과 고객 인증</li>
-            <li>Micron·Samsung 실적 코멘트와 공급 계획</li>
-          </ul>
-          <ul class="list">
-            <li>Nvidia·AMD·CSP의 AI 인프라 투자 가이던스</li>
-            <li>Yongin/M15X CAPEX, EUV 발주 및 감가상각 전망</li>
-            <li>원/달러 환율과 외국인 수급</li>
-            <li>주가 52주 고점 돌파 이후 변동성 관리</li>
-            <li>기관 목표가 상향 속도와 실제 EPS 상향 속도의 차이</li>
-          </ul>
-        </div>
+      <div class="grid g2" style="margin-top:16px">
+        <article class="panel p20"><div class="card-title"><h3>관찰해야 할 체크포인트</h3><span class="tag mid">Monitoring</span></div><ul class="list"><li>다음 실적 발표: Q2 2026 일정은 확인 필요, 통상 7월 하순 관찰.</li><li>FY1/FY2 EPS 컨센서스의 1주·1개월·3개월 변화.</li><li>DRAM/NAND 현물·계약 가격과 HBM 계약 구조.</li><li>HBM4/HBM4E 전환 일정, 수율, 고객 인증.</li><li>eSSD 수요와 주요 CSP AI 인프라 투자 코멘트.</li><li>Micron·Samsung 실적 컨콜에서 공급 증설/가격 언급.</li></ul></article>
+        <article class="panel p20"><div class="card-title"><h3>리밸런싱·실행 규칙 예시</h3><span class="tag gray">기계적 규칙</span></div><ul class="list"><li>신규 진입은 단일 매수보다 3~6개월 분할 접근.</li><li>EPS 컨센서스가 2개월 연속 하향되면 비중 축소 검토.</li><li>PER 12배 이상 + EPS Revision 둔화 시 과열 점검.</li><li>주가가 확률가중 목표주가를 10% 이상 초과하면 시나리오 업데이트.</li><li>HBM 고객사 주문 조정 뉴스 발생 시 Bear Case 확률 상향.</li></ul></article>
       </div>
     </section>
 
-    <section id="sources" class="container">
-      <div class="section-head">
-        <div>
-          <h2>출처 · 가정 · 면책</h2>
-          <p>확정 실적, 주가 데이터, 리서치 추정치를 구분했습니다. 컨센서스 EPS는 공개 웹 데이터의 제약으로 일부 역산 또는 리포트 기반 추정으로 표시했습니다.</p>
+    <section id="sources">
+      <div class="section-head"><div><div class="eyebrow">Sources & Verification</div><h2>출처·검증·면책</h2></div><p>정확한 실시간 수치와 컨센서스는 제공처별 갱신 시점이 다릅니다. 중요한 수치는 투자 전 재확인해야 합니다.</p></div>
+      <div class="panel p20">
+        <div class="source-list">
+          <div class="source-item"><b>현재 주가·시가총액:</b> Yahoo Finance, Investing.com, TradingView, 매일경제 증권 페이지. 2026-06-16 기준 주가 ₩2,382,000 및 시가총액 약 ₩1,690.9조/제공처별 차이를 확인.</div>
+          <div class="source-item"><b>실적:</b> SK hynix IR·Newsroom, FY2025 및 Q1 2026 earnings release. Q1 2026 매출 ₩52.5763T, 영업이익 ₩37.6103T, 순이익 ₩40.3459T.</div>
+          <div class="source-item"><b>컨센서스:</b> Investing.com 애널리스트 컨센서스, LSEG 인용 보도, 국내 증권사 리포트. 평균 목표주가·Forward PER·EPS Revision은 갱신 가능.</div>
+          <div class="source-item"><b>업황:</b> Reuters, MarketWatch, 국내외 증권사 리포트. HBM 점유율, 공급 부족, ADR 추진, DRAM/NAND 가격 전망 관련 보도.</div>
+          <div class="source-item"><b>기관 리포트:</b> 미래에셋증권, KB증권, 대신증권, SK증권, 키움증권, 하나증권 관련 공개 요약/기사 및 보고서 검색 결과.</div>
         </div>
       </div>
-
-      <div class="panel pad">
-        <ul class="source-list">
-          <li><strong>SK hynix / PRNewswire, 2026-04-22:</strong> 1Q26 매출 52.5763조원, 영업이익 37.6103조원, 순이익 40.3459조원, 순현금 35조원.</li>
-          <li><strong>SK hynix Newsroom, 2026-01-28:</strong> 2025년 매출 97.1467조원, 영업이익 47.2063조원, 순이익 42.9479조원.</li>
-          <li><strong>Google Finance, 2026-05-21 15:30 KST:</strong> 현재가 1,940,000원, 시총 1,382.64조원, PER 18.37x, EPS 105,627원, 발행주식수 712.70M.</li>
-          <li><strong>Yahoo Finance, 2026-05-20 공개값:</strong> Forward P/E 6.17x. Forward EPS는 현재가 ÷ Forward P/E로 역산했으며 직접 컨센서스가 아닙니다.</li>
-          <li><strong>미래에셋증권, 2026-01-30:</strong> 목표주가 1,370,000원, 2026F EPS 170,736원, 2026F OP 147.9조원, 2027F EPS 213,003원.</li>
-          <li><strong>매일경제, 2026-04-23:</strong> 1Q26 DRAM ASP 중반 60%대 상승, NAND 가격 중반 70%대 상승 보도.</li>
-          <li><strong>아시아경제·중부매일·이데일리, 2026-04~05:</strong> 국내 증권사 목표주가 상향 보도 요약. 기관별 원문 리포트 전문은 별도 확인 필요.</li>
-          <li><strong>SK hynix IR 주주환원:</strong> FY2025~2027 고정 배당 1,500원 및 재무목표 설명.</li>
-        </ul>
-        <div class="disclaimer">
-          본 자료는 투자 참고용이며, 매수·매도 권유가 아닙니다. 본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.
-        </div>
+      <div class="panel p20" style="margin-top:16px">
+        <h3>최종 전략 요약</h3>
+        <p class="muted">SK하이닉스의 투자 포인트는 HBM 선도력과 서버 메모리 수요가 EPS 레벨을 구조적으로 올리고 있다는 점입니다. 그러나 현재 주가는 단기 EPS 급증을 상당 부분 반영하고 있어, 추가 상승은 “EPS 재상향 지속” 또는 “메모리 업종 PER 리레이팅” 중 적어도 하나가 더 필요합니다. 따라서 이 페이지의 Base Case는 긍정적이되, Bear Case 전환 신호를 빠르게 감지하는 모니터링형 접근을 권합니다.</p>
+        <p class="warn"><b>본 자료는 투자 참고용이며 투자 판단의 책임은 투자자 본인에게 있습니다.</b></p>
       </div>
-      <div class="footer-space"></div>
     </section>
   </main>
 
+  <footer class="wrap footer-note">
+    <p>본 자료는 투자 참고용이며, 매수·매도 권유가 아닙니다. 모든 수치는 공개 자료와 시장 데이터에 기반한 대시보드용 요약이며, 실시간 가격·컨센서스·기관 리포트는 갱신 시점에 따라 달라질 수 있습니다.</p>
+  </footer>
+
   <script>
-    const COLORS = {
-      red: '#e11d48',
-      orange: '#f97316',
-      amber: '#f59e0b',
-      green: '#10b981',
-      cyan: '#06b6d4',
-      blue: '#3b82f6',
-      purple: '#8b5cf6',
-      grid: 'rgba(255,255,255,.10)',
-      text: '#cbd5e1',
-      muted: '#94a3b8'
-    };
-
-    const annualData = [
-      { label:'2021', revenue:42.998, op:12.41, net:9.61, eps:13200 },
-      { label:'2022', revenue:44.648, op:7.007, net:2.439, eps:3350 },
-      { label:'2023', revenue:32.766, op:-7.730, net:-9.112, eps:-12517 },
-      { label:'2024', revenue:66.193, op:23.467, net:19.789, eps:27182 },
-      { label:'2025', revenue:97.147, op:47.206, net:42.948, eps:60260 },
-      { label:'2026F', revenue:229.451, op:147.948, net:124.296, eps:170736 },
-      { label:'2027F', revenue:282.618, op:182.677, net:155.067, eps:213003 }
-    ];
-
-    const quarterlyData = [
-      { label:'1Q25', revenue:17.64, op:7.44, eps:11376 },
-      { label:'2Q25', revenue:22.23, op:9.21, eps:9809 },
-      { label:'3Q25', revenue:24.45, op:11.38, eps:17679 },
-      { label:'4Q25', revenue:32.83, op:19.17, eps:21356 },
-      { label:'1Q26', revenue:52.58, op:37.61, eps:56589 }
-    ];
-
-    const scenarios = [
-      { label:'Bear', target:1305000, prob:25, color:COLORS.red },
-      { label:'Base', target:2185000, prob:45, color:COLORS.orange },
-      { label:'Bull', target:3220000, prob:30, color:COLORS.green },
-      { label:'Weighted', target:2275500, prob:100, color:COLORS.amber }
-    ];
-
-    const institutions = [
-      { label:'Mirae', target:1370000 },
-      { label:'LS', target:1500000 },
-      { label:'Hana', target:1750000 },
-      { label:'NH', target:1800000 },
-      { label:'IBK', target:1800000 },
-      { label:'Shinhan', target:1900000 },
-      { label:'KB Apr', target:2000000 },
-      { label:'Daol', target:2100000 },
-      { label:'KB May', target:2800000 }
-    ];
-
-    function fitCanvas(canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-      const ctx = canvas.getContext('2d');
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      return { ctx, w: rect.width, h: rect.height };
-    }
-
-    function drawAxes(ctx, w, h, pad) {
-      ctx.strokeStyle = COLORS.grid;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(pad.l, pad.t);
-      ctx.lineTo(pad.l, h - pad.b);
-      ctx.lineTo(w - pad.r, h - pad.b);
-      ctx.stroke();
-    }
-
-    function drawText(ctx, text, x, y, size=12, color=COLORS.text, align='center', weight='700') {
-      ctx.fillStyle = color;
-      ctx.font = `${weight} ${size}px Inter, system-ui, sans-serif`;
-      ctx.textAlign = align;
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, x, y);
-    }
-
-    function drawGroupedBars(id, data) {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      const {ctx, w, h} = fitCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      const pad = {l:54, r:20, t:24, b:46};
-      drawAxes(ctx,w,h,pad);
-      const maxVal = Math.max(...data.flatMap(d => [d.revenue, d.op, d.net]));
-      const minVal = Math.min(0, ...data.flatMap(d => [d.revenue, d.op, d.net]));
-      const range = maxVal - minVal;
-      const baseY = h - pad.b - ((0 - minVal) / range) * (h - pad.t - pad.b);
-      ctx.strokeStyle = 'rgba(255,255,255,.16)';
-      ctx.beginPath(); ctx.moveTo(pad.l, baseY); ctx.lineTo(w-pad.r, baseY); ctx.stroke();
-
-      const groupW = (w - pad.l - pad.r) / data.length;
-      const barW = Math.min(15, groupW / 5);
-      const series = [
-        {key:'revenue', color:COLORS.orange, name:'매출'},
-        {key:'op', color:COLORS.red, name:'영업이익'},
-        {key:'net', color:COLORS.green, name:'순이익'}
-      ];
-      data.forEach((d, i) => {
-        const cx = pad.l + groupW*i + groupW/2;
-        series.forEach((s, j) => {
-          const v = d[s.key];
-          const y = h - pad.b - ((v - minVal) / range) * (h - pad.t - pad.b);
-          const x = cx + (j-1)*barW*1.25 - barW/2;
-          const bh = Math.abs(baseY - y);
-          ctx.fillStyle = s.color;
-          ctx.globalAlpha = .88;
-          ctx.fillRect(x, Math.min(y, baseY), barW, Math.max(2,bh));
-          ctx.globalAlpha = 1;
-        });
-        drawText(ctx, d.label, cx, h-22, 11, COLORS.muted);
-      });
-      series.forEach((s,i) => {
-        const x = pad.l + i*82;
-        ctx.fillStyle = s.color; ctx.fillRect(x, 8, 10, 10);
-        drawText(ctx, s.name, x+16, 13, 11, COLORS.text, 'left');
-      });
-      drawText(ctx, '조원', 18, 20, 11, COLORS.muted, 'left');
-    }
-
-    function drawLine(id, labels, values, color, suffix='') {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      const {ctx, w, h} = fitCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      const pad = {l:58, r:24, t:26, b:48};
-      drawAxes(ctx,w,h,pad);
-      const maxVal = Math.max(...values);
-      const minVal = Math.min(...values);
-      const range = (maxVal - minVal) || 1;
-      const x = i => pad.l + (w-pad.l-pad.r) * (i/(values.length-1));
-      const y = v => h - pad.b - ((v-minVal)/range)*(h-pad.t-pad.b);
-      ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath();
-      values.forEach((v,i)=>{ if(i===0) ctx.moveTo(x(i),y(v)); else ctx.lineTo(x(i),y(v)); });
-      ctx.stroke();
-      values.forEach((v,i)=>{
-        ctx.fillStyle = '#09090b'; ctx.beginPath(); ctx.arc(x(i), y(v), 5, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
-        drawText(ctx, labels[i], x(i), h-22, 11, COLORS.muted);
-      });
-      drawText(ctx, `${Math.round(maxVal).toLocaleString()}${suffix}`, pad.l-8, pad.t+5, 11, COLORS.muted, 'right');
-      drawText(ctx, `${Math.round(minVal).toLocaleString()}${suffix}`, pad.l-8, h-pad.b-5, 11, COLORS.muted, 'right');
-    }
-
-    function drawDualLine(id, data) {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      const {ctx,w,h} = fitCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      const pad={l:52,r:24,t:30,b:48};
-      drawAxes(ctx,w,h,pad);
-      const vals = data.flatMap(d=>[d.revenue,d.op]);
-      const maxVal=Math.max(...vals), minVal=0, range=maxVal-minVal;
-      const x=i=>pad.l+(w-pad.l-pad.r)*(i/(data.length-1));
-      const y=v=>h-pad.b-((v-minVal)/range)*(h-pad.t-pad.b);
-      [
-        {key:'revenue', color:COLORS.orange, name:'매출'},
-        {key:'op', color:COLORS.red, name:'영업이익'}
-      ].forEach((s, idx)=>{
-        ctx.strokeStyle=s.color; ctx.lineWidth=3; ctx.beginPath();
-        data.forEach((d,i)=>{ if(i===0) ctx.moveTo(x(i), y(d[s.key])); else ctx.lineTo(x(i), y(d[s.key])); });
-        ctx.stroke();
-        data.forEach((d,i)=>{ ctx.fillStyle=s.color; ctx.beginPath(); ctx.arc(x(i), y(d[s.key]), 4, 0, Math.PI*2); ctx.fill(); });
-        ctx.fillStyle=s.color; ctx.fillRect(pad.l + idx*90, 10, 10, 10);
-        drawText(ctx, s.name, pad.l + idx*90 + 16, 15, 11, COLORS.text, 'left');
-      });
-      data.forEach((d,i)=>drawText(ctx,d.label,x(i),h-22,11,COLORS.muted));
-      drawText(ctx,'조원',16,20,11,COLORS.muted,'left');
-    }
-
-    function drawDoughnut(id, labels, values, colors) {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      const {ctx,w,h} = fitCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      const cx=w/2, cy=h/2-10, r=Math.min(w,h)*.31, inner=r*.62;
-      const total=values.reduce((a,b)=>a+b,0);
-      let start=-Math.PI/2;
-      values.forEach((v,i)=>{
-        const end=start+(v/total)*Math.PI*2;
-        ctx.beginPath(); ctx.arc(cx,cy,r,start,end); ctx.arc(cx,cy,inner,end,start,true); ctx.closePath();
-        ctx.fillStyle=colors[i]; ctx.fill();
-        start=end;
-      });
-      drawText(ctx,'EPS',cx,cy-8,20,'#fff');
-      drawText(ctx,'Bridge',cx,cy+12,12,COLORS.muted);
-      const lx=20, ly=h-74;
-      labels.forEach((label,i)=>{
-        const x=lx + (i%2)*(w/2-10), y=ly + Math.floor(i/2)*24;
-        ctx.fillStyle=colors[i]; ctx.fillRect(x,y,10,10);
-        drawText(ctx, `${label} ${values[i]}%`, x+16, y+6, 11, COLORS.text, 'left');
-      });
-    }
-
-    function drawScenarioBars(id) {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      const {ctx,w,h} = fitCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      const pad={l:70,r:24,t:28,b:54};
-      drawAxes(ctx,w,h,pad);
-      const maxVal=Math.max(...scenarios.map(s=>s.target));
-      const barW=(w-pad.l-pad.r)/scenarios.length*.55;
-      scenarios.forEach((s,i)=>{
-        const step=(w-pad.l-pad.r)/scenarios.length;
-        const x=pad.l+i*step+step/2-barW/2;
-        const bh=(s.target/maxVal)*(h-pad.t-pad.b);
-        const y=h-pad.b-bh;
-        ctx.fillStyle=s.color; ctx.globalAlpha=.88;
-        ctx.fillRect(x,y,barW,bh);
-        ctx.globalAlpha=1;
-        drawText(ctx,s.label,x+barW/2,h-24,12,COLORS.text);
-        drawText(ctx,`${Math.round(s.target/10000).toLocaleString()}만원`,x+barW/2,y-12,12,'#fff');
-      });
-      drawText(ctx,'목표주가 후보',pad.l,14,12,COLORS.muted,'left');
-    }
-
-    function drawHorizontalBars(id, data) {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      const {ctx,w,h} = fitCanvas(canvas);
-      ctx.clearRect(0,0,w,h);
-      const pad={l:76,r:34,t:20,b:28};
-      const maxVal=Math.max(...data.map(d=>d.target));
-      const rowH=(h-pad.t-pad.b)/data.length;
-      data.forEach((d,i)=>{
-        const y=pad.t+i*rowH+rowH*.25;
-        const bw=(d.target/maxVal)*(w-pad.l-pad.r);
-        const grad=ctx.createLinearGradient(pad.l,y,pad.l+bw,y);
-        grad.addColorStop(0,COLORS.red); grad.addColorStop(1,COLORS.orange);
-        ctx.fillStyle='rgba(255,255,255,.06)';
-        ctx.fillRect(pad.l,y,w-pad.l-pad.r,rowH*.48);
-        ctx.fillStyle=grad;
-        ctx.fillRect(pad.l,y,bw,rowH*.48);
-        drawText(ctx,d.label,pad.l-10,y+rowH*.24,11,COLORS.text,'right');
-        drawText(ctx,`${(d.target/10000).toLocaleString()}만원`,pad.l+bw+8,y+rowH*.24,11,'#fff','left');
-      });
-      drawText(ctx,'기관 목표주가 분포(기사·리포트 기반)',pad.l,10,12,COLORS.muted,'left');
-    }
-
-    function drawAll() {
-      drawGroupedBars('annualFinancialChart', annualData);
-      drawDoughnut('epsBridgeChart', ['HBM','DRAM','NAND/eSSD','환율·기타'], [45,30,20,5], [COLORS.red, COLORS.orange, COLORS.green, COLORS.blue]);
-      drawLine('annualEpsChart', annualData.map(d=>d.label), annualData.map(d=>d.eps), COLORS.orange, '원');
-      drawDualLine('quarterlyChart', quarterlyData);
-      drawScenarioBars('scenarioChart');
-      drawHorizontalBars('institutionChart', institutions);
-    }
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(drawAll, 120);
-    });
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', drawAll);
-    } else {
-      drawAll();
-    }
+    const css = getComputedStyle(document.documentElement);
+    const C = { text:'#f4f5f7', muted:'#a6adbb', dim:'#70798b', red:'#e31b23', orange:'#ff7a1a', gold:'#ffb547', green:'#23d18b', blue:'#4ea8ff', purple:'#a78bfa', grid:'rgba(255,255,255,.10)' };
+    function setupCanvas(id){const canvas=document.getElementById(id); if(!canvas) return null; const rect=canvas.getBoundingClientRect(); const dpr=window.devicePixelRatio||1; canvas.width=rect.width*dpr; canvas.height=rect.height*dpr; const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); return {canvas,ctx,w:rect.width,h:rect.height};}
+    function fmt(v){return v>=1000000?(v/1000000).toFixed(2)+'m':v>=1000?(v/1000).toFixed(0)+'k':v.toString()}
+    function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+    function drawBarChart(id, labels, values, opts={}){const s=setupCanvas(id); if(!s) return; const {ctx,w,h}=s; ctx.clearRect(0,0,w,h); const pad={l:54,r:22,t:20,b:46}; const min=Math.min(0,...values), max=Math.max(...values)*1.1; const range=max-min||1; ctx.font='12px system-ui'; ctx.fillStyle=C.muted; ctx.strokeStyle=C.grid; ctx.lineWidth=1; for(let i=0;i<5;i++){const y=pad.t+(h-pad.t-pad.b)*i/4; ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke(); const val=max-(range*i/4); ctx.fillText(fmt(Math.round(val)),8,y+4);} const zeroY=pad.t+(max-0)/range*(h-pad.t-pad.b); ctx.strokeStyle='rgba(255,255,255,.22)'; ctx.beginPath();ctx.moveTo(pad.l,zeroY);ctx.lineTo(w-pad.r,zeroY);ctx.stroke(); const bw=(w-pad.l-pad.r)/values.length*.58; values.forEach((v,i)=>{const x=pad.l+(w-pad.l-pad.r)*(i+.5)/values.length-bw/2; const y=pad.t+(max-v)/range*(h-pad.t-pad.b); const bY=Math.min(y,zeroY), bh=Math.abs(zeroY-y); const grad=ctx.createLinearGradient(0,bY,0,bY+bh); grad.addColorStop(0, opts.color||C.orange); grad.addColorStop(1, v<0?'#7a1b22':C.red); ctx.fillStyle=grad; roundRect(ctx,x,bY,bw,Math.max(2,bh),8); ctx.fill(); ctx.fillStyle=C.muted; ctx.textAlign='center'; ctx.fillText(labels[i],x+bw/2,h-18); ctx.fillStyle=v<0?'#ffadb4':'#ffd1a8'; ctx.font='bold 11px system-ui'; ctx.fillText(fmt(v),x+bw/2,Math.max(14,bY-6)); ctx.font='12px system-ui';}); ctx.textAlign='left';}
+    function drawLineChart(id, labels, values){const s=setupCanvas(id); if(!s) return; const {ctx,w,h}=s; ctx.clearRect(0,0,w,h); const pad={l:54,r:22,t:20,b:46}; const min=Math.min(0,...values)*1.05, max=Math.max(...values)*1.12; const range=max-min||1; ctx.font='12px system-ui'; ctx.fillStyle=C.muted; ctx.strokeStyle=C.grid; for(let i=0;i<5;i++){const y=pad.t+(h-pad.t-pad.b)*i/4; ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke(); ctx.fillText(fmt(Math.round(max-(range*i/4))),8,y+4);} const pts=values.map((v,i)=>[pad.l+(w-pad.l-pad.r)*i/(values.length-1), pad.t+(max-v)/range*(h-pad.t-pad.b)]); const grad=ctx.createLinearGradient(0,pad.t,0,h-pad.b); grad.addColorStop(0,'rgba(255,122,26,.35)');grad.addColorStop(1,'rgba(227,27,35,0)'); ctx.beginPath(); pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.lineTo(pts[pts.length-1][0],h-pad.b);ctx.lineTo(pts[0][0],h-pad.b);ctx.closePath();ctx.fillStyle=grad;ctx.fill(); ctx.beginPath(); pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.strokeStyle=C.orange;ctx.lineWidth=3;ctx.stroke(); pts.forEach((p,i)=>{ctx.fillStyle=C.red;ctx.beginPath();ctx.arc(p[0],p[1],4,0,Math.PI*2);ctx.fill();ctx.fillStyle=C.muted;ctx.textAlign='center';ctx.font='12px system-ui';ctx.fillText(labels[i],p[0],h-18);ctx.fillStyle='#ffd1a8';ctx.font='bold 11px system-ui';ctx.fillText(fmt(values[i]),p[0],p[1]-10);}); ctx.textAlign='left';}
+    function drawScenarioChart(){drawBarChart('scenarioChart',['Bear','Base','Bull'],[2.00,2.85,3.80],{color:C.gold}); const s=setupCanvas('scenarioChart');}
+    function populateSensitivity(){const el=document.getElementById('sensitivityMatrix'); if(!el) return; const epsBase=313421; const mults=[0.8,0.9,1.0,1.1,1.2]; const pers=[8,10,12,14,16]; el.style.gridTemplateColumns=`repeat(${pers.length+1}, minmax(88px, 1fr))`; el.innerHTML=''; const add=(html,cls='cell')=>{const d=document.createElement('div'); d.className=cls; d.innerHTML=html; el.appendChild(d);}; add('EPS / PER','cell head'); pers.forEach(p=>add(p+'x','cell head')); const min=epsBase*.8*8, max=epsBase*1.2*16; mults.forEach(m=>{add((m*100).toFixed(0)+'%<br><span class="mini">EPS '+Math.round(epsBase*m/1000)+'k</span>','cell head'); pers.forEach(p=>{const v=epsBase*m*p; const t=(v-min)/(max-min); const alpha=.08+t*.28; add('<span class="val">₩'+(v/1000000).toFixed(2)+'m</span>', 'cell'); el.lastChild.style.background=`linear-gradient(135deg, rgba(227,27,35,${alpha}), rgba(255,122,26,${alpha*.75})), rgba(14,16,23,.92)`;});});}
+    function init(){drawBarChart('annualEpsChart',['2021','2022','2023','2024','2025'],[13190,3064,-12517,27182,58955],{color:C.orange}); drawLineChart('quarterEpsChart',['2Q24','3Q24','4Q24','1Q25','2Q25','3Q25','4Q25','1Q26'],[5650,7900,11000,11143,9610,17304,20934,56670]); drawBarChart('forwardEpsChart',['FY1','FY2','FY3'],[313421,382000,466000],{color:C.green}); drawBarChart('scenarioChart',['Bear','Base','Bull'],[2.00,2.85,3.80],{color:C.gold}); populateSensitivity();}
+    let rTimer; window.addEventListener('resize',()=>{clearTimeout(rTimer); rTimer=setTimeout(init,150);}); document.addEventListener('DOMContentLoaded',init);
   </script>
 </body>
 </html>
