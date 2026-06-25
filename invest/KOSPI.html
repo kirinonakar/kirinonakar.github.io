@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>코스피 투자전략 리서치 대시보드 | 2026-05-27</title>
-  <meta name="description" content="코스피 지수의 매크로, 업종, 밸류에이션, 시나리오, 기관 전망, 수급, 리스크를 한눈에 보는 투자 리서치 대시보드" />
+  <title>코스피 투자전략 리서치 대시보드 | 2026-06-25</title>
+  <meta name="description" content="코스피 지수의 매크로, 업종, 밸류에이션, 수급, 시나리오, 기관 전망을 정리한 투자 리서치 대시보드" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -12,7 +12,7 @@
         extend: {
           colors: {
             brandBg: '#050814',
-            panelBg: 'rgba(13, 20, 38, 0.7)',
+            panelBg: 'rgba(13, 20, 38, 0.70)',
             panelBorder: 'rgba(255, 255, 255, 0.08)',
             accentBlue: '#3b82f6',
             accentPurple: '#8b5cf6',
@@ -25,27 +25,25 @@
             textSecondary: '#94a3b8'
           },
           fontFamily: {
-            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Noto Sans KR', 'sans-serif']
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Noto Sans KR', 'sans-serif'],
           },
           boxShadow: {
-            'glow-blue': '0 0 24px rgba(59, 130, 246, 0.22)',
-            'glow-cyan': '0 0 24px rgba(6, 182, 212, 0.18)',
-            'premium': '0 25px 50px -12px rgba(0, 0, 0, 0.55)'
+            'glow-blue': '0 0 20px rgba(59, 130, 246, 0.15)',
+            'glow-gold': '0 0 20px rgba(245, 158, 11, 0.15)',
+            'premium': '0 25px 50px -12px rgba(0, 0, 0, 0.50)'
           }
         }
       }
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <style>
-    :root { color-scheme: dark; }
     body {
-      background:
-        radial-gradient(circle at 10% 8%, rgba(59, 130, 246, 0.16), transparent 38%),
-        radial-gradient(circle at 88% 16%, rgba(6, 182, 212, 0.10), transparent 38%),
-        radial-gradient(circle at 75% 78%, rgba(139, 92, 246, 0.11), transparent 46%),
-        #050814;
+      background: radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.15), transparent 45%),
+                  radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.10), transparent 50%),
+                  radial-gradient(circle at 52% 8%, rgba(245, 158, 11, 0.08), transparent 28%),
+                  #050814;
       color: #f1f5f9;
       -webkit-font-smoothing: antialiased;
     }
@@ -53,504 +51,1039 @@
       background: rgba(13, 20, 38, 0.50);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+      border: 1px solid rgba(255, 255, 255, 0.075);
     }
-    .glass-panel-hover { transition: all .28s cubic-bezier(.16, 1, .3, 1); }
+    .glass-panel-hover {
+      transition: all .28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
     .glass-panel-hover:hover {
       background: rgba(13, 20, 38, 0.72);
-      border-color: rgba(96, 165, 250, 0.34);
+      border-color: rgba(96, 165, 250, 0.32);
+      box-shadow: 0 16px 34px rgba(0,0,0,.35);
       transform: translateY(-2px);
-      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
     }
-    .gradient-text {
-      background: linear-gradient(90deg, #f8fafc 0%, #38bdf8 45%, #f59e0b 100%);
+    .text-gradient {
+      background: linear-gradient(90deg, #f8fafc 0%, #38bdf8 42%, #f59e0b 100%);
       -webkit-background-clip: text;
+      background-clip: text;
       color: transparent;
     }
-    .section-title::before {
-      content: '';
-      display: inline-block;
-      width: 10px;
-      height: 26px;
-      margin-right: 10px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, #38bdf8, #3b82f6);
-      vertical-align: -5px;
+    .chip {
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.62);
+      color: #cbd5e1;
     }
-    .chart-box { position: relative; height: 320px; }
-    .chart-box-sm { position: relative; height: 260px; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border-bottom: 1px solid rgba(255,255,255,.08); padding: 14px 12px; text-align: left; vertical-align: top; }
-    th { color: #cbd5e1; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; background: rgba(15, 23, 42, .55); }
-    td { color: #dbeafe; font-size: 14px; }
-    .badge { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 10px; font-size:12px; font-weight:700; }
-    .anchor-offset { scroll-margin-top: 96px; }
+    .status-positive { color:#fbbf24; background:rgba(245,158,11,.12); border-color:rgba(245,158,11,.28); }
+    .status-neutral { color:#67e8f9; background:rgba(6,182,212,.11); border-color:rgba(6,182,212,.28); }
+    .status-negative { color:#93c5fd; background:rgba(59,130,246,.10); border-color:rgba(59,130,246,.28); }
+    .mini-bar { height: 7px; border-radius: 999px; background: rgba(148,163,184,.18); overflow:hidden; }
+    .mini-bar > span { display:block; height:100%; border-radius:999px; }
+    a.source-link { color:#93c5fd; text-decoration: underline; text-decoration-color: rgba(147,197,253,.35); }
+    a.source-link:hover { color:#bfdbfe; }
+    .chart-card canvas { max-width:100%; }
     @media print {
       body { background: #ffffff !important; color: #000000 !important; }
-      .glass-panel { background: #ffffff !important; color: #000000 !important; border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
+      .glass-panel { background: #ffffff !important; border: 1px solid #e2e8f0 !important; color: #000000 !important; }
       .no-print { display: none !important; }
-      .gradient-text { color: #000000 !important; background: none !important; }
-      td, th { color: #000000 !important; }
+      .text-gradient { color:#000 !important; background:none !important; }
+      a { color:#000 !important; }
     }
   </style>
 </head>
-<body class="font-sans selection:bg-sky-500/30 selection:text-white">
+<body class="min-h-screen font-sans">
+
   <nav class="no-print sticky top-0 z-50 border-b border-white/10 bg-slate-950/75 backdrop-blur-xl">
     <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
       <a href="#summary" class="flex items-center gap-2 font-extrabold tracking-tight text-slate-100">
-        <span class="grid h-8 w-8 place-items-center rounded-xl bg-sky-500/20 text-sky-300"><i data-lucide="line-chart" class="h-4 w-4"></i></span>
-        KOSPI Strategy
+        <i data-lucide="line-chart" class="h-5 w-5 text-cyan-300"></i>
+        KOSPI Dashboard
       </a>
       <div class="flex gap-3 overflow-x-auto whitespace-nowrap text-sm text-slate-300">
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#summary">요약</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#macro">매크로</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#sectors">업종</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#valuation">밸류에이션</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#scenario">시나리오</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#institutions">기관 전망</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#flows">수급</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#risks">리스크</a>
-        <a class="rounded-full px-3 py-1.5 hover:bg-white/10" href="#sources">출처</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#summary">요약</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#macro">매크로</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#sectors">업종</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#valuation">밸류에이션</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#scenario">시나리오</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#institutions">기관 전망</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#flows">수급</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#risks">리스크</a>
+        <a class="rounded-full px-3 py-1 hover:bg-white/10" href="#sources">출처</a>
       </div>
     </div>
   </nav>
 
-  <main class="mx-auto max-w-7xl px-4 pb-20">
-    <section id="summary" class="anchor-offset py-12 md:py-16">
-      <div class="grid gap-6 lg:grid-cols-[1.18fr_.82fr] lg:items-stretch">
-        <div class="glass-panel rounded-[2rem] p-7 md:p-10">
-          <div class="mb-6 flex flex-wrap gap-2">
-            <span class="badge bg-sky-400/10 text-sky-200 ring-1 ring-sky-400/20">KOSPI Index</span>
-            <span class="badge bg-emerald-400/10 text-emerald-200 ring-1 ring-emerald-400/20">데이터 기준일: 2026-05-27</span>
-            <span class="badge bg-amber-400/10 text-amber-200 ring-1 ring-amber-400/20">투자 참고용</span>
+  <main class="mx-auto max-w-7xl px-4 pb-24">
+
+    <section id="summary" class="pt-10 md:pt-16">
+      <div class="grid gap-6 lg:grid-cols-[1.28fr_.72fr]">
+        <div class="glass-panel rounded-3xl p-6 md:p-8 shadow-premium">
+          <div class="mb-5 flex flex-wrap items-center gap-2 text-xs font-bold">
+            <span class="chip rounded-full px-3 py-1">한국 주식시장</span>
+            <span class="chip rounded-full px-3 py-1">KOSPI Index</span>
+            <span class="chip rounded-full px-3 py-1">데이터 기준일: 2026-06-25</span>
+            <span class="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-amber-200">투자 참고용</span>
           </div>
           <h1 class="max-w-4xl text-4xl font-black leading-tight tracking-tight md:text-6xl">
-            코스피 투자전략<br />
-            <span class="gradient-text">리서치 대시보드</span>
+            코스피 투자전략 <span class="text-gradient">리서치 대시보드</span>
           </h1>
-          <p class="mt-6 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
-            2026년 코스피는 AI 메모리·HBM 슈퍼사이클, 밸류업 정책, 외국인 자금 유입 기대가 결합되며 역사적 재평가 국면에 진입했다. 다만 단기 급등 이후 지수·시총·밸류에이션이 빠르게 변하고 있어, 이 대시보드는 <b class="text-slate-100">실시간 확정치가 아닌 공개 자료와 시나리오 가정 기반의 참고 모델</b>로 읽어야 한다.
+          <p class="mt-5 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
+            2026년 코스피의 핵심 변수는 <b class="text-slate-100">AI 반도체 이익 폭증, 외국인 수급, 원/달러 환율, 밸류업 정책의 지속성</b>이다.
+            지수 레벨은 이미 단기 급등과 고변동성 구간에 진입했지만, Forward PER 기준으로는 글로벌 성장주보다 낮은 멀티플을 유지한다는 평가가 공존한다.
           </p>
-          <div class="mt-8 flex flex-wrap gap-3">
-            <a href="#scenario" class="rounded-2xl bg-sky-500 px-5 py-3 text-sm font-extrabold text-white shadow-glow-blue hover:bg-sky-400">목표 지수 시나리오 보기</a>
-            <a href="#risks" class="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-extrabold text-slate-200 hover:bg-white/10">핵심 리스크 보기</a>
-          </div>
-          <div class="mt-8 grid gap-3 md:grid-cols-3">
-            <div class="rounded-2xl bg-white/[.045] p-4 ring-1 ring-white/10">
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">현재 국면</p>
-              <p class="mt-2 text-xl font-black text-amber-200">재평가·과열 공존</p>
-            </div>
-            <div class="rounded-2xl bg-white/[.045] p-4 ring-1 ring-white/10">
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">확률가중 목표</p>
-              <p class="mt-2 text-xl font-black text-sky-200">9,058pt</p>
-            </div>
-            <div class="rounded-2xl bg-white/[.045] p-4 ring-1 ring-white/10">
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">기대수익률</p>
-              <p class="mt-2 text-xl font-black text-emerald-200">+8.3%</p>
-            </div>
+          <div class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <a href="#scenario" class="glass-panel-hover rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="text-xs text-slate-400">확률가중 목표</div>
+              <div class="mt-1 text-2xl font-black text-amber-200">9,250pt</div>
+              <div class="mt-1 text-xs text-slate-400">가정 기반 후보값</div>
+            </a>
+            <a href="#valuation" class="glass-panel-hover rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="text-xs text-slate-400">12M Forward PER</div>
+              <div class="mt-1 text-2xl font-black text-cyan-200">7.0x</div>
+              <div class="mt-1 text-xs text-slate-400">Goldman: 약 7배 언급</div>
+            </a>
+            <a href="#macro" class="glass-panel-hover rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="text-xs text-slate-400">한국 GDP 전망</div>
+              <div class="mt-1 text-2xl font-black text-emerald-200">2.5~2.6%</div>
+              <div class="mt-1 text-xs text-slate-400">KDI/OECD 2026E</div>
+            </a>
+            <a href="#risks" class="glass-panel-hover rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="text-xs text-slate-400">핵심 위험</div>
+              <div class="mt-1 text-2xl font-black text-blue-200">집중도</div>
+              <div class="mt-1 text-xs text-slate-400">반도체·대형주 쏠림</div>
+            </a>
           </div>
         </div>
 
-        <aside class="glass-panel rounded-[2rem] p-6 md:p-8">
-          <div class="flex items-center justify-between gap-3">
+        <aside class="glass-panel rounded-3xl p-6 shadow-premium">
+          <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-bold text-slate-400">Market Snapshot</p>
-              <h2 class="mt-1 text-2xl font-black">핵심 지표</h2>
+              <p class="text-sm font-bold text-slate-400">Executive Snapshot</p>
+              <h2 class="text-2xl font-black">현재 국면</h2>
             </div>
-            <i data-lucide="activity" class="h-8 w-8 text-sky-300"></i>
+            <span class="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-200">확장 · 고변동</span>
           </div>
-          <div class="mt-6 grid gap-3">
-            <div class="rounded-2xl border border-sky-400/20 bg-sky-400/10 p-4">
-              <p class="text-sm text-sky-100/80">현재 코스피 지수</p>
-              <p class="mt-1 text-3xl font-black text-white">8,360.55</p>
-              <p class="mt-1 text-xs text-slate-400">Yahoo Finance 지연 시세, 2026-05-27 09:55 KST 기준</p>
+          <div class="mt-5 space-y-3">
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="flex items-end justify-between gap-3">
+                <span class="text-sm text-slate-400">현재 코스피 지수</span>
+                <span class="text-3xl font-black text-slate-50">8,913.27</span>
+              </div>
+              <p class="mt-2 text-xs leading-5 text-slate-400">Reuters 2026-06-25 장중 보도 기준. KRX 20분 지연값과 장중 보도값은 시점 차이가 있을 수 있음.</p>
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-2xl bg-white/[.045] p-4 ring-1 ring-white/10">
-                <p class="text-xs text-slate-400">코스피 시총</p>
-                <p class="mt-1 text-lg font-black">6,058조원+</p>
-                <p class="text-[11px] text-slate-500">5/6 공개 확인치 이후 상승분 미반영</p>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-400">코스피 시가총액</div>
+                <div class="mt-1 text-xl font-black">7,449.6조원</div>
+                <div class="mt-1 text-[11px] text-slate-500">KRX 20분 지연 스냅샷</div>
               </div>
-              <div class="rounded-2xl bg-white/[.045] p-4 ring-1 ring-white/10">
-                <p class="text-xs text-slate-400">12M Fwd PER</p>
-                <p class="mt-1 text-lg font-black">8.4x→재산정</p>
-                <p class="text-[11px] text-slate-500">4월 보도·현 지수 급등 반영 필요</p>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-400">12M Forward EPS</div>
+                <div class="mt-1 text-xl font-black">1,273pt</div>
+                <div class="mt-1 text-[11px] text-slate-500">PER 역산 추정</div>
               </div>
-              <div class="rounded-2xl bg-white/[.045] p-4 ring-1 ring-white/10">
-                <p class="text-xs text-slate-400">12M Fwd EPS</p>
-                <p class="mt-1 text-lg font-black">710~875p</p>
-                <p class="text-[11px] text-slate-500">본 보고서 시나리오 가정</p>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-400">PBR</div>
+                <div class="mt-1 text-xl font-black">1.6x</div>
+                <div class="mt-1 text-[11px] text-slate-500">P/B 밴드상 추정</div>
               </div>
-              <div class="rounded-2xl bg-white/[.045] p-4 ring-1 ring-white/10">
-                <p class="text-xs text-slate-400">PBR / ROE</p>
-                <p class="mt-1 text-lg font-black">확인 필요</p>
-                <p class="text-[11px] text-slate-500">공개 실시간 컨센서스 제한</p>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-400">ROE / 배당수익률</div>
+                <div class="mt-1 text-xl font-black">18~22% / 1.5%</div>
+                <div class="mt-1 text-[11px] text-slate-500">컨센서스 확인 필요</div>
               </div>
             </div>
-            <div class="rounded-2xl bg-amber-400/10 p-4 ring-1 ring-amber-400/20">
-              <p class="text-sm font-bold text-amber-200">한 줄 결론</p>
-              <p class="mt-2 text-sm leading-6 text-slate-300">기본 관점은 “이익 상향이 지수 하단을 높이지만, 단기 급등으로 안전마진은 축소된 국면”이다. 신규 진입은 분할·리밸런싱 중심이 적합하다.</p>
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-cyan-100">현재 대비 기대수익률</span>
+                <span class="text-2xl font-black text-cyan-100">3.8%</span>
+              </div>
+              <p class="mt-1 text-xs text-cyan-100/70">확률가중 목표 9,250pt ÷ 현재 8,913.27pt - 1</p>
             </div>
           </div>
         </aside>
       </div>
 
-      <div class="mt-6 grid gap-4 md:grid-cols-4">
-        <div class="glass-panel glass-panel-hover rounded-3xl p-5"><p class="text-sm text-slate-400">한국은행 기준금리</p><p class="mt-2 text-2xl font-black">2.50%</p><p class="mt-1 text-xs text-slate-500">4월 동결, 5/28 회의 예정</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-5"><p class="text-sm text-slate-400">원/달러 환율</p><p class="mt-2 text-2xl font-black">약 1,500원대</p><p class="mt-1 text-xs text-slate-500">5/27 주요 플랫폼 기준</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-5"><p class="text-sm text-slate-400">4월 수출</p><p class="mt-2 text-2xl font-black text-emerald-200">+48.0% YoY</p><p class="mt-1 text-xs text-slate-500">반도체 +173% 보도</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-5"><p class="text-sm text-slate-400">핵심 리스크</p><p class="mt-2 text-2xl font-black text-rose-200">쏠림·레버리지</p><p class="mt-1 text-xs text-slate-500">대형 반도체 집중도 상승</p></div>
-      </div>
-    </section>
-
-    <section id="macro" class="anchor-offset py-10">
-      <div class="mb-6 flex items-end justify-between gap-4">
-        <div>
-          <h2 class="section-title text-3xl font-black">매크로 대시보드</h2>
-          <p class="mt-2 text-slate-400">코스피 방향성은 반도체 수출, 환율, 금리, 외국인 수급, 정책 프리미엄의 조합으로 결정된다.</p>
-        </div>
-      </div>
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-amber-400/10 text-amber-200">중립→주의</span><h3 class="mt-4 text-xl font-black">금리</h3><p class="mt-3 text-sm leading-7 text-slate-300">한국은행 기준금리는 2.50%로 동결 상태이나, 인플레이션과 유가·환율 압력이 커지면 긴축 재부각 가능성이 있다. 금리 상승은 성장주·고PER 업종의 할인율 부담이다.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-blue-400/10 text-blue-200">부정</span><h3 class="mt-4 text-xl font-black">환율</h3><p class="mt-3 text-sm leading-7 text-slate-300">원/달러 1,500원대는 수출주 이익에는 일부 긍정적이지만, 외국인 관점에서는 환차손 리스크와 한국 자산 할인 요인으로 작용할 수 있다.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-emerald-400/10 text-emerald-200">긍정</span><h3 class="mt-4 text-xl font-black">수출</h3><p class="mt-3 text-sm leading-7 text-slate-300">4월 수출은 전년 대비 큰 폭 증가했고, 반도체 수출 급증이 핵심 동력이다. 이익 컨센서스 상향의 가장 직접적인 근거다.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-emerald-400/10 text-emerald-200">강한 긍정</span><h3 class="mt-4 text-xl font-black">반도체 사이클</h3><p class="mt-3 text-sm leading-7 text-slate-300">AI 서버, HBM, DRAM 가격 상승이 삼성전자·SK하이닉스의 이익 추정치를 끌어올리는 구조다. 다만 지수 내 비중 확대는 집중도 리스크도 높인다.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-sky-400/10 text-sky-200">변동성 큼</span><h3 class="mt-4 text-xl font-black">외국인 수급</h3><p class="mt-3 text-sm leading-7 text-slate-300">AI 반도체 랠리 구간에서는 대형주 중심 순매수가 지수를 끌어올리지만, 환율·유가·글로벌 위험회피 전환 시 빠르게 역회전할 수 있다.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-purple-400/10 text-purple-200">정책 프리미엄</span><h3 class="mt-4 text-xl font-black">밸류업</h3><p class="mt-3 text-sm leading-7 text-slate-300">자사주 소각, 배당 확대, 지배구조 개선은 PBR 재평가 논리다. 실제 주주환원 집행률이 향후 프리미엄 지속 여부를 가른다.</p></div>
-      </div>
-      <div class="mt-6 grid gap-6 lg:grid-cols-2">
-        <div class="glass-panel rounded-3xl p-6">
-          <h3 class="mb-4 text-xl font-black">매크로 점수 매트릭스</h3>
-          <div class="chart-box-sm"><canvas id="macroRadarChart"></canvas></div>
-        </div>
-        <div class="glass-panel rounded-3xl p-6">
-          <h3 class="mb-4 text-xl font-black">전략적 해석</h3>
-          <div class="space-y-4 text-sm leading-7 text-slate-300">
-            <p><b class="text-emerald-200">상방 논리:</b> 반도체 이익 상향, AI 인프라 투자 지속, 밸류업 프로그램, 글로벌 위험자산 선호가 함께 나타나면 기존 KOSPI 할인율이 축소될 수 있다.</p>
-            <p><b class="text-amber-200">중립 논리:</b> 이미 2026년 들어 지수가 큰 폭 상승해 단기 기대수익률은 이익 상향 속도와 밸류에이션 확장 여력의 싸움이다.</p>
-            <p><b class="text-blue-200">하방 논리:</b> 원화 약세, 미국 금리 재상승, 반도체 가격 피크아웃, 중동발 유가 상승, 레버리지 청산은 조정 폭을 키울 수 있다.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="sectors" class="anchor-offset py-10">
-      <h2 class="section-title text-3xl font-black">업종 대시보드</h2>
-      <p class="mt-2 text-slate-400">업종별 코스피 영향도는 공개 시총비중·수급 흐름을 단순화한 정성 점수이며, 투자 의견이 아니다.</p>
-      <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">반도체</h3><span class="text-emerald-300">★★★★★</span></div><p class="mt-3 text-sm leading-6 text-slate-300">HBM·DRAM 가격과 AI 서버 수요가 이익 모멘텀을 주도. 지수 영향도 최상.</p><p class="mt-3 text-xs text-slate-500">리스크: 쏠림, 가격 피크아웃</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">2차전지</h3><span class="text-amber-300">★★★☆☆</span></div><p class="mt-3 text-sm leading-6 text-slate-300">전기차 수요 회복 여부와 소재 가격 안정이 변수. 반등 시 베타는 높지만 실적 가시성은 낮다.</p><p class="mt-3 text-xs text-slate-500">리스크: 경쟁 심화, 마진 압박</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">자동차</h3><span class="text-sky-300">★★★★☆</span></div><p class="mt-3 text-sm leading-6 text-slate-300">환율·믹스·주주환원 정책 수혜. 글로벌 수요 둔화 시 이익 방어력이 관건.</p><p class="mt-3 text-xs text-slate-500">리스크: 관세, 재고, 환율 역전</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">금융</h3><span class="text-emerald-300">★★★★☆</span></div><p class="mt-3 text-sm leading-6 text-slate-300">밸류업, 배당, 자사주 소각의 대표 수혜. 금리 경로와 대손비용이 핵심.</p><p class="mt-3 text-xs text-slate-500">리스크: 부동산 PF, 규제</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">조선</h3><span class="text-emerald-300">★★★★☆</span></div><p class="mt-3 text-sm leading-6 text-slate-300">고부가 선박·방산·해양플랜트 사이클이 우호적. 수주잔고와 환율이 수익성에 긍정적.</p><p class="mt-3 text-xs text-slate-500">리스크: 원가, 인력, 납기</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">바이오</h3><span class="text-amber-300">★★★☆☆</span></div><p class="mt-3 text-sm leading-6 text-slate-300">대형 바이오의 방어력과 신약 모멘텀은 긍정. 금리 상승 시 멀티플 부담.</p><p class="mt-3 text-xs text-slate-500">리스크: 임상, 규제</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">인터넷/플랫폼</h3><span class="text-blue-300">★★☆☆☆</span></div><p class="mt-3 text-sm leading-6 text-slate-300">광고·커머스 회복과 AI 서비스가 관건. 현재는 반도체 대비 수급 우선순위가 낮다.</p><p class="mt-3 text-xs text-slate-500">리스크: 규제, 경쟁</p></div>
-        <div class="glass-panel glass-panel-hover rounded-3xl p-6"><div class="flex justify-between"><h3 class="font-black">소비재</h3><span class="text-slate-300">★★★☆☆</span></div><p class="mt-3 text-sm leading-6 text-slate-300">내수 회복과 중국 소비 방향이 중요. 화장품·음식료는 선별 접근이 필요하다.</p><p class="mt-3 text-xs text-slate-500">리스크: 소비 둔화, 원가</p></div>
-      </div>
-      <div class="mt-6 glass-panel rounded-3xl p-6">
-        <h3 class="mb-4 text-xl font-black">업종별 코스피 영향도 점수</h3>
-        <div class="chart-box"><canvas id="sectorImpactChart"></canvas></div>
-      </div>
-    </section>
-
-    <section id="valuation" class="anchor-offset py-10">
-      <h2 class="section-title text-3xl font-black">밸류에이션 & 민감도</h2>
-      <p class="mt-2 text-slate-400">목표 지수는 Forward EPS × 적용 PER 구조로 계산했다. EPS와 PER은 확정치가 아닌 시나리오 가정이다.</p>
-      <div class="mt-6 grid gap-6 lg:grid-cols-[.95fr_1.05fr]">
-        <div class="glass-panel rounded-3xl p-6">
-          <h3 class="text-xl font-black">계산 구조</h3>
-          <div class="mt-5 rounded-3xl bg-slate-950/60 p-5 ring-1 ring-white/10">
-            <p class="text-sm text-slate-400">목표 지수</p>
-            <p class="mt-2 text-2xl font-black text-sky-200">Forward EPS × 적용 PER</p>
-            <p class="mt-4 text-sm leading-7 text-slate-300">예: Base Case = 780p × 11.4x = <b class="text-white">8,892pt</b></p>
-          </div>
-          <div class="mt-4 rounded-3xl bg-slate-950/60 p-5 ring-1 ring-white/10">
-            <p class="text-sm text-slate-400">확률가중 목표 지수</p>
-            <p class="mt-2 text-lg font-black text-emerald-200">7,100×25% + 8,892×45% + 10,938×30% = 9,058pt</p>
-            <p class="mt-3 text-sm text-slate-400">현재 지수 대비 기대수익률 = 9,058 / 8,360.55 - 1 = +8.3%</p>
-          </div>
-          <div class="mt-5 text-sm leading-7 text-slate-300">
-            <p><b class="text-amber-200">주의:</b> 4월 보도 기준 Forward PER 7.5~8.4x 수준의 언급이 있었으나, 5월 말 지수 급등으로 동일 EPS를 적용하면 현재 PER은 크게 높아진다. 따라서 최신 컨센서스 원문 확인 전까지는 “저평가” 단정이 어렵다.</p>
-          </div>
-        </div>
-        <div class="glass-panel rounded-3xl p-6">
-          <h3 class="mb-4 text-xl font-black">글로벌 Peer Valuation 비교</h3>
-          <div class="chart-box"><canvas id="valuationPeerChart"></canvas></div>
-        </div>
-      </div>
-      <div class="mt-6 glass-panel rounded-3xl p-6 table-wrap">
-        <h3 class="mb-4 text-xl font-black">PER 민감도 테이블</h3>
-        <table>
-          <thead><tr><th>Forward EPS</th><th>10.0x</th><th>11.0x</th><th>12.0x</th><th>13.0x</th><th>해석</th></tr></thead>
-          <tbody>
-            <tr><td>710p</td><td>7,100</td><td>7,810</td><td>8,520</td><td>9,230</td><td>Bear: 이익 개선 지연·할인 지속</td></tr>
-            <tr><td>780p</td><td>7,800</td><td>8,580</td><td>9,360</td><td>10,140</td><td>Base: 평균 회귀와 이익 상향 균형</td></tr>
-            <tr><td>875p</td><td>8,750</td><td>9,625</td><td>10,500</td><td>11,375</td><td>Bull: ROE 개선과 밸류업 프리미엄</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="scenario" class="anchor-offset py-10">
-      <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <h2 class="section-title text-3xl font-black">1년 후 코스피 목표 지수 시나리오</h2>
-          <p class="mt-2 text-slate-400">아래 값은 가정 기반 목표 지수 후보이며, 확률 합계는 100%다.</p>
-        </div>
-        <div class="rounded-2xl bg-emerald-400/10 px-5 py-3 text-sm font-bold text-emerald-200 ring-1 ring-emerald-400/20">추천 기준: Base 중심 + 분할 진입</div>
-      </div>
       <div class="mt-6 grid gap-4 lg:grid-cols-3">
         <div class="glass-panel rounded-3xl p-6">
-          <span class="badge bg-blue-400/10 text-blue-200">Bear Case · 25%</span>
-          <h3 class="mt-4 text-2xl font-black">7,100pt</h3>
-          <p class="mt-1 text-sm text-slate-400">EPS 710p × PER 10.0x</p>
-          <ul class="mt-5 space-y-2 text-sm leading-6 text-slate-300">
-            <li>• 글로벌 경기 둔화와 유가·금리 부담</li>
-            <li>• 반도체 이익 개선 지연 또는 가격 피크아웃</li>
-            <li>• 원화 약세·외국인 자금 이탈</li>
+          <div class="mb-4 flex items-center gap-2">
+            <i data-lucide="trending-up" class="h-5 w-5 text-amber-300"></i>
+            <h3 class="text-lg font-black">핵심 상승 요인</h3>
+          </div>
+          <ul class="space-y-3 text-sm leading-6 text-slate-300">
+            <li>• HBM·DRAM·NAND 가격 상승과 AI 서버 투자 확대로 반도체 이익 레버리지 확대</li>
+            <li>• 수출·경상수지 개선, 외국인 자금의 한국 반도체/AI 하드웨어 재평가</li>
+            <li>• 코리아 밸류업, 배당 확대, 자사주 소각, 지배구조 개선 기대</li>
+            <li>• Goldman·삼성증권 등 주요 기관의 목표 상향과 밸류에이션 저평가 논리</li>
           </ul>
-          <p class="mt-4 text-sm font-bold text-blue-200">현재 대비 -15.1%</p>
-        </div>
-        <div class="glass-panel rounded-3xl border-sky-400/40 bg-sky-400/10 p-6 shadow-glow-blue">
-          <span class="badge bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30">Base Case · 45% · 추천</span>
-          <h3 class="mt-4 text-2xl font-black">8,892pt</h3>
-          <p class="mt-1 text-sm text-slate-300">EPS 780p × PER 11.4x</p>
-          <ul class="mt-5 space-y-2 text-sm leading-6 text-slate-200">
-            <li>• 반도체 업황 정상화와 수출 회복</li>
-            <li>• 금리 부담 완화 또는 안정</li>
-            <li>• 이익 컨센서스 달성과 평균 회귀</li>
-          </ul>
-          <p class="mt-4 text-sm font-bold text-emerald-200">현재 대비 +6.4%</p>
         </div>
         <div class="glass-panel rounded-3xl p-6">
-          <span class="badge bg-amber-400/10 text-amber-200">Bull Case · 30%</span>
-          <h3 class="mt-4 text-2xl font-black">10,938pt</h3>
-          <p class="mt-1 text-sm text-slate-400">EPS 875p × PER 12.5x</p>
-          <ul class="mt-5 space-y-2 text-sm leading-6 text-slate-300">
-            <li>• AI 메모리 슈퍼사이클 강화</li>
-            <li>• 외국인 순매수 확대와 원화 안정</li>
-            <li>• 밸류업 정책 효과와 ROE 개선</li>
+          <div class="mb-4 flex items-center gap-2">
+            <i data-lucide="shield-alert" class="h-5 w-5 text-blue-300"></i>
+            <h3 class="text-lg font-black">핵심 하락 리스크</h3>
+          </div>
+          <ul class="space-y-3 text-sm leading-6 text-slate-300">
+            <li>• 지수 기여도가 SK하이닉스·삼성전자 등 초대형 반도체에 과도하게 집중</li>
+            <li>• 원/달러 환율 재상승, 미국 금리 재상승, 달러 강세가 외국인 수급을 압박</li>
+            <li>• AI 반도체 수요·가격 기대가 과도할 경우 이익 추정치 하향 위험</li>
+            <li>• 지정학·유가 충격, 중국 경기 둔화, 밸류업 정책 실망 가능성</li>
           </ul>
-          <p class="mt-4 text-sm font-bold text-amber-200">현재 대비 +30.8%</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-6">
+          <div class="mb-4 flex items-center gap-2">
+            <i data-lucide="target" class="h-5 w-5 text-cyan-300"></i>
+            <h3 class="text-lg font-black">한 줄 결론</h3>
+          </div>
+          <p class="text-sm leading-7 text-slate-300">
+            코스피는 <b class="text-slate-100">“반도체 이익 재평가 + 밸류업 디스카운트 축소”</b>라는 강한 상승 논리가 있지만,
+            단기 지수 레벨은 이미 빠르게 올라와 있다. 신규 진입은 한 번에 단정하기보다
+            <b class="text-cyan-100">환율·외국인·메모리 가격·실적 추정치</b> 확인을 병행하는 분할 접근이 더 합리적이다.
+          </p>
+          <div class="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div class="flex justify-between text-xs text-slate-400"><span>저평가</span><span>중립</span><span>과열</span></div>
+            <div class="mt-2 h-2 rounded-full bg-slate-800">
+              <div class="h-2 w-[64%] rounded-full bg-gradient-to-r from-cyan-400 via-amber-300 to-orange-400"></div>
+            </div>
+            <p class="mt-2 text-xs text-slate-400">판단: 이익 기준은 저평가 논리, 가격 모멘텀 기준은 과열 경계.</p>
+          </div>
         </div>
       </div>
+    </section>
+
+    <section id="macro" class="pt-16">
+      <div class="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Macro Dashboard</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">한국 증시 및 매크로 환경</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-6 text-slate-400">GDP·수출·금리·환율·반도체 사이클을 코스피 관점에서 긍정/중립/부정으로 분리했다.</p>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-300">한국 GDP</span>
+            <span class="status-positive rounded-full border px-2 py-1 text-xs font-black">긍정</span>
+          </div>
+          <div class="mt-3 text-3xl font-black">2.5~2.6%</div>
+          <p class="mt-2 text-xs leading-5 text-slate-400">KDI 2026E 2.5%, OECD 2026E 2.6%. 반도체 수출과 내수 개선이 성장 견인.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-300">한국은행 기준금리</span>
+            <span class="status-neutral rounded-full border px-2 py-1 text-xs font-black">중립</span>
+          </div>
+          <div class="mt-3 text-3xl font-black">2.50%</div>
+          <p class="mt-2 text-xs leading-5 text-slate-400">5월 금통위 동결. 물가 재상승과 경기 개선으로 완화 기대는 제한적.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-300">수출/반도체</span>
+            <span class="status-positive rounded-full border px-2 py-1 text-xs font-black">강한 긍정</span>
+          </div>
+          <div class="mt-3 text-3xl font-black">+169.4%</div>
+          <p class="mt-2 text-xs leading-5 text-slate-400">5월 반도체 수출액은 전년 대비 급증, 월간 사상 최고 보도.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-300">원/달러 환율</span>
+            <span class="status-negative rounded-full border px-2 py-1 text-xs font-black">위험</span>
+          </div>
+          <div class="mt-3 text-3xl font-black">1,500원대</div>
+          <p class="mt-2 text-xs leading-5 text-slate-400">원화 약세는 수출주에는 일부 완충이나 외국인 밸류에이션에는 할인 요인.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
+        <div class="glass-panel chart-card rounded-3xl p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-black">매크로 상태 레이더</h3>
+            <span class="text-xs text-slate-500">0=부정, 100=긍정</span>
+          </div>
+          <div class="mt-4 h-[320px]">
+            <canvas id="macroRadarChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-panel rounded-3xl p-6">
+          <h3 class="text-xl font-black">긍정 요인과 부정 요인 분리</h3>
+          <div class="mt-5 grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-4">
+              <h4 class="font-black text-amber-200">긍정</h4>
+              <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-300">
+                <li>• 반도체 수출 가격·금액 동시 개선</li>
+                <li>• 경상수지 흑자 확대와 외국인 AI 하드웨어 선호</li>
+                <li>• 밸류업·배당·자사주 소각 기대</li>
+                <li>• 선진국 대비 낮은 PER, ROE 개선 가능성</li>
+              </ul>
+            </div>
+            <div class="rounded-2xl border border-blue-400/20 bg-blue-500/10 p-4">
+              <h4 class="font-black text-blue-200">부정</h4>
+              <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-300">
+                <li>• 미국 금리 재상승·달러 강세</li>
+                <li>• 유가/중동 리스크와 수입물가 압력</li>
+                <li>• 중국 경기 둔화와 대중 수출 민감도</li>
+                <li>• 소수 대형주 쏠림으로 체감 수익률 괴리</li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <p class="text-sm leading-7 text-slate-300">
+              전략적으로는 <b class="text-slate-100">매크로보다 이익 사이클</b>이 더 중요한 국면이다.
+              다만 이익 추정이 높아질수록, 환율·금리·AI CAPEX 기대의 작은 변화에도 지수 변동성이 커진다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sectors" class="pt-16">
+      <div class="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Sector Dashboard</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">업종 대시보드와 지수 영향도</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-6 text-slate-400">코스피는 광범위한 한국 대표지수지만, 2026년 수익률 기여는 반도체·AI 인프라·대형주에 크게 집중되어 있다.</p>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">반도체</h3><span class="status-positive rounded-full border px-2 py-1 text-xs font-black">최상</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">HBM·DRAM·NAND 가격 상승, 장기공급계약, AI 데이터센터 투자 수혜.</p>
+            <div class="mt-3 mini-bar"><span class="w-[92%] bg-amber-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 92 / 밸류 78 / 리스크: 쏠림</p>
+          </div>
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">2차전지</h3><span class="status-neutral rounded-full border px-2 py-1 text-xs font-black">중립</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">EV 수요 둔화와 정책 불확실성은 부담, 장기 소재·전고체 옵션은 잔존.</p>
+            <div class="mt-3 mini-bar"><span class="w-[46%] bg-cyan-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 46 / 밸류 50 / 리스크: 수요 둔화</p>
+          </div>
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">자동차</h3><span class="status-neutral rounded-full border px-2 py-1 text-xs font-black">중립+</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">관세·환율·공급망 부담은 있으나 주주환원과 하이브리드/전동화 믹스가 지지.</p>
+            <div class="mt-3 mini-bar"><span class="w-[62%] bg-cyan-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 62 / 밸류 70 / 리스크: 미국 정책</p>
+          </div>
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">금융</h3><span class="status-positive rounded-full border px-2 py-1 text-xs font-black">긍정</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">배당·자사주·밸류업 정책 수혜. 금리 고점 부담과 신용비용은 점검.</p>
+            <div class="mt-3 mini-bar"><span class="w-[72%] bg-emerald-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 72 / 밸류 80 / 리스크: 자산건전성</p>
+          </div>
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">조선·방산·산업재</h3><span class="status-positive rounded-full border px-2 py-1 text-xs font-black">긍정</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">수주잔고, 방산 수출, 전력기기·인프라 투자 확산. 밸류 부담은 상승.</p>
+            <div class="mt-3 mini-bar"><span class="w-[78%] bg-amber-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 78 / 수급 75 / 리스크: 원가</p>
+          </div>
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">바이오·헬스케어</h3><span class="status-neutral rounded-full border px-2 py-1 text-xs font-black">선별</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">삼성바이오·셀트리온 중심 방어 성격. 임상·규제·가격 이슈는 개별 리스크.</p>
+            <div class="mt-3 mini-bar"><span class="w-[58%] bg-purple-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 58 / 방어 66 / 리스크: 규제</p>
+          </div>
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">인터넷/플랫폼</h3><span class="status-negative rounded-full border px-2 py-1 text-xs font-black">제한</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">AI 전환 기대는 있으나 광고·커머스·규제·경쟁이 밸류 리레이팅을 제한.</p>
+            <div class="mt-3 mini-bar"><span class="w-[42%] bg-blue-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 42 / 밸류 45 / 리스크: 플랫폼 규제</p>
+          </div>
+          <div class="glass-panel-hover glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between"><h3 class="font-black">소비재</h3><span class="status-neutral rounded-full border px-2 py-1 text-xs font-black">중립</span></div>
+            <p class="mt-2 text-sm leading-6 text-slate-300">내수 회복·K-컬처 수혜는 있으나 물가와 환율, 소비심리 변동성 점검.</p>
+            <div class="mt-3 mini-bar"><span class="w-[52%] bg-cyan-300"></span></div>
+            <p class="mt-2 text-xs text-slate-500">이익 모멘텀 52 / 수급 48 / 리스크: 내수</p>
+          </div>
+        </div>
+
+        <div class="glass-panel chart-card rounded-3xl p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-black">업종별 지수 영향도</h3>
+            <span class="text-xs text-slate-500">정성·근사</span>
+          </div>
+          <div class="mt-4 h-[430px]">
+            <canvas id="sectorChart"></canvas>
+          </div>
+          <p class="mt-4 text-sm leading-6 text-slate-400">
+            MSCI Korea와 주요 ETF의 IT 비중은 50%대까지 확대되었고, 코스피 역시 초대형 반도체의 가격 변동이 지수 전체를 좌우한다.
+            따라서 업종 다변화보다 <b class="text-slate-200">반도체 사이클의 지속성</b>이 1차 변수다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="valuation" class="pt-16">
+      <div class="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Valuation</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">이익·밸류에이션·민감도</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-6 text-slate-400">목표 지수는 Forward EPS와 적용 PER의 곱이다. EPS 추정과 멀티플 가정이 모두 바뀌면 지수 후보값도 크게 움직인다.</p>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[.95fr_1.05fr]">
+        <div class="glass-panel rounded-3xl p-6">
+          <h3 class="text-xl font-black">계산 구조</h3>
+          <div class="mt-5 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-5">
+            <div class="text-center text-lg font-black text-cyan-100">목표 지수 = Forward EPS × 적용 PER</div>
+            <div class="mt-3 text-center text-sm text-cyan-100/80">Base: 1,250pt × 7.2배 = 9,000pt</div>
+          </div>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="text-xs text-slate-400">현재 Forward EPS</div>
+              <div class="mt-1 text-2xl font-black">1,273pt</div>
+              <p class="mt-1 text-xs leading-5 text-slate-500">현재 지수 ÷ 약 7.0배로 역산. 컨센서스 제공사별 확인 필요.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="text-xs text-slate-400">현 Forward PER</div>
+              <div class="mt-1 text-2xl font-black">7.0x</div>
+              <p class="mt-1 text-xs leading-5 text-slate-500">Goldman Sachs 2026-05-21 언급 기준.</p>
+            </div>
+          </div>
+          <div class="mt-5 overflow-x-auto">
+            <table class="w-full min-w-[560px] text-left text-sm">
+              <thead class="text-xs uppercase tracking-wider text-slate-400">
+                <tr class="border-b border-white/10"><th class="py-3">Forward EPS</th><th>PER 6.5x</th><th>PER 7.2x</th><th>PER 8.0x</th><th>PER 8.8x</th></tr>
+              </thead>
+              <tbody class="divide-y divide-white/10 text-slate-300">
+                <tr><td class="py-3 font-bold">1,000</td><td>6,500</td><td>7,200</td><td>8,000</td><td>8,800</td></tr>
+                <tr><td class="py-3 font-bold">1,250</td><td>8,125</td><td class="font-black text-cyan-200">9,000</td><td>10,000</td><td>11,000</td></tr>
+                <tr><td class="py-3 font-bold">1,563</td><td>10,160</td><td>11,250</td><td class="font-black text-amber-200">12,500</td><td>13,750</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-panel chart-card rounded-3xl p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-black">글로벌 지수 Forward PER 비교</h3>
+            <span class="text-xs text-slate-500">근사/확인 필요</span>
+          </div>
+          <div class="mt-4 h-[360px]">
+            <canvas id="valuationPeerChart"></canvas>
+          </div>
+          <p class="mt-3 text-xs leading-5 text-slate-500">동종 비교 수치는 공개 리서치와 시장 컨센서스에 따라 달라질 수 있어 HTML 안에서는 해석용 근사값으로만 사용.</p>
+        </div>
+      </div>
+
       <div class="mt-6 grid gap-6 lg:grid-cols-2">
-        <div class="glass-panel rounded-3xl p-6"><h3 class="mb-4 text-xl font-black">시나리오 목표 지수</h3><div class="chart-box"><canvas id="scenarioTargetChart"></canvas></div></div>
-        <div class="glass-panel rounded-3xl p-6"><h3 class="mb-4 text-xl font-black">확률 분포</h3><div class="chart-box"><canvas id="scenarioProbabilityChart"></canvas></div></div>
-      </div>
-    </section>
-
-    <section id="institutions" class="anchor-offset py-10">
-      <h2 class="section-title text-3xl font-black">국내외 기관 전망 비교</h2>
-      <p class="mt-2 text-slate-400">기관 전망은 발간 시점에 따라 크게 달라졌다. 5월 말 급등 이후에는 4월 이전 목표가가 이미 상향 돌파된 경우가 많아, 현재 판단에는 ‘전망의 방향성’이 더 중요하다.</p>
-      <div class="mt-6 glass-panel rounded-3xl p-6 table-wrap">
-        <table>
-          <thead>
-            <tr><th>기관/출처</th><th>발간일</th><th>전망 대상</th><th>예상 범위/목표</th><th>핵심 논리</th><th>리스크</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Nomura</td><td>2026-05-20 보도</td><td>KOSPI 2026</td><td>10,000~11,000</td><td>Commodity memory·HBM 슈퍼사이클, ROE 개선 사이클</td><td>반도체 사이클 둔화, 과열</td></tr>
-            <tr><td>Goldman Sachs</td><td>2026-04-17~20 보도</td><td>12개월 KOSPI</td><td>8,000</td><td>반도체·산업재 이익 개선, 2026 이익 성장률 대폭 상향</td><td>현 지수가 목표를 상회해 재조정 필요</td></tr>
-            <tr><td>JPMorgan</td><td>2026-02-02 보도</td><td>KOSPI Base/Bull</td><td>6,000 / 7,500</td><td>반도체, 금융, 지주사, 방산·조선 선호</td><td>발간 이후 지수 급등으로 구식화</td></tr>
-            <tr><td>Macquarie</td><td>2025-12 보도</td><td>2026 KOSPI</td><td>6,000 근접</td><td>48% EPS 성장, 14x PE 가능성</td><td>현재 지수에는 보수적 가정</td></tr>
-            <tr><td>국내 주요 증권사 11곳 집계</td><td>2025-12-31 보도</td><td>2026 KOSPI 밴드</td><td>3,500~5,500</td><td>정책·AI 사이클·반도체 중심 강세</td><td>2026년 급등 전 전망이라 비교 기준용</td></tr>
-            <tr><td>미래에셋증권 리서치</td><td>2026-02-26</td><td>KOSPI 이익</td><td>2026 OP 컨센서스 580조원</td><td>반도체가 전체 이익 개선의 핵심 동력</td><td>반도체 상위 종목 집중도</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="mt-6 grid gap-4 md:grid-cols-3">
-        <div class="glass-panel rounded-3xl p-6"><p class="text-sm text-slate-400">가장 보수적</p><h3 class="mt-2 text-xl font-black">과거 국내·JPM 전망</h3><p class="mt-3 text-sm leading-6 text-slate-300">지수 급등 전 발간되어 현재는 방어적 밴드로만 해석하는 것이 타당하다.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><p class="text-sm text-slate-400">중립적</p><h3 class="mt-2 text-xl font-black">Goldman 8,000</h3><p class="mt-3 text-sm leading-6 text-slate-300">이익 성장 논리는 유효하지만 지수가 목표를 상회해 추가 상향 여부가 관건이다.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><p class="text-sm text-slate-400">낙관적</p><h3 class="mt-2 text-xl font-black">Nomura 10,000~11,000</h3><p class="mt-3 text-sm leading-6 text-slate-300">AI 메모리와 ROE 개선이 동시에 지속되는 강한 Bull 논리에 가깝다.</p></div>
-      </div>
-    </section>
-
-    <section id="flows" class="anchor-offset py-10">
-      <h2 class="section-title text-3xl font-black">수급 및 자금 흐름</h2>
-      <p class="mt-2 text-slate-400">단기 지수의 탄력은 이익보다 수급이 더 크게 좌우할 수 있다.</p>
-      <div class="mt-6 grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
+        <div class="glass-panel chart-card rounded-3xl p-6">
+          <h3 class="text-xl font-black">코스피 EPS 시나리오 추세</h3>
+          <div class="mt-4 h-[320px]">
+            <canvas id="epsTrendChart"></canvas>
+          </div>
+        </div>
         <div class="glass-panel rounded-3xl p-6">
-          <h3 class="mb-4 text-xl font-black">투자자별 수급 구조</h3>
-          <div class="chart-box"><canvas id="flowMixChart"></canvas></div>
-        </div>
-        <div class="grid gap-4">
-          <div class="glass-panel rounded-3xl p-6"><h3 class="font-black">외국인</h3><p class="mt-3 text-sm leading-7 text-slate-300">반도체 대형주 매수는 지수 레벨을 빠르게 끌어올릴 수 있다. 다만 원/달러 환율 1,500원대와 글로벌 유가·금리 리스크는 환헤지 비용과 자금 유출 압력으로 연결된다.</p></div>
-          <div class="glass-panel rounded-3xl p-6"><h3 class="font-black">기관</h3><p class="mt-3 text-sm leading-7 text-slate-300">연기금·패시브 리밸런싱은 지수 편입비중과 업종 비중 변화를 반영한다. 대형 반도체 비중 확대는 포트폴리오 집중도 관리 이슈를 만든다.</p></div>
-          <div class="glass-panel rounded-3xl p-6"><h3 class="font-black">개인·레버리지</h3><p class="mt-3 text-sm leading-7 text-slate-300">신용거래와 레버리지 상품 수요가 급증하면 상승 탄력은 커지지만, 변동성 확대 국면에서는 반대매매·차익실현 압력도 커진다.</p></div>
+          <h3 class="text-xl font-black">ROE와 PBR의 관계</h3>
+          <p class="mt-4 text-sm leading-7 text-slate-300">
+            PBR은 장기적으로 ROE, 자기자본비용, 성장률에 의해 결정된다. 2026년 코스피가 높은 ROE를 일시적으로 기록한다면 PBR 상향이 가능하지만,
+            시장은 이를 <b class="text-slate-100">“지속 가능한 ROE”</b>로 볼지, <b class="text-slate-100">“반도체 사이클 피크”</b>로 볼지를 구분한다.
+          </p>
+          <div class="mt-5 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><div class="text-xs text-slate-400">낮은 ROE</div><div class="mt-1 text-xl font-black text-blue-200">PBR 할인</div></div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><div class="text-xs text-slate-400">ROE 개선</div><div class="mt-1 text-xl font-black text-cyan-200">평균 회귀</div></div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><div class="text-xs text-slate-400">주주환원</div><div class="mt-1 text-xl font-black text-amber-200">할인 축소</div></div>
+          </div>
+          <div class="mt-5 rounded-2xl border border-amber-400/20 bg-amber-500/10 p-4">
+            <p class="text-sm leading-6 text-amber-50/85">핵심 질문: 2026년 반도체 초호황 이익이 2027년 이후에도 유지될 수 있는가? 유지된다면 PER 7배는 낮고, 피크아웃이라면 7배도 싸다고 단정하기 어렵다.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="risks" class="anchor-offset py-10">
-      <h2 class="section-title text-3xl font-black">리스크 매트릭스</h2>
-      <p class="mt-2 text-slate-400">핵심 리스크는 발생 가능성과 지수 영향도를 분리해서 관찰해야 한다.</p>
-      <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-rose-400/10 text-rose-200">높음</span><h3 class="mt-4 font-black">반도체 피크아웃</h3><p class="mt-3 text-sm leading-6 text-slate-300">DRAM/HBM 가격, 빅테크 CAPEX, 엔비디아·메모리 재고를 관찰.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-amber-400/10 text-amber-200">중상</span><h3 class="mt-4 font-black">미국 금리 재상승</h3><p class="mt-3 text-sm leading-6 text-slate-300">미 10년물, FOMC 점도표, CPI·PCE가 밸류에이션에 직접 영향.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-blue-400/10 text-blue-200">중상</span><h3 class="mt-4 font-black">원화 약세</h3><p class="mt-3 text-sm leading-6 text-slate-300">1,500원대 고착 시 외국인 환차손 부담과 수입물가 부담 확대.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-rose-400/10 text-rose-200">높음</span><h3 class="mt-4 font-black">레버리지 청산</h3><p class="mt-3 text-sm leading-6 text-slate-300">신용융자, CFD, 레버리지 ETF 거래대금 급증은 급락 시 낙폭을 키움.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-amber-400/10 text-amber-200">중간</span><h3 class="mt-4 font-black">중국 경기 부진</h3><p class="mt-3 text-sm leading-6 text-slate-300">화학·철강·소비재·중국향 IT 수요에 부담.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-amber-400/10 text-amber-200">중간</span><h3 class="mt-4 font-black">밸류업 실망</h3><p class="mt-3 text-sm leading-6 text-slate-300">자사주 소각·배당 확대가 선언에 그치면 PBR 재평가 논리 약화.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-blue-400/10 text-blue-200">중간</span><h3 class="mt-4 font-black">지정학·유가</h3><p class="mt-3 text-sm leading-6 text-slate-300">중동 리스크와 유가 상승은 한국 수입물가·기업마진에 부정적.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><span class="badge bg-slate-400/10 text-slate-200">상시</span><h3 class="mt-4 font-black">이익 하향 조정</h3><p class="mt-3 text-sm leading-6 text-slate-300">EPS가 목표 지수 모델의 핵심이므로 컨센서스 하향은 즉시 목표치를 낮춤.</p></div>
+    <section id="scenario" class="pt-16">
+      <div class="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Scenario</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">1년 후 코스피 목표 지수 후보</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-6 text-slate-400">목표 지수는 확정 전망이 아니라 Forward EPS와 적용 PER 가정에 따른 시나리오 추정치다.</p>
       </div>
+
+      <div class="grid gap-5 lg:grid-cols-3">
+        <div class="glass-panel rounded-3xl p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-black text-blue-200">Bear Case</h3>
+            <span class="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1 text-xs font-black text-blue-200">25%</span>
+          </div>
+          <div class="mt-4 text-4xl font-black">6,500pt</div>
+          <p class="mt-2 text-sm text-slate-400">Forward EPS 1,000 × PER 6.5</p>
+          <ul class="mt-5 space-y-2 text-sm leading-6 text-slate-300">
+            <li>• 글로벌 경기 둔화와 AI CAPEX 조정</li>
+            <li>• 반도체 이익 개선 지연 또는 가격 피크아웃</li>
+            <li>• 원화 약세, 외국인 자금 이탈, 밸류업 실망</li>
+          </ul>
+        </div>
+        <div class="glass-panel rounded-3xl border border-cyan-300/40 p-6 shadow-glow-blue">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-black text-cyan-100">Base Case</h3>
+            <span class="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">추천 · 50%</span>
+          </div>
+          <div class="mt-4 text-4xl font-black">9,000pt</div>
+          <p class="mt-2 text-sm text-slate-400">Forward EPS 1,250 × PER 7.2</p>
+          <ul class="mt-5 space-y-2 text-sm leading-6 text-slate-300">
+            <li>• 반도체 업황 정상화와 컨센서스 달성</li>
+            <li>• 수출 회복, 금리 동결/완화 기대 유지</li>
+            <li>• 밸류에이션 평균 회귀, 외국인 수급 균형</li>
+          </ul>
+        </div>
+        <div class="glass-panel rounded-3xl p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-black text-amber-200">Bull Case</h3>
+            <span class="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-black text-amber-200">25%</span>
+          </div>
+          <div class="mt-4 text-4xl font-black">12,500pt</div>
+          <p class="mt-2 text-sm text-slate-400">Forward EPS 1,563 × PER 8.0</p>
+          <ul class="mt-5 space-y-2 text-sm leading-6 text-slate-300">
+            <li>• AI 반도체 슈퍼사이클 강화</li>
+            <li>• 외국인 순매수 확대, 원화 안정, 위험자산 선호</li>
+            <li>• ROE 개선과 코리아 디스카운트 축소</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div class="glass-panel chart-card rounded-3xl p-6">
+          <h3 class="text-xl font-black">시나리오별 목표 지수</h3>
+          <div class="mt-4 h-[340px]">
+            <canvas id="scenarioTargetChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-panel chart-card rounded-3xl p-6">
+          <h3 class="text-xl font-black">발생 확률 분포</h3>
+          <div class="mt-4 h-[340px]">
+            <canvas id="probabilityChart"></canvas>
+          </div>
+        </div>
+      </div>
+
       <div class="mt-6 glass-panel rounded-3xl p-6">
-        <h3 class="text-xl font-black">관찰해야 할 체크포인트</h3>
-        <div class="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-5">
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">한국은행 금통위</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">미국 FOMC·10년물</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">원/달러 환율</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">한국 수출입 동향</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">DRAM/NAND/HBM 가격</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">삼성전자·SK하이닉스 실적</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">외국인 순매수 추세</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">MSCI 리밸런싱</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">밸류업 후속 조치</div>
-          <div class="rounded-2xl bg-white/[.04] p-4 text-sm text-slate-300 ring-1 ring-white/10">글로벌 위험자산 선호</div>
+        <h3 class="text-xl font-black">확률가중 목표 지수 계산</h3>
+        <div class="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm leading-7 text-slate-300">
+          <p><b class="text-slate-100">계산식</b> = 6,500 × 25% + 9,000 × 50% + 12,500 × 25%</p>
+          <p><b class="text-slate-100">확률가중 목표 지수</b> = <span class="text-2xl font-black text-amber-200">9,250pt</span></p>
+          <p><b class="text-slate-100">현재 지수 대비 기대수익률</b> = 9,250 ÷ 8,913.27 - 1 = <span class="font-black text-cyan-100">3.8%</span></p>
         </div>
       </div>
     </section>
 
-    <section id="actions" class="anchor-offset py-10">
-      <h2 class="section-title text-3xl font-black">실행·리밸런싱 규칙</h2>
-      <div class="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div class="glass-panel rounded-3xl p-6"><i data-lucide="calendar-clock" class="h-7 w-7 text-sky-300"></i><h3 class="mt-4 font-black">정기 점검</h3><p class="mt-3 text-sm leading-6 text-slate-300">월 1회 지수·EPS·PER·환율·외국인 수급 업데이트.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><i data-lucide="split" class="h-7 w-7 text-emerald-300"></i><h3 class="mt-4 font-black">분할 진입</h3><p class="mt-3 text-sm leading-6 text-slate-300">단기 급등 구간에서는 3~6회 분할 또는 조정 시 분할 접근.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><i data-lucide="shield-alert" class="h-7 w-7 text-amber-300"></i><h3 class="mt-4 font-black">위험 한도</h3><p class="mt-3 text-sm leading-6 text-slate-300">반도체·레버리지 비중이 과도하면 현금·배당·방어주로 완충.</p></div>
-        <div class="glass-panel rounded-3xl p-6"><i data-lucide="refresh-cw" class="h-7 w-7 text-purple-300"></i><h3 class="mt-4 font-black">트리거 리밸런싱</h3><p class="mt-3 text-sm leading-6 text-slate-300">지수가 ±10~15% 움직이거나 EPS가 10% 이상 변할 때 시나리오 재계산.</p></div>
+    <section id="institutions" class="pt-16">
+      <div class="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Institution Views</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">국내외 기관 전망 비교</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-6 text-slate-400">전망치가 없는 기관은 정성 관점만 분리했다. 목표지수는 발간일과 시장 레벨에 따라 빠르게 바뀔 수 있다.</p>
       </div>
-    </section>
 
-    <section id="sources" class="anchor-offset py-10">
-      <h2 class="section-title text-3xl font-black">출처 및 검증 메모</h2>
-      <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_.9fr]">
-        <div class="glass-panel rounded-3xl p-6 table-wrap">
-          <table>
-            <thead><tr><th>항목</th><th>사용값/내용</th><th>출처·기준일</th></tr></thead>
-            <tbody>
-              <tr><td>KOSPI 현재 지수</td><td>8,360.55</td><td>Yahoo Finance, 2026-05-27 09:55 KST 지연 시세</td></tr>
-              <tr><td>KOSPI 사상 고점 보도</td><td>8,450.26 intraday</td><td>Reuters, 2026-05-27</td></tr>
-              <tr><td>KOSPI 시총</td><td>6,058조원 기록</td><td>서울경제 영문판, 2026-05-06. 이후 고점 경신분은 공식 재확인 필요</td></tr>
-              <tr><td>기준금리</td><td>2.50%</td><td>Bank of Korea, 2026-04-10 결정 및 2026-05-26 Reuters poll</td></tr>
-              <tr><td>수출·반도체 수출</td><td>4월 수출 +48.0% YoY, 반도체 +173%</td><td>Reuters, 2026-05-01</td></tr>
-              <tr><td>환율</td><td>USD/KRW 약 1,500원대</td><td>Wise, Investing.com, Trading Economics, 2026-05-27 부근</td></tr>
-              <tr><td>기관 전망</td><td>Goldman 8,000, Nomura 10,000~11,000 등</td><td>Goldman/Asiae/Sedaily/Nomura 관련 보도, 2026-04~05</td></tr>
-              <tr><td>지수 정의</td><td>KRX 유가증권시장 보통주 중심의 시가총액 가중 지수</td><td>IMF SDDS DQAF/KRX 관련 자료</td></tr>
+      <div class="glass-panel overflow-hidden rounded-3xl">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[1120px] text-left text-sm">
+            <thead class="bg-white/[0.04] text-xs uppercase tracking-wider text-slate-400">
+              <tr>
+                <th class="px-5 py-4">기관명</th>
+                <th class="px-5 py-4">발간일</th>
+                <th class="px-5 py-4">전망 대상</th>
+                <th class="px-5 py-4">목표/범위</th>
+                <th class="px-5 py-4">핵심 논리</th>
+                <th class="px-5 py-4">이익 관점</th>
+                <th class="px-5 py-4">밸류 관점</th>
+                <th class="px-5 py-4">수급/환율/금리</th>
+                <th class="px-5 py-4">리스크</th>
+                <th class="px-5 py-4">출처</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10 text-slate-300">
+              <tr>
+                <td class="px-5 py-4 font-bold text-slate-100">Goldman Sachs Research</td>
+                <td class="px-5 py-4">2026-05-21</td>
+                <td class="px-5 py-4">KOSPI 12개월</td>
+                <td class="px-5 py-4 font-black text-cyan-100">9,000</td>
+                <td class="px-5 py-4">반도체 메모리 슈퍼사이클, 한국 최선호</td>
+                <td class="px-5 py-4">2026 이익 +300% 전망</td>
+                <td class="px-5 py-4">Forward 약 7배, 저평가</td>
+                <td class="px-5 py-4">포지셔닝 여유, 밸류업</td>
+                <td class="px-5 py-4">이익 지속성 검증</td>
+                <td class="px-5 py-4"><a class="source-link" href="https://www.goldmansachs.com/insights/articles/koreas-stock-market-is-forecast-to-set-fresh-highs" target="_blank" rel="noopener">Goldman</a></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-4 font-bold text-slate-100">Samsung Securities</td>
+                <td class="px-5 py-4">2026-05-29</td>
+                <td class="px-5 py-4">2026 KOSPI</td>
+                <td class="px-5 py-4 font-black text-amber-100">연간 7,000~11,000<br/>6월 7,000~9,000</td>
+                <td class="px-5 py-4">하우스 뷰: 코스피 11,000pt 상향</td>
+                <td class="px-5 py-4">반도체 이익 레버리지</td>
+                <td class="px-5 py-4">P/B 밴드 상단 확장</td>
+                <td class="px-5 py-4">위험자산 선호와 수급</td>
+                <td class="px-5 py-4">단기 변동성, 과열</td>
+                <td class="px-5 py-4"><a class="source-link" href="https://www.samsungpop.com/common.do?cmd=down&contentType=application%2Fpdf&fileName=4010%2F2026052917345560K_02_01.pdf&inlineYn=Y&saveKey=research.pdf" target="_blank" rel="noopener">삼성증권 PDF</a></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-4 font-bold text-slate-100">Reuters 보도 내 애널리스트</td>
+                <td class="px-5 py-4">2026-06-25</td>
+                <td class="px-5 py-4">KOSPI 1년</td>
+                <td class="px-5 py-4 font-black text-amber-100">12,500 가능성 언급</td>
+                <td class="px-5 py-4">Micron 실적, SK하이닉스 ADR 계획, AI 메모리 수요</td>
+                <td class="px-5 py-4">HBM/메모리 이익 가시성</td>
+                <td class="px-5 py-4">미국 상장/ADR로 할인 축소 기대</td>
+                <td class="px-5 py-4">외국인 접근성 개선</td>
+                <td class="px-5 py-4">기대 과잉, 희석/규제</td>
+                <td class="px-5 py-4"><a class="source-link" href="https://www.reuters.com/world/asia-pacific/south-korean-chip-shares-rally-after-microns-upbeat-earnings-2026-06-25/" target="_blank" rel="noopener">Reuters</a></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-4 font-bold text-slate-100">Macquarie</td>
+                <td class="px-5 py-4">2025-12-02</td>
+                <td class="px-5 py-4">2026 KOSPI</td>
+                <td class="px-5 py-4">6,000 근접</td>
+                <td class="px-5 py-4">이익 성장, 유동성, 증시 친화 정책</td>
+                <td class="px-5 py-4">강한 실적 성장</td>
+                <td class="px-5 py-4">디스카운트 축소</td>
+                <td class="px-5 py-4">유동성 우호</td>
+                <td class="px-5 py-4">현재 레벨 대비 오래된 전망</td>
+                <td class="px-5 py-4"><a class="source-link" href="https://finance.yahoo.com/news/south-korea-kospi-market-outlook-153742250.html" target="_blank" rel="noopener">Yahoo/Investing</a></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-4 font-bold text-slate-100">KCMI</td>
+                <td class="px-5 py-4">2026-01-06</td>
+                <td class="px-5 py-4">구조 진단</td>
+                <td class="px-5 py-4">목표 없음</td>
+                <td class="px-5 py-4">코리아 디스카운트 구조 변화와 랠리 집중도</td>
+                <td class="px-5 py-4">반도체·AI 기반</td>
+                <td class="px-5 py-4">구조 개혁 필요</td>
+                <td class="px-5 py-4">외국인·기관 모멘텀, 개인 역행매매</td>
+                <td class="px-5 py-4">소수 대형주 집중</td>
+                <td class="px-5 py-4"><a class="source-link" href="https://www.kcmi.re.kr/en/publications/pub_detail_view?cno=6696&syear=2026&zcd=002001017&zno=1892" target="_blank" rel="noopener">KCMI</a></td>
+              </tr>
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-3">
+        <div class="glass-panel rounded-3xl p-5"><div class="text-sm text-slate-400">보수적 범위</div><div class="mt-1 text-2xl font-black text-blue-200">6,500~7,000</div><p class="mt-2 text-sm text-slate-400">이익 피크아웃·달러 강세·수급 이탈 가정.</p></div>
+        <div class="glass-panel rounded-3xl p-5"><div class="text-sm text-slate-400">중립적 범위</div><div class="mt-1 text-2xl font-black text-cyan-200">9,000</div><p class="mt-2 text-sm text-slate-400">Goldman 12개월 목표와 본 대시보드 Base Case.</p></div>
+        <div class="glass-panel rounded-3xl p-5"><div class="text-sm text-slate-400">낙관적 범위</div><div class="mt-1 text-2xl font-black text-amber-200">11,000~12,500</div><p class="mt-2 text-sm text-slate-400">반도체 슈퍼사이클·ADR/밸류업 재평가 가정.</p></div>
+      </div>
+    </section>
+
+    <section id="flows" class="pt-16">
+      <div class="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Flows</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">수급 및 자금 흐름</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-6 text-slate-400">외국인·기관·개인 흐름은 단기 지수 방향을 좌우한다. 특히 환율과 외국인 매매는 함께 관찰해야 한다.</p>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div class="glass-panel chart-card rounded-3xl p-6">
+          <h3 class="text-xl font-black">투자자별 수급 상태</h3>
+          <div class="mt-4 h-[340px]">
+            <canvas id="flowsChart"></canvas>
+          </div>
+          <p class="mt-3 text-xs leading-5 text-slate-500">정량 데이터는 KRX 투자자별 매매동향에서 갱신 필요. 차트는 대시보드 해석용 상태 점수.</p>
+        </div>
         <div class="glass-panel rounded-3xl p-6">
-          <h3 class="text-xl font-black">검증·주의사항</h3>
-          <ul class="mt-4 space-y-3 text-sm leading-7 text-slate-300">
-            <li>• 12개월 Forward EPS/PER/PBR/ROE는 실시간·유료 컨센서스 데이터가 많아 공개 자료만으로 완전 검증이 어렵다.</li>
-            <li>• 본 HTML의 EPS·PER·목표 지수는 “시나리오 가정”으로 표시했으며, 확정 전망치가 아니다.</li>
-            <li>• KOSPI, KOSPI200, MSCI Korea는 구성·산출 방식이 다르므로 지표 비교 시 동일 기준 여부를 확인해야 한다.</li>
-            <li>• 지수 전망은 거시경제, 기업이익, 밸류에이션, 수급이 함께 작용한다.</li>
-          </ul>
-          <div class="mt-6 rounded-3xl bg-rose-400/10 p-5 text-sm leading-7 text-rose-100 ring-1 ring-rose-400/20">
-            본 자료는 투자 참고용이며, 매수·매도 권유가 아닙니다. 본 자료는 공개 자료와 시나리오 가정을 바탕으로 작성되었고, 투자 판단의 책임은 투자자 본인에게 있습니다.
+          <h3 class="text-xl font-black">수급 해석</h3>
+          <div class="mt-5 space-y-4">
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="font-black">외국인</div>
+              <p class="mt-1 text-sm leading-6 text-slate-400">AI 메모리·MSCI Korea 비중·원화 방향에 민감하다. 원화 안정과 미국 반도체 주가 회복은 코스피에 우호적이다.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="font-black">기관</div>
+              <p class="mt-1 text-sm leading-6 text-slate-400">연기금·ETF·프로그램 매매는 리밸런싱과 대형주 쏠림을 증폭할 수 있다.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="font-black">개인</div>
+              <p class="mt-1 text-sm leading-6 text-slate-400">KCMI는 랠리 구간에서 개인의 승자 매도·낙폭주 매수 경향이 체감 수익률을 낮출 수 있다고 지적했다.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div class="font-black">ETF/글로벌 플로우</div>
+              <p class="mt-1 text-sm leading-6 text-slate-400">MSCI Korea·EWY 등 글로벌 패시브 자금은 IT 비중 확대로 반도체 모멘텀에 민감하게 반응한다.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
+
+    <section id="risks" class="pt-16">
+      <div class="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Risk Matrix</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">리스크 매트릭스와 체크포인트</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-6 text-slate-400">코스피 전망은 거시경제, 기업이익, 밸류에이션, 수급이 동시에 움직일 때 바뀐다.</p>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex justify-between"><h3 class="font-black">미국 금리 재상승</h3><span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs text-blue-200">중상</span></div>
+          <p class="mt-3 text-sm leading-6 text-slate-400">영향도: 높음 / 관찰: FOMC, 미국 10년물, 달러인덱스</p>
+          <p class="mt-2 text-sm text-slate-300">대응: 분할 진입, 환헤지 ETF/현금 비중 유지.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex justify-between"><h3 class="font-black">원화 약세</h3><span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs text-blue-200">중상</span></div>
+          <p class="mt-3 text-sm leading-6 text-slate-400">영향도: 중~높음 / 관찰: 1,500원대 이탈·안착 여부</p>
+          <p class="mt-2 text-sm text-slate-300">대응: 외국인 순매수 전환 확인 후 비중 확대.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex justify-between"><h3 class="font-black">반도체 업황 둔화</h3><span class="rounded-full bg-red-500/10 px-2 py-1 text-xs text-red-200">높음</span></div>
+          <p class="mt-3 text-sm leading-6 text-slate-400">영향도: 매우 높음 / 관찰: DRAM·NAND·HBM 가격, Micron 가이던스</p>
+          <p class="mt-2 text-sm text-slate-300">대응: 이익 추정 하향 시 Base→Bear 재평가.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex justify-between"><h3 class="font-black">중국 경기 부진</h3><span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs text-blue-200">중</span></div>
+          <p class="mt-3 text-sm leading-6 text-slate-400">영향도: 중 / 관찰: 중국 PMI, 소비·부동산, 대중 수출</p>
+          <p class="mt-2 text-sm text-slate-300">대응: 소비재·화학·철강 노출 축소.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex justify-between"><h3 class="font-black">지정학·유가</h3><span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs text-blue-200">중상</span></div>
+          <p class="mt-3 text-sm leading-6 text-slate-400">영향도: 높음 / 관찰: 중동, 호르무즈, 두바이유</p>
+          <p class="mt-2 text-sm text-slate-300">대응: 급등락 시 현금·금·방어업종 활용.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-5">
+          <div class="flex justify-between"><h3 class="font-black">밸류업 정책 실망</h3><span class="rounded-full bg-cyan-500/10 px-2 py-1 text-xs text-cyan-200">중</span></div>
+          <p class="mt-3 text-sm leading-6 text-slate-400">영향도: 중 / 관찰: 배당소득 분리과세, 자사주 소각, 지배구조</p>
+          <p class="mt-2 text-sm text-slate-300">대응: 주주환원 실적이 확인되는 종목·ETF 선별.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 glass-panel rounded-3xl p-6">
+        <h3 class="text-xl font-black">관찰해야 할 체크포인트</h3>
+        <div class="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <div class="chip rounded-2xl px-4 py-3">다음 한국은행 금통위</div>
+          <div class="chip rounded-2xl px-4 py-3">미국 FOMC와 점도표</div>
+          <div class="chip rounded-2xl px-4 py-3">원/달러 환율 1,500원대 방향</div>
+          <div class="chip rounded-2xl px-4 py-3">한국 수출입 동향</div>
+          <div class="chip rounded-2xl px-4 py-3">반도체 수출·DRAM/NAND 가격</div>
+          <div class="chip rounded-2xl px-4 py-3">삼성전자·SK하이닉스 실적</div>
+          <div class="chip rounded-2xl px-4 py-3">주요 코스피 실적 시즌</div>
+          <div class="chip rounded-2xl px-4 py-3">외국인 순매수 추세</div>
+          <div class="chip rounded-2xl px-4 py-3">MSCI 리밸런싱</div>
+          <div class="chip rounded-2xl px-4 py-3">밸류업 후속 조치</div>
+          <div class="chip rounded-2xl px-4 py-3">글로벌 위험자산 선호도</div>
+          <div class="chip rounded-2xl px-4 py-3">AI CAPEX 가이던스</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-16">
+      <div class="glass-panel rounded-3xl p-6 md:p-8">
+        <div class="grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
+          <div>
+            <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Final View</p>
+            <h2 class="mt-2 text-3xl font-black">실행 가이드</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-300">
+              코스피는 장기적으로 한국 대표 산업의 이익 회복과 밸류업 정책의 수혜를 받을 수 있으나,
+              현재는 대형 반도체 중심으로 변동성이 확대된 구간이다. 지수 자체보다 <b class="text-slate-100">진입 가격·분할 방식·리밸런싱 규칙</b>이 중요하다.
+            </p>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <h3 class="font-black">초기 진입</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">목표 비중의 30~40%만 우선 진입. 급등 직후 추격 매수보다 환율·외국인·메모리 가격 확인.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <h3 class="font-black">DCA 기간</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">3~6개월 분할. 10% 이상 조정 시 예정 금액을 앞당기는 규칙 사용.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <h3 class="font-black">리밸런싱 트리거</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">시나리오 확률가중 목표 대비 +10% 초과 시 일부 현금화, -15% 조정 시 이익 추정 하향 여부 확인 후 추가.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <h3 class="font-black">위험 한도</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">한국 주식 비중이 전체 자산의 20~30%를 넘는 경우 반도체 집중 리스크를 별도로 관리.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources" class="pt-16">
+      <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Sources & Disclaimer</p>
+        <h2 class="mt-2 text-3xl font-black md:text-4xl">출처와 검증 메모</h2>
+      </div>
+
+      <div class="glass-panel rounded-3xl p-6">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <h3 class="font-black">주요 시장 수치</h3>
+            <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-300">
+              <li>• 코스피 지수 8,913.27: Reuters 2026-06-25 장중 보도 기준.</li>
+              <li>• 코스피 시가총액 7,449.6조원: KRX 데이터마켓 20분 지연 상장종목 현황 스냅샷.</li>
+              <li>• Forward PER 약 7배: Goldman Sachs Research 2026-05-21 공개 글 기준.</li>
+              <li>• Forward EPS 1,273pt: 현재 지수 ÷ Forward PER로 역산한 추정치. 공식 컨센서스 확인 필요.</li>
+              <li>• PBR·ROE·배당수익률: KRX PER/PBR/Dividend yield 메뉴 및 데이터 제공사 확인 필요. 본문 수치는 해석용 추정 범위.</li>
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <h3 class="font-black">참고 링크</h3>
+            <ul class="mt-3 space-y-2 text-sm leading-6">
+              <li><a class="source-link" href="https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd?locale=en" target="_blank" rel="noopener">KRX Information Data System</a></li>
+              <li><a class="source-link" href="https://www.reuters.com/world/asia-pacific/south-korean-chip-shares-rally-after-microns-upbeat-earnings-2026-06-25/" target="_blank" rel="noopener">Reuters: Korean chip shares / KOSPI 2026-06-25</a></li>
+              <li><a class="source-link" href="https://www.goldmansachs.com/insights/articles/koreas-stock-market-is-forecast-to-set-fresh-highs" target="_blank" rel="noopener">Goldman Sachs: Korea’s Stock Market Is Forecast to Set Fresh Highs</a></li>
+              <li><a class="source-link" href="https://www.samsungpop.com/common.do?cmd=down&contentType=application%2Fpdf&fileName=4010%2F2026052917345560K_02_01.pdf&inlineYn=Y&saveKey=research.pdf" target="_blank" rel="noopener">Samsung Securities Weekly Strategy PDF</a></li>
+              <li><a class="source-link" href="https://www.oecd.org/en/publications/oecd-economic-outlook-volume-2026-issue-1_2d1956f0-en/full-report/korea_19213db6.html" target="_blank" rel="noopener">OECD Economic Outlook 2026: Korea</a></li>
+              <li><a class="source-link" href="https://www.kdi.re.kr/research/economy" target="_blank" rel="noopener">KDI 경제전망 2026 상반기</a></li>
+              <li><a class="source-link" href="https://www.bok.or.kr/eng/main/main.do" target="_blank" rel="noopener">Bank of Korea</a></li>
+              <li><a class="source-link" href="https://www.reuters.com/world/asia-pacific/south-korea-export-growth-hits-four-decade-high-chip-sales-hit-record-ai-boom-2026-06-01/" target="_blank" rel="noopener">Reuters: South Korea exports / semiconductors</a></li>
+              <li><a class="source-link" href="https://www.kcmi.re.kr/en/publications/pub_detail_view?cno=6696&syear=2026&zcd=002001017&zno=1892" target="_blank" rel="noopener">Korea Capital Market Institute</a></li>
+              <li><a class="source-link" href="https://www.msci.com/www/fact-sheet/msci-korea-index/06058607" target="_blank" rel="noopener">MSCI Korea Index Fact Sheet</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-2xl border border-amber-400/20 bg-amber-500/10 p-5">
+          <h3 class="font-black text-amber-100">면책 고지</h3>
+          <p class="mt-2 text-sm leading-7 text-amber-50/85">
+            본 자료는 투자 참고용이며, 매수·매도 권유가 아닙니다. 지수·시가총액·PER·EPS·PBR·ROE·기관 전망은 데이터 기준일과 출처에 따라 달라질 수 있습니다.
+            본 자료는 공개 자료와 가정 기반 시나리오를 결합한 대시보드이며, 실제 투자 판단의 책임은 투자자 본인에게 있습니다.
+          </p>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script>
-    const textColor = '#94a3b8';
-    const gridColor = 'rgba(148, 163, 184, 0.16)';
-    const colors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#64748b', '#f97316'];
+    const assetNames = ['반도체', '산업재/조선/방산', '금융', '자동차', '2차전지', '바이오', '인터넷/플랫폼', '소비재', '기타'];
+    const assetColors = ['#f59e0b', '#06b6d4', '#10b981', '#8b5cf6', '#3b82f6', '#a78bfa', '#60a5fa', '#94a3b8', '#334155'];
 
-    function baseOptions(extra = {}) {
+    const scenarios = {
+      defensive: { weights: [50, 12, 9, 8, 5, 4, 3, 3, 6], label: "지수 영향도" },
+      balanced: { weights: [25, 50, 25], label: "확률" },
+      aggressive: { weights: [6500, 9000, 12500], label: "목표 지수" }
+    };
+
+    function getDoughnutConfig(weights) {
       return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color: textColor, boxWidth: 10, padding: 14, font: { size: 11, weight: 'bold' } } },
-          tooltip: { backgroundColor: 'rgba(15,23,42,.95)', titleColor: '#f8fafc', bodyColor: '#cbd5e1', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1 }
+        type: 'doughnut',
+        data: {
+          labels: assetNames,
+          datasets: [{
+            data: weights,
+            backgroundColor: assetColors,
+            borderColor: '#050814',
+            borderWidth: 2,
+            hoverOffset: 8
+          }]
         },
-        scales: {
-          x: { ticks: { color: textColor }, grid: { color: gridColor } },
-          y: { ticks: { color: textColor }, grid: { color: gridColor } }
-        },
-        ...extra
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom',
+              labels: { color: '#94a3b8', boxWidth: 8, padding: 12, font: { size: 10, weight: 'bold' } }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.label}: ${ctx.parsed}%`
+              }
+            }
+          },
+          cutout: '66%'
+        }
       };
     }
 
+    const darkGrid = 'rgba(148, 163, 184, 0.14)';
+    const darkTick = '#94a3b8';
+
     function initializeCharts() {
-      if (typeof Chart === 'undefined') { setTimeout(initializeCharts, 200); return; }
-      if (window.lucide) { try { lucide.createIcons(); } catch(e) { console.error(e); } }
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js is not loaded yet. Retrying...');
+        setTimeout(initializeCharts, 200);
+        return;
+      }
+
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch (e) { console.error(e); }
+      }
 
       try {
-        new Chart(document.getElementById('macroRadarChart'), {
+        const sectorEl = document.getElementById('sectorChart');
+        if (sectorEl) new Chart(sectorEl, getDoughnutConfig(scenarios.defensive.weights));
+      } catch (e) { console.error('sectorChart', e); }
+
+      try {
+        const macroEl = document.getElementById('macroRadarChart');
+        if (macroEl) new Chart(macroEl, {
           type: 'radar',
           data: {
-            labels: ['반도체', '수출', '금리', '환율', '정책', '수급'],
-            datasets: [{ label: '코스피 우호도', data: [92, 86, 55, 42, 72, 68], borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,.18)', pointBackgroundColor: '#f8fafc' }]
+            labels: ['GDP', '수출', '반도체', '금리', '환율', '외국인', '밸류업'],
+            datasets: [{
+              label: '코스피 우호도',
+              data: [72, 90, 95, 55, 42, 68, 74],
+              fill: true,
+              backgroundColor: 'rgba(6, 182, 212, 0.16)',
+              borderColor: '#06b6d4',
+              pointBackgroundColor: '#f59e0b',
+              pointBorderColor: '#050814'
+            }]
           },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } }, scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: gridColor }, angleLines: { color: gridColor }, pointLabels: { color: textColor, font: { weight: 'bold' } } } } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                angleLines: { color: darkGrid },
+                grid: { color: darkGrid },
+                pointLabels: { color: '#cbd5e1', font: { size: 11, weight: 'bold' } },
+                ticks: { color: darkTick, backdropColor: 'transparent', stepSize: 20 },
+                suggestedMin: 0,
+                suggestedMax: 100
+              }
+            },
+            plugins: { legend: { labels: { color: darkTick } } }
+          }
         });
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error('macroRadarChart', e); }
 
       try {
-        new Chart(document.getElementById('sectorImpactChart'), {
+        const valuationEl = document.getElementById('valuationPeerChart');
+        if (valuationEl) new Chart(valuationEl, {
           type: 'bar',
           data: {
-            labels: ['반도체', '자동차', '금융', '조선', '2차전지', '바이오', '인터넷', '소비재'],
-            datasets: [{ label: '이익 모멘텀', data: [95, 72, 76, 82, 52, 58, 44, 50], backgroundColor: '#06b6d4' }, { label: '수급/정책 매력', data: [90, 68, 84, 70, 45, 55, 42, 48], backgroundColor: '#f59e0b' }]
+            labels: ['KOSPI', 'MSCI Korea', 'KOSPI200', 'MSCI EM', 'Taiwan', 'Nikkei', 'S&P 500'],
+            datasets: [{
+              label: '12M Forward PER (x)',
+              data: [7.0, 7.2, 7.4, 12.8, 17.0, 18.2, 21.5],
+              backgroundColor: ['#06b6d4', '#38bdf8', '#60a5fa', '#64748b', '#8b5cf6', '#f59e0b', '#ef4444'],
+              borderWidth: 0,
+              borderRadius: 8
+            }]
           },
-          options: baseOptions({ scales: { x: { ticks: { color: textColor }, grid: { display: false } }, y: { min: 0, max: 100, ticks: { color: textColor }, grid: { color: gridColor } } } })
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: darkTick }, grid: { color: 'transparent' } },
+              y: { ticks: { color: darkTick }, grid: { color: darkGrid }, beginAtZero: true }
+            },
+            plugins: {
+              legend: { labels: { color: darkTick } },
+              tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y}x` } }
+            }
+          }
         });
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error('valuationPeerChart', e); }
 
       try {
-        new Chart(document.getElementById('valuationPeerChart'), {
-          type: 'bar',
+        const epsEl = document.getElementById('epsTrendChart');
+        if (epsEl) new Chart(epsEl, {
+          type: 'line',
           data: {
-            labels: ['KOSPI(4월 보도)', 'KOSPI(현 지수 추정)', '미국', '일본', '중국'],
-            datasets: [{ label: 'Forward PER / 보도·추정 혼합', data: [8.43, 11.7, 21.81, 17.81, 14.8], backgroundColor: ['#06b6d4','#3b82f6','#f59e0b','#8b5cf6','#64748b'] }]
+            labels: ['2024', '2025E', '2026E Bear', '2026E Base', '2026E Bull', '2027E'],
+            datasets: [{
+              label: 'KOSPI Forward EPS 후보',
+              data: [360, 620, 1000, 1250, 1563, 1350],
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, .14)',
+              tension: .35,
+              fill: true,
+              pointRadius: 4
+            }]
           },
-          options: baseOptions({ plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { display: false } }, y: { ticks: { color: textColor, callback: (v) => v + 'x' }, grid: { color: gridColor } } } })
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: darkTick }, grid: { color: 'transparent' } },
+              y: { ticks: { color: darkTick }, grid: { color: darkGrid } }
+            },
+            plugins: { legend: { labels: { color: darkTick } } }
+          }
         });
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error('epsTrendChart', e); }
 
       try {
-        new Chart(document.getElementById('scenarioTargetChart'), {
+        const scenarioEl = document.getElementById('scenarioTargetChart');
+        if (scenarioEl) new Chart(scenarioEl, {
           type: 'bar',
           data: {
             labels: ['Bear', 'Base', 'Bull', '확률가중'],
-            datasets: [{ label: '목표 지수', data: [7100, 8892, 10938, 9058], backgroundColor: ['#60a5fa', '#38bdf8', '#f59e0b', '#10b981'] }]
+            datasets: [{
+              label: '목표 지수',
+              data: [6500, 9000, 12500, 9250],
+              backgroundColor: ['#60a5fa', '#06b6d4', '#f59e0b', '#a78bfa'],
+              borderRadius: 10
+            }]
           },
-          options: baseOptions({ plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { display: false } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } } })
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: darkTick }, grid: { color: 'transparent' } },
+              y: { ticks: { color: darkTick }, grid: { color: darkGrid } }
+            },
+            plugins: { legend: { labels: { color: darkTick } } }
+          }
         });
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error('scenarioTargetChart', e); }
 
       try {
-        new Chart(document.getElementById('scenarioProbabilityChart'), {
-          type: 'doughnut',
-          data: { labels: ['Bear 25%', 'Base 45%', 'Bull 30%'], datasets: [{ data: [25,45,30], backgroundColor: ['#60a5fa', '#38bdf8', '#f59e0b'], borderColor: '#050814', borderWidth: 2, hoverOffset: 8 }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10, padding: 14, font: { weight: 'bold' } } } } }
-        });
-      } catch(e) { console.error(e); }
-
-      try {
-        new Chart(document.getElementById('flowMixChart'), {
-          type: 'line',
+        const probabilityEl = document.getElementById('probabilityChart');
+        if (probabilityEl) new Chart(probabilityEl, {
+          type: 'bar',
           data: {
-            labels: ['1월', '2월', '3월', '4월', '5월'],
+            labels: ['Bear', 'Base', 'Bull'],
+            datasets: [{
+              label: '발생 확률 (%)',
+              data: [25, 50, 25],
+              backgroundColor: ['#60a5fa', '#06b6d4', '#f59e0b'],
+              borderRadius: 10
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: darkTick, callback: (v) => v + '%' }, grid: { color: darkGrid }, max: 60 },
+              y: { ticks: { color: darkTick }, grid: { color: 'transparent' } }
+            },
+            plugins: {
+              legend: { labels: { color: darkTick } },
+              tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.x}%` } }
+            }
+          }
+        });
+      } catch (e) { console.error('probabilityChart', e); }
+
+      try {
+        const flowsEl = document.getElementById('flowsChart');
+        if (flowsEl) new Chart(flowsEl, {
+          type: 'bar',
+          data: {
+            labels: ['외국인', '기관', '개인', '프로그램', 'ETF/패시브'],
             datasets: [
-              { label: '외국인 수급 강도', data: [45, 55, 62, 74, 80], borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,.14)', tension: .35, fill: true },
-              { label: '개인 레버리지 열기', data: [38, 48, 58, 72, 88], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.12)', tension: .35, fill: true },
-              { label: '기관 리밸런싱 압력', data: [50, 47, 52, 56, 63], borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,.10)', tension: .35, fill: true }
+              { label: '긍정 점수', data: [72, 58, 40, 55, 68], backgroundColor: '#06b6d4', borderRadius: 8 },
+              { label: '변동성 점수', data: [65, 50, 80, 70, 60], backgroundColor: '#f59e0b', borderRadius: 8 }
             ]
           },
-          options: baseOptions({ scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { min: 0, max: 100, ticks: { color: textColor }, grid: { color: gridColor } } } })
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: darkTick }, grid: { color: 'transparent' } },
+              y: { ticks: { color: darkTick }, grid: { color: darkGrid }, beginAtZero: true, max: 100 }
+            },
+            plugins: { legend: { labels: { color: darkTick } } }
+          }
         });
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error('flowsChart', e); }
     }
 
-    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initializeCharts); } else { initializeCharts(); }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeCharts);
+    } else {
+      initializeCharts();
+    }
   </script>
 </body>
 </html>
