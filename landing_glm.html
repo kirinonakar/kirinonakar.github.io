@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kirinonakar의 작업실 — 일상의 불편함을 코드로 해결합니다</title>
+    <meta name="description" content="C#, C++, Kotlin, Python, Rust로 만든 실용적인 데스크톱 도구와 웹 애플리케이션. 투자 리서치 대시보드, FIRE 시뮬레이터, 태양계 시뮬레이터 등을 한곳에서 만나보세요.">
+    <meta property="og:title" content="kirinonakar의 작업실">
+    <meta property="og:description" content="다양한 언어로 실용적인 도구를 만드는 개발자의 공간">
+    <meta name="theme-color" content="#0a0e14">
+    <link rel="icon" href="git_profile.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="git_profile.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e14;
+            --surface: rgba(255, 255, 255, .04);
+            --surface-2: rgba(255, 255, 255, .07);
+            --border: rgba(255, 255, 255, .12);
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-2: #bc8cff;
+            --gold: #d4a843;
+            --green: #3fb950;
+            --radius: 20px;
+            --font-main: 'Inter', system-ui, sans-serif;
+            --font-head: 'Outfit', var(--font-main);
+            --nav-h: 72px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: calc(var(--nav-h) + 16px);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: rgba(88, 166, 255, .35);
+        }
+
+        /* ── Background ─────────────────────────── */
+        .bg-orbs {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(88, 166, 255, .12), transparent 70%),
+                var(--bg);
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: .32;
+            z-index: -1;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .orb-1 {
+            width: 540px;
+            height: 540px;
+            top: -140px;
+            left: -140px;
+            background: radial-gradient(circle, rgba(88, 166, 255, .55), transparent 70%);
+        }
+
+        .orb-2 {
+            width: 620px;
+            height: 620px;
+            bottom: -180px;
+            right: -160px;
+            background: radial-gradient(circle, rgba(188, 140, 255, .5), transparent 70%);
+        }
+
+        .orb-3 {
+            width: 380px;
+            height: 380px;
+            top: 40%;
+            left: 58%;
+            background: radial-gradient(circle, rgba(212, 168, 67, .4), transparent 70%);
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+            background-size: 56px 56px;
+            -webkit-mask-image: radial-gradient(ellipse 90% 62% at 50% 0%, #000 35%, transparent 100%);
+            mask-image: radial-gradient(ellipse 90% 62% at 50% 0%, #000 35%, transparent 100%);
+        }
+
+        /* ── Nav ────────────────────────────────── */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-h);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            transition: background .35s, border-color .35s, backdrop-filter .35s;
+            border-bottom: 1px solid transparent;
+        }
+
+        .nav.scrolled {
+            background: rgba(10, 14, 20, .72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom-color: var(--border);
+        }
+
+        .nav-inner {
+            width: min(1160px, 92%);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: var(--font-head);
+            font-weight: 800;
+            font-size: 1.12rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -.01em;
+        }
+
+        .logo span {
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.9rem;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .92rem;
+            font-weight: 500;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .btn-gh {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .55rem 1.15rem;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: .9rem;
+            backdrop-filter: blur(10px);
+            transition: border-color .25s, transform .25s;
+        }
+
+        .btn-gh:hover {
+            border-color: rgba(88, 166, 255, .5);
+            transform: translateY(-2px);
+        }
+
+        .burger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: 0;
+            cursor: pointer;
+            padding: .5rem;
+        }
+
+        .burger span {
+            width: 22px;
+            height: 2px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: transform .3s, opacity .3s;
+        }
+
+        .nav.open .burger span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .nav.open .burger span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav.open .burger span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* ── Layout ─────────────────────────────── */
+        .wrap {
+            width: min(1160px, 92%);
+            margin: 0 auto;
+        }
+
+        section {
+            padding: 5.5rem 0;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: .9rem;
+        }
+
+        .sec-title {
+            font-family: var(--font-head);
+            font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: -.02em;
+            line-height: 1.2;
+            margin-bottom: .8rem;
+        }
+
+        .sec-desc {
+            color: var(--muted);
+            max-width: 620px;
+        }
+
+        .sec-head {
+            margin-bottom: 2.75rem;
+        }
+
+        /* ── Hero ───────────────────────────────── */
+        .hero {
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: calc(var(--nav-h) + 4rem) 1rem 5rem;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .45rem 1.05rem;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: .82rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            margin-bottom: 1.6rem;
+        }
+
+        .hero-badge b {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .hero h1 {
+            font-family: var(--font-head);
+            font-size: clamp(2.5rem, 6.5vw, 4.6rem);
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: -.03em;
+            margin-bottom: 1.4rem;
+        }
+
+        .grad {
+            background: linear-gradient(120deg, var(--accent), var(--accent-2) 55%, var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .lead {
+            max-width: 660px;
+            color: var(--muted);
+            font-size: clamp(1.02rem, 2vw, 1.22rem);
+            margin: 0 auto 2.4rem;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: .9rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: .85rem 1.9rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: .98rem;
+            text-decoration: none;
+            transition: transform .3s, box-shadow .3s, border-color .3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #05080d;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 32px -8px rgba(88, 166, 255, .45);
+        }
+
+        .btn-ghost {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-ghost:hover {
+            transform: translateY(-4px);
+            border-color: rgba(188, 140, 255, .5);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            width: min(780px, 100%);
+            margin-top: 3.6rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.1rem .8rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat b {
+            display: block;
+            font-family: var(--font-head);
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            font-weight: 800;
+            letter-spacing: -.02em;
+            background: linear-gradient(120deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat span {
+            font-size: .8rem;
+            color: var(--muted);
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 1.6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 36px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .scroll-hint::after {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 50%;
+            width: 3px;
+            height: 7px;
+            margin-left: -1.5px;
+            border-radius: 3px;
+            background: var(--accent);
+            animation: drop 1.8s ease-in-out infinite;
+        }
+
+        @keyframes drop {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            70% {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+        }
+
+        /* ── Marquee ────────────────────────────── */
+        .marquee {
+            overflow: hidden;
+            border-block: 1px solid var(--border);
+            padding: 1.15rem 0;
+            background: rgba(255, 255, 255, .02);
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+        }
+
+        .marquee-track {
+            display: flex;
+            gap: 2.6rem;
+            width: max-content;
+            animation: scroll 34s linear infinite;
+        }
+
+        .marquee:hover .marquee-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes scroll {
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        .chip {
+            font-family: var(--font-head);
+            font-weight: 700;
+            font-size: .95rem;
+            color: var(--muted);
+            white-space: nowrap;
+            transition: color .2s;
+        }
+
+        .chip:hover {
+            color: var(--accent);
+        }
+
+        /* ── Cards ──────────────────────────────── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.4rem;
+        }
+
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: .55rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.9rem;
+            text-decoration: none;
+            color: inherit;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            transition: transform .45s cubic-bezier(.22, 1, .36, 1), border-color .3s, box-shadow .45s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(88, 166, 255, .14), transparent 45%);
+            opacity: 0;
+            transition: opacity .3s;
+            pointer-events: none;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(88, 166, 255, .45);
+            box-shadow: 0 24px 48px -20px rgba(0, 0, 0, .6);
+        }
+
+        .card h3 {
+            font-family: var(--font-head);
+            font-size: 1.28rem;
+            font-weight: 700;
+            letter-spacing: -.01em;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: .95rem;
+        }
+
+        .go {
+            margin-top: auto;
+            padding-top: .9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: .9rem;
+        }
+
+        .go .arrow {
+            transition: transform .3s;
+        }
+
+        .card:hover .arrow {
+            transform: translateX(5px);
+        }
+
+        .lang {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .lang i {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--c, var(--accent));
+        }
+
+        .badge {
+            position: absolute;
+            top: 1.15rem;
+            right: 1.15rem;
+            font-size: .66rem;
+            font-weight: 700;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            padding: .32rem .68rem;
+            border-radius: 999px;
+            color: var(--accent);
+            background: rgba(88, 166, 255, .12);
+            border: 1px solid rgba(88, 166, 255, .3);
+        }
+
+        .badge.gold {
+            color: var(--gold);
+            background: rgba(212, 168, 67, .12);
+            border-color: rgba(212, 168, 67, .35);
+        }
+
+        .badge.new {
+            color: var(--green);
+            background: rgba(63, 185, 80, .12);
+            border-color: rgba(63, 185, 80, .35);
+        }
+
+        /* ── Premium investment card ────────────── */
+        .premium {
+            border-color: rgba(212, 168, 67, .35);
+            background: linear-gradient(135deg, rgba(212, 168, 67, .09), rgba(88, 166, 255, .06));
+        }
+
+        .premium:hover {
+            border-color: rgba(212, 168, 67, .6);
+        }
+
+        .premium .go {
+            color: var(--gold);
+        }
+
+        .ticker-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-top: 1.1rem;
+        }
+
+        .ticker-chips span {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--muted);
+            padding: .34rem .8rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border);
+            transition: color .2s, border-color .2s;
+        }
+
+        .card:hover .ticker-chips span {
+            color: var(--text);
+            border-color: rgba(212, 168, 67, .4);
+        }
+
+        /* ── More card ──────────────────────────── */
+        .more-card {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: .4rem;
+            border-style: dashed;
+            color: var(--muted);
+        }
+
+        .more-card b {
+            font-family: var(--font-head);
+            font-size: 1.15rem;
+            color: var(--text);
+        }
+
+        .more-card:hover {
+            border-color: rgba(188, 140, 255, .5);
+        }
+
+        /* ── CTA band ───────────────────────────── */
+        .cta-band {
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: clamp(2.5rem, 6vw, 4.5rem) 2rem;
+            text-align: center;
+            background:
+                radial-gradient(ellipse 60% 90% at 50% 0%, rgba(88, 166, 255, .14), transparent 70%),
+                linear-gradient(135deg, rgba(188, 140, 255, .08), rgba(88, 166, 255, .05));
+        }
+
+        .cta-band h2 {
+            font-family: var(--font-head);
+            font-size: clamp(1.9rem, 4.5vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -.02em;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .cta-band p {
+            color: var(--muted);
+            max-width: 520px;
+            margin: 0 auto 2.2rem;
+        }
+
+        /* ── Footer ─────────────────────────────── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.2rem 0 2.6rem;
+        }
+
+        .foot-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: .88rem;
+        }
+
+        .foot-links {
+            display: flex;
+            gap: 1.4rem;
+        }
+
+        .foot-links a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .foot-links a:hover {
+            color: var(--text);
+        }
+
+        /* ── Animations ─────────────────────────── */
+        .anim {
+            opacity: 0;
+            transform: translateY(26px);
+            animation: rise .9s cubic-bezier(.22, 1, .36, 1) forwards;
+            animation-delay: var(--d, 0s);
+        }
+
+        @keyframes rise {
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .8s cubic-bezier(.22, 1, .36, 1), transform .8s cubic-bezier(.22, 1, .36, 1);
+            transition-delay: var(--d, 0s);
+        }
+
+        .reveal.in {
+            opacity: 1;
+            transform: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .anim,
+            .scroll-hint::after,
+            .marquee-track {
+                animation: none !important;
+            }
+
+            .anim,
+            .reveal {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+
+        /* ── Responsive ─────────────────────────── */
+        @media (max-width: 860px) {
+            .nav-links {
+                position: fixed;
+                top: var(--nav-h);
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.1rem;
+                padding: 1.4rem 5%;
+                background: rgba(10, 14, 20, .96);
+                backdrop-filter: blur(18px);
+                border-bottom: 1px solid var(--border);
+                display: none;
+            }
+
+            .nav.open .nav-links {
+                display: flex;
+            }
+
+            .burger {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 640px) {
+            section {
+                padding: 4rem 0;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .foot-inner {
+                justify-content: center;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-orbs"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="#home" class="logo">kirino<span>nakar</span></a>
+            <div class="nav-links" id="menu">
+                <a href="#investment">투자 리서치</a>
+                <a href="#apps">웹 앱</a>
+                <a href="#repos">저장소</a>
+                <a href="#philosophy">철학</a>
+                <a href="https://github.com/kirinonakar" class="btn-gh" target="_blank" rel="noopener">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+            <button class="burger" id="burger" aria-label="메뉴 열기" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ── Hero ── -->
+    <header class="hero" id="home">
+        <div class="hero-badge anim" style="--d:.05s">✦ GitHub Pages · <b>kirinonakar</b>의 작업실</div>
+        <h1 class="anim" style="--d:.15s">일상의 불편함을<br><span class="grad">코드로 해결합니다</span></h1>
+        <p class="lead anim" style="--d:.3s">
+            C#, C++, Kotlin, Python, Rust — 다양한 언어로 만든 데스크톱 도구와 웹 애플리케이션을
+            한곳에 모았습니다. 투자 리서치부터 3D 시뮬레이션까지, 실용성을 우선합니다.
+        </p>
+        <div class="cta-group anim" style="--d:.45s">
+            <a href="#apps" class="btn btn-primary">프로젝트 보기</a>
+            <a href="https://github.com/kirinonakar" class="btn btn-ghost" target="_blank" rel="noopener">GitHub 프로필</a>
+        </div>
+        <div class="stats anim" style="--d:.6s">
+            <div class="stat"><b data-count="22" data-suffix="+">0</b><span>공개 저장소</span></div>
+            <div class="stat"><b data-count="5" data-suffix="">0</b><span>웹 애플리케이션</span></div>
+            <div class="stat"><b data-count="6" data-suffix="">0</b><span>사용 언어</span></div>
+            <div class="stat"><b data-count="100" data-suffix="%">0</b><span>로컬 우선 설계</span></div>
+        </div>
+        <div class="scroll-hint" aria-hidden="true"></div>
+    </header>
+
+    <!-- ── Tech marquee ── -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track" id="track">
+            <span class="chip">C#</span>
+            <span class="chip">C++</span>
+            <span class="chip">Kotlin</span>
+            <span class="chip">Python</span>
+            <span class="chip">Rust</span>
+            <span class="chip">TypeScript</span>
+            <span class="chip">React</span>
+            <span class="chip">WinUI 3</span>
+            <span class="chip">WebView2</span>
+            <span class="chip">Slint</span>
+            <span class="chip">Tauri</span>
+            <span class="chip">Three.js</span>
+            <span class="chip">ONNX Runtime</span>
+            <span class="chip">FFmpeg</span>
+            <span class="chip">libmpv</span>
+            <span class="chip">7-Zip</span>
+        </div>
+    </div>
+
+    <!-- ── Investment Research ── -->
+    <section id="investment">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <span class="eyebrow">Investment Research</span>
+                <h2 class="sec-title">데이터로 보는 시장</h2>
+                <p class="sec-desc">글로벌 경제 지표, 포트폴리오 백테스터, 주요 기업 분석 대시보드를 한곳에서 확인하세요.</p>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr;">
+                <a href="invest_dashboard.html" class="card premium reveal">
+                    <span class="badge gold">Premium</span>
+                    <span class="lang" style="--c: var(--gold)">Financial Analysis</span>
+                    <h3>Investment Research Dashboard</h3>
+                    <p>글로벌 경제 지표, 포트폴리오 백테스터, 그리고 주요 기업·자산 분석 대시보드를 하나의 허브에서 제공하는 프리미엄 리서치 공간입니다.</p>
+                    <div class="ticker-chips">
+                        <span>종합 요약</span><span>S&amp;P 500</span><span>KOSPI</span><span>NVIDIA</span>
+                        <span>Samsung</span><span>SK하이닉스</span><span>Google</span><span>Gold</span>
+                        <span>BTC</span><span>KRW</span><span>미국 상속세 계산기</span>
+                    </div>
+                    <span class="go">Enter Dashboard <span class="arrow">→</span></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Web Apps ── -->
+    <section id="apps">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <span class="eyebrow">Web Applications</span>
+                <h2 class="sec-title">브라우저에서 바로 실행되는 도구</h2>
+                <p class="sec-desc">설치 없이 클릭 한 번으로 사용할 수 있는 인터랙티브 웹 애플리케이션입니다.</p>
+            </div>
+            <div class="grid">
+                <a href="https://react-portfolio-7td.pages.dev/" class="card reveal" target="_blank" rel="noopener">
+                    <span class="badge">Featured</span>
+                    <span class="lang" style="--c:#61dafb">React</span>
+                    <h3>Global Economic Dashboard</h3>
+                    <p>React, Recharts, TailwindCSS를 활용하여 글로벌 경제 지표와 주식 시장 데이터를 시각화하는 프리미엄 대시보드입니다.</p>
+                    <span class="go">Launch App <span class="arrow">→</span></span>
+                </a>
+                <a href="https://react-backtester.pages.dev/" class="card reveal" style="--d:.08s" target="_blank"
+                    rel="noopener">
+                    <span class="badge new">New</span>
+                    <span class="lang" style="--c:#61dafb">React</span>
+                    <h3>Pro Portfolio Backtester</h3>
+                    <p>React, Vite, Cloudflare Pages 기반의 고성능 포트폴리오 백테스팅 도구. 과거 데이터 기반 수익률 시뮬레이션과 리스크 지표를 제공합니다.</p>
+                    <span class="go">Launch App <span class="arrow">→</span></span>
+                </a>
+                <a href="fire_simulator.html" class="card reveal" style="--d:.16s">
+                    <span class="badge">Tool</span>
+                    <span class="lang" style="--c:#61dafb">React</span>
+                    <h3>FIRE Simulator</h3>
+                    <p>자산 축적과 인출률을 고려하여 은퇴 이후의 재정 현황을 시뮬레이션할 수 있는 고도화된 웹 도구입니다.</p>
+                    <span class="go">Launch App <span class="arrow">→</span></span>
+                </a>
+                <a href="solar_system.html" class="card reveal" style="--d:.24s">
+                    <span class="badge">Tool</span>
+                    <span class="lang" style="--c:#8ecae6">Three.js</span>
+                    <h3>Solar System Simulator</h3>
+                    <p>Three.js와 WebGL 기반의 인터랙티브 태양계 시뮬레이터. 행성 궤도와 자전을 3D로 탐색하고 시간 배속을 조절할 수 있습니다.</p>
+                    <span class="go">Launch App <span class="arrow">→</span></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Repositories ── -->
+    <section id="repos">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <span class="eyebrow">Open Source</span>
+                <h2 class="sec-title">Featured Repositories</h2>
+                <p class="sec-desc">데스크톱, 모바일, CLI까지 — 실사용을 전제로 만든 오픈소스 프로젝트를 소개합니다.</p>
+            </div>
+            <div class="grid">
+                <a href="https://github.com/kirinonakar/TxtAIEditor" class="card reveal" target="_blank" rel="noopener">
+                    <span class="lang" style="--c:#178600">C#</span>
+                    <h3>TxtAIEditor</h3>
+                    <p>WinUI 3와 WebView2 하이브리드 코어 기반의 AI 에이전트 통합 프리미엄 데스크톱 텍스트 에디터입니다.</p>
+                    <span class="go">GitHub <span class="arrow">→</span></span>
+                </a>
+                <a href="https://github.com/kirinonakar/AIMediaWorker" class="card reveal" style="--d:.08s"
+                    target="_blank" rel="noopener">
+                    <span class="lang" style="--c:#178600">C#</span>
+                    <h3>AIMediaWorker</h3>
+                    <p>WinUI 3 + libmpv 기반 AI 미디어 플레이어. Qwen3-ASR 오프라인 실시간 자막, LLM 번역·요약, RTX VSR을 지원합니다.</p>
+                    <span class="go">GitHub <span class="arrow">→</span></span>
+                </a>
+                <a href="https://github.com/kirinonakar/ArchiveRclick" class="card reveal" style="--d:.16s"
+                    target="_blank" rel="noopener">
+                    <span class="lang" style="--c:#dea584">Rust</span>
+                    <h3>ArchiveRclick</h3>
+                    <p>Slint GUI 기반 휴대용 압축 관리자. ZIP, 7z, RAR, TAR, ISO 등을 지원하고 탐색기 우클릭에 통합됩니다.</p>
+                    <span class="go">GitHub <span class="arrow">→</span></span>
+                </a>
+                <a href="https://github.com/kirinonakar/ocr_trans" class="card reveal" target="_blank" rel="noopener">
+                    <span class="lang" style="--c:#dea584">Rust</span>
+                    <h3>OCR Translator</h3>
+                    <p>화면 특정 영역을 캡처해 즉시 번역하는 고성능 실시간 OCR 도구. Gemini 및 로컬 LLM API를 지원합니다.</p>
+                    <span class="go">GitHub <span class="arrow">→</span></span>
+                </a>
+                <a href="https://github.com/kirinonakar/WintarotAI" class="card reveal" style="--d:.08s" target="_blank"
+                    rel="noopener">
+                    <span class="lang" style="--c:#3178c6">TypeScript</span>
+                    <h3>WintarotAI</h3>
+                    <p>Tauri 기반 프리미엄 AI 타로 리딩 앱. 다양한 스프레드 배치와 LLM 실시간 심층 해설을 제공합니다.</p>
+                    <span class="go">GitHub <span class="arrow">→</span></span>
+                </a>
+                <a href="https://github.com/kirinonakar/GPUtray" class="card reveal" style="--d:.16s" target="_blank"
+                    rel="noopener">
+                    <span class="lang" style="--c:#f34b7d">C++</span>
+                    <h3>GPUtray</h3>
+                    <p>시스템 트레이에서 GPU·CPU 사용률, 온도, 메모리를 직관적인 그래프로 모니터링하는 가벼운 도구입니다.</p>
+                    <span class="go">GitHub <span class="arrow">→</span></span>
+                </a>
+                <a href="https://github.com/kirinonakar?tab=repositories" class="card more-card reveal" style="--d:.24s"
+                    target="_blank" rel="noopener">
+                    <b>22개 저장소 전체 보기</b>
+                    <span>Uviewer · NovelGen AI · Video Encoder · AI Upscaler 등</span>
+                    <span class="go">GitHub에서 계속 <span class="arrow">→</span></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Philosophy ── -->
+    <section id="philosophy">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <span class="eyebrow">Philosophy</span>
+                <h2 class="sec-title">만드는 이유</h2>
+                <p class="sec-desc">거창한 기술보다, 매일 쓰면서 손에 붙는 도구를 믿습니다.</p>
+            </div>
+            <div class="grid">
+                <div class="card reveal">
+                    <span class="lang" style="--c: var(--accent)">01 · Performance</span>
+                    <h3>⚡ 성능 우선</h3>
+                    <p>Rust와 Slint, 네이티브 엔진을 적극 활용해 가볍고 빠르게. 시작이 빠른 도구는 자주 쓰게 됩니다.</p>
+                </div>
+                <div class="card reveal" style="--d:.08s">
+                    <span class="lang" style="--c: var(--green)">02 · Privacy</span>
+                    <h3>🔒 로컬 프라이버시</h3>
+                    <p>오프라인 우선 설계와 로컬 추론(ONNX, ASR)을 기본으로. 데이터는 내 PC 밖으로 나가지 않습니다.</p>
+                </div>
+                <div class="card reveal" style="--d:.16s">
+                    <span class="lang" style="--c: var(--gold)">03 · Practicality</span>
+                    <h3>🧩 실용성</h3>
+                    <p>직접 겪은 불편함에서 출발합니다. 인코딩 변환, 자소 분리, PDF 편집 같은 사소한 문제를 도구로 해결합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <section>
+        <div class="wrap">
+            <div class="cta-band reveal">
+                <h2>오늘의 불편함이<br><span class="grad">내일의 도구</span>가 됩니다.</h2>
+                <p>진행 중인 프로젝트와 새로운 도구는 GitHub에서 가장 먼저 공개됩니다.</p>
+                <div class="cta-group">
+                    <a href="https://github.com/kirinonakar" class="btn btn-primary" target="_blank"
+                        rel="noopener">GitHub 방문하기</a>
+                    <a href="#apps" class="btn btn-ghost">프로젝트 살펴보기</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Footer ── -->
+    <footer>
+        <div class="wrap foot-inner">
+            <p>&copy; <span id="year">2026</span> kirinonakar. All rights reserved.</p>
+            <div class="foot-links">
+                <a href="https://github.com/kirinonakar" target="_blank" rel="noopener">GitHub</a>
+                <a href="index.html">메인</a>
+                <a href="index_light.html">☀️ Light 테마</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const $ = (s, c = document) => c.querySelector(s);
+        const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+        const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Footer year
+        $('#year').textContent = new Date().getFullYear();
+
+        // Nav background on scroll
+        const nav = $('#nav');
+        const onScroll = () => nav.classList.toggle('scrolled', scrollY > 24);
+        addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        // Mobile menu
+        const burger = $('#burger');
+        burger.addEventListener('click', () => {
+            const open = nav.classList.toggle('open');
+            burger.setAttribute('aria-expanded', open);
+            burger.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+        });
+        $$('#menu a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+
+        // Scroll reveal
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+            });
+        }, { threshold: .12 });
+        $$('.reveal').forEach(el => io.observe(el));
+
+        // Stat count-up
+        const cio = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (!e.isIntersecting) return;
+                cio.unobserve(e.target);
+                const el = e.target;
+                const target = +el.dataset.count;
+                const suffix = el.dataset.suffix || '';
+                if (reduceMotion) { el.textContent = target + suffix; return; }
+                const dur = 1400, start = performance.now();
+                const tick = now => {
+                    const p = Math.min(1, (now - start) / dur);
+                    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+                    if (p < 1) requestAnimationFrame(tick);
+                };
+                requestAnimationFrame(tick);
+            });
+        }, { threshold: .5 });
+        $$('[data-count]').forEach(el => cio.observe(el));
+
+        // Cursor-following glow on cards
+        $$('.card').forEach(card => {
+            card.addEventListener('pointermove', e => {
+                const r = card.getBoundingClientRect();
+                card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+                card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+            });
+        });
+
+        // Seamless marquee (duplicate track)
+        const track = $('#track');
+        track.innerHTML += track.innerHTML;
+
+        // Hero orb parallax
+        if (!reduceMotion) {
+            const orbs = $$('.orb');
+            addEventListener('pointermove', e => {
+                const x = e.clientX / innerWidth - .5;
+                const y = e.clientY / innerHeight - .5;
+                orbs.forEach((o, i) => {
+                    const f = (i + 1) * 16;
+                    o.style.transform = `translate(${x * f}px, ${y * f}px)`;
+                });
+            }, { passive: true });
+        }
+    </script>
+</body>
+
+</html>
