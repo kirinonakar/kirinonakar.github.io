@@ -69,20 +69,38 @@ button.primary{background:linear-gradient(#4b7dff,#2f5ad6);border-color:#3c66e0}
 .promo .btns{display:flex;gap:8px}
 .promo button{font-size:32px;line-height:1;padding:6px 12px;font-family:'Segoe UI Symbol','Noto Sans Symbols 2',serif}
 .promo button.w{color:#fff}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.row-a11y{display:contents}
+.sq:focus-visible{outline:3px solid #4b7dff;outline-offset:-3px;z-index:2}
+button:focus-visible,select:focus-visible,.moves:focus-visible{outline:2px solid #4b7dff;outline-offset:2px}
 </style>
 </head>
 <body>
+<!--
+  AI/접근성 계약 v1 — 이 주석은 문서 구조 설명용입니다.
+  · 접근성 트리: #board[role=grid] > div[role=row] > .sq[role=gridcell] (aria-label=좌표+기물, aria-selected, roving tabindex)
+  · 상태 텍스트: #a11y-state (차례/체크/FEN/보드/합법 수/기보), 상태 JSON: #a11y-json
+  · 라이브 알림: #status[role=status][aria-live=polite]
+  · 키보드: 방향키=칸 이동, Enter/Space=선택·이동, Esc/Backspace=선택 취소
+  · 스크립트 API: window.chessA11y
+    snapshot() 상태객체 · text() 텍스트 · json() JSON · fen() FEN · legalMoves() 합법수[{from,to,promotion,san}]
+    play('e2','e4') / play('e7','e8','q') · select('e2') · clearSelection() · undo() · newGame() · whenIdle(ms)
+  · 좌표는 'e4' 형식(파일 a~h, 랭크 1~8). 승진은 promotion 'q'|'r'|'b'|'n'.
+-->
 <div class='app'>
-  <h1>&#9822; 체스</h1>
+  <h1><span aria-hidden='true'>&#9822;</span> 체스</h1>
   <div class='sub'>기물을 클릭하거나 드래그해서 이동하세요. 컴퓨터 대전과 2인 대국을 지원합니다.</div>
   <main>
     <section class='left'>
       <div class='board-wrap'>
-        <div id='board' class='board'></div>
+        <div id='board' class='board' role='grid' aria-label='체스판, 8x8 격자' aria-describedby='board-help'></div>
         <div class='bar'>
-          <span id='ind' class='ind w'></span>
-          <span id='status' class='status'>백(흰색) 차례</span>
+          <span id='ind' class='ind w' aria-hidden='true'></span>
+          <span id='status' class='status' role='status' aria-live='polite' aria-atomic='true'>백(흰색) 차례</span>
         </div>
+        <div id='board-help' class='sr-only'>화살표 키로 칸을 이동하고 Enter 또는 Space로 기물을 선택하거나 이동합니다. Esc로 선택을 취소하고, 승진 시 대화상자에서 기물을 고릅니다.</div>
+        <pre id='a11y-state' class='sr-only' aria-label='체스 상태 텍스트: 차례, 체크, FEN, 보드, 합법 수, 기보'></pre>
+        <pre id='a11y-json' class='sr-only' aria-label='체스 상태 JSON'></pre>
       </div>
     </section>
     <aside class='panel'>
@@ -114,7 +132,7 @@ button.primary{background:linear-gradient(#4b7dff,#2f5ad6);border-color:#3c66e0}
         <button id='undo'>무르기</button>
         <button id='flip'>뒤집기</button>
       </div>
-      <div class='moves' id='moves'></div>
+      <div class='moves' id='moves' role='table' aria-label='기보'></div>
       <div class='hint'>기물 선택 시 이동 가능한 칸이 표시됩니다.<br>체크 상태의 왕은 붉게 표시되고, 마지막 수는 노랗게 표시됩니다.</div>
     </aside>
   </main>
@@ -127,6 +145,7 @@ button.primary{background:linear-gradient(#4b7dff,#2f5ad6);border-color:#3c66e0}
 const FILES='abcdefgh';
 const GLYPH={k:'\u265A',q:'\u265B',r:'\u265C',b:'\u265D',n:'\u265E',p:'\u265F'};
 const PNAME={q:'퀸',r:'룩',b:'비숍',n:'나이트'};
+const PIECE_KO={p:'폰',n:'나이트',b:'비숍',r:'룩',q:'퀸',k:'킹'};
 const PIECE_VAL={p:100,n:320,b:330,r:500,q:900,k:20000};
 const KNIGHT_D=[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
 const BISHOP_D=[[-1,-1],[-1,1],[1,-1],[1,1]];
@@ -139,6 +158,7 @@ const inB=(r,c)=>r>=0&&r<8&&c>=0&&c<8;
 const isWhitePiece=p=>!!p&&p===p.toUpperCase();
 const sqName=i=>FILES[i&7]+(8-(i>>3));
 function findKing(b,col){const k=col==='w'?'K':'k';for(let i=0;i<64;i++)if(b[i]===k)return i;return -1;}
+const pieceKo=p=>(isWhitePiece(p)?'백 ':'흑 ')+PIECE_KO[p.toLowerCase()];
 
 /* 피스-스퀘어 테이블 (a8 -> h1 순서, 백 기준) */
 const PST={
@@ -224,6 +244,23 @@ function parseFen(fen){
 function posKeyOf(st){
   const c=st.castling;
   return st.board.map(x=>x||'.').join('')+st.turn+(c.K?'K':'')+(c.Q?'Q':'')+(c.k?'k':'')+(c.q?'q':'')+st.ep;
+}
+function toFen(st){
+  const rows=[];
+  for(let r=0;r<8;r++){
+    let s='',empty=0;
+    for(let c=0;c<8;c++){
+      const p=st.board[r*8+c];
+      if(!p){empty++;continue;}
+      if(empty){s+=empty;empty=0;}
+      s+=p;
+    }
+    if(empty)s+=empty;
+    rows.push(s);
+  }
+  const k=st.castling;
+  const cast=((k.K?'K':'')+(k.Q?'Q':'')+(k.k?'k':'')+(k.q?'q':''))||'-';
+  return rows.join('/')+' '+st.turn+' '+cast+' '+(st.ep<0?'-':sqName(st.ep))+' '+st.half+' '+st.full;
 }
 
 /* ================= 수 생성 ================= */
@@ -493,28 +530,46 @@ const modeSel=document.getElementById('mode');
 const levelSel=document.getElementById('level');
 const sideSel=document.getElementById('side');
 const undoBtn=document.getElementById('undo');
+const a11yStateEl=document.getElementById('a11y-state');
+const a11yJsonEl=document.getElementById('a11y-json');
 
 let squareEls=new Array(64);
 let flipped=false,mode='ai',level=2,humanSide='w';
 let state=null,past=[],sanList=[],posKeys=[],curLegal=[],lastMove=null,selected=null;
 let gameOver=false,result=null,busy=false,dragState=null;
+let focusIdx=60,sanCacheKey='',sanCacheList=[],statusText='';
 
 function buildBoard(){
   boardEl.innerHTML='';
   squareEls=new Array(64);
-  for(let d=0;d<64;d++){
-    const i=flipped?63-d:d;
-    const el=document.createElement('div');
-    el.className='sq '+(d%2===Math.floor(d/8)%2?'light':'dark');
-    el.dataset.sq=String(i);
-    boardEl.appendChild(el);
-    squareEls[i]=el;
+  boardEl.setAttribute('role','grid');
+  boardEl.setAttribute('aria-label','체스판, 8x8 격자. 파일 a~h, 랭크 1~8.');
+  for(let dr=0;dr<8;dr++){
+    const rowEl=document.createElement('div');
+    rowEl.className='row-a11y';
+    rowEl.setAttribute('role','row');
+    rowEl.setAttribute('aria-rowindex',String(dr+1));
+    rowEl.setAttribute('aria-label',(flipped?dr+1:8-dr)+'랭크');
+    for(let dc=0;dc<8;dc++){
+      const d=dr*8+dc;
+      const i=flipped?63-d:d;
+      const el=document.createElement('div');
+      el.className='sq '+(d%2===Math.floor(d/8)%2?'light':'dark');
+      el.dataset.sq=String(i);
+      el.setAttribute('role','gridcell');
+      el.setAttribute('aria-colindex',String(dc+1));
+      el.setAttribute('tabindex','-1');
+      rowEl.appendChild(el);
+      squareEls[i]=el;
+    }
+    boardEl.appendChild(rowEl);
   }
 }
 function render(){
   const ck=inCheck(state.board,state.turn)?findKing(state.board,state.turn):-1;
   const targets=new Set();
   if(selected!==null) for(const m of curLegal) if(m.from===selected) targets.add(m.to);
+  if(focusIdx<0||focusIdx>63) focusIdx=flipped?4:60;
   for(let i=0;i<64;i++){
     const el=squareEls[i];
     const r=i>>3,c=i&7;
@@ -527,34 +582,46 @@ function render(){
     if(dragState&&i===dragState.from) cls+=' dragging';
     el.className=cls;
     let html='';
-    if(dc===0) html+='<span class=\'coord rk\'>'+(8-r)+'</span>';
-    if(dr===7) html+='<span class=\'coord fl\'>'+FILES[c]+'</span>';
+    if(dc===0) html+='<span class=\'coord rk\' aria-hidden=\'true\'>'+(8-r)+'</span>';
+    if(dr===7) html+='<span class=\'coord fl\' aria-hidden=\'true\'>'+FILES[c]+'</span>';
     const p=state.board[i];
-    if(p) html+='<span class=\'piece '+(isWhitePiece(p)?'w':'b')+'\'>'+GLYPH[p.toLowerCase()]+'</span>';
-    if(targets.has(i)) html+=p?'<span class=\'ring\'></span>':'<span class=\'dot\'></span>';
+    if(p) html+='<span class=\'piece '+(isWhitePiece(p)?'w':'b')+'\' aria-hidden=\'true\'>'+GLYPH[p.toLowerCase()]+'</span>';
+    if(targets.has(i)) html+=p?'<span class=\'ring\' aria-hidden=\'true\'></span>':'<span class=\'dot\' aria-hidden=\'true\'></span>';
     el.innerHTML=html;
+    el.setAttribute('aria-label',squareAriaLabel(i,targets.has(i),i===ck));
+    el.setAttribute('aria-selected',i===selected?'true':'false');
+    el.setAttribute('tabindex',i===focusIdx?'0':'-1');
   }
+  updateA11y();
 }
 function renderMoves(){
   let html='';
   for(let i=0;i<sanList.length;i+=2){
-    html+='<div class=\'mv\'><span class=\'num\'>'+(i/2+1)+'.</span><span>'+(sanList[i]||'')+'</span><span>'+(sanList[i+1]||'')+'</span></div>';
+    const w=sanList[i]||'',b=sanList[i+1]||'';
+    html+='<div class=\'mv\' role=\'row\' aria-rowindex=\''+(i/2+1)+'\'>'
+        +'<span class=\'num\' role=\'cell\'>'+(i/2+1)+'.</span>'
+        +'<span role=\'cell\'>'+(w||'\u00a0')+'</span>'
+        +'<span role=\'cell\'>'+(b||'\u00a0')+'</span>'
+        +'</div>';
   }
   movesEl.innerHTML=html;
   movesEl.scrollTop=movesEl.scrollHeight;
 }
 function updatePanel(){
   indEl.className='ind '+state.turn;
-  if(result) statusEl.textContent=result;
-  else if(busy) statusEl.textContent='컴퓨터가 생각 중…';
+  if(result) statusText=result;
+  else if(busy) statusText='컴퓨터가 생각 중…';
   else {
     let s=(state.turn==='w'?'백(흰색)':'흑(검은색)')+' 차례';
     if(inCheck(state.board,state.turn)) s+=' · 체크!';
     if(mode==='ai') s+=(state.turn===humanSide?' · 내 차례':' · 컴퓨터 차례');
-    statusEl.textContent=s;
+    statusText=s;
   }
+  if(lastMove) statusText+=' · 마지막 수 '+sqName(lastMove.from)+'-'+sqName(lastMove.to);
+  statusEl.textContent=statusText;
   renderMoves();
   undoBtn.disabled=(past.length===0||busy);
+  updateA11y();
 }
 
 /* ================= 게임 진행 ================= */
@@ -566,6 +633,7 @@ function newGame(){
   past=[];sanList=[];posKeys=[posKeyOf(state)];
   lastMove=null;selected=null;gameOver=false;result=null;busy=false;dragState=null;
   flipped=(mode==='ai'&&humanSide==='b');
+  focusIdx=flipped?4:60;
   curLegal=legalMoves(state);
   buildBoard();render();updatePanel();
   if(mode==='ai'&&state.turn!==humanSide) maybeAI();
@@ -616,28 +684,40 @@ function tryMove(from,to){
 function askPromotion(cands,cb){
   const wrap=document.createElement('div');
   wrap.className='promo';
+  wrap.setAttribute('role','dialog');
+  wrap.setAttribute('aria-modal','true');
+  wrap.setAttribute('aria-labelledby','promo-ttl');
   const box=document.createElement('div');
   box.className='box';
   const ttl=document.createElement('div');
   ttl.className='ttl';
+  ttl.id='promo-ttl';
   ttl.textContent='승진할 기물을 선택하세요';
   const btns=document.createElement('div');
   btns.className='btns';
+  btns.setAttribute('role','group');
+  btns.setAttribute('aria-label','승진 기물');
   for(const pr of ['q','r','b','n']){
     const b=document.createElement('button');
     b.textContent=GLYPH[pr];
     b.title=PNAME[pr];
+    b.setAttribute('aria-label',PNAME[pr]+'로 승진');
     if(state.turn==='w') b.className='w';
     b.onclick=function(){
       wrap.remove();
       cb(cands.find(m=>m.promotion===pr));
+      refocusBoard();
     };
     btns.appendChild(b);
   }
   box.appendChild(ttl);box.appendChild(btns);
   wrap.appendChild(box);
-  wrap.onclick=function(e){if(e.target===wrap){wrap.remove();selected=null;render();}};
+  function close(){wrap.remove();selected=null;render();refocusBoard();}
+  wrap.onclick=function(e){if(e.target===wrap)close();};
+  wrap.addEventListener('keydown',function(e){if(e.key==='Escape'){e.preventDefault();close();}});
   document.body.appendChild(wrap);
+  const first=btns.querySelector('button');
+  if(first&&first.focus) first.focus();
 }
 function undo(){
   if(busy||!past.length) return;
@@ -719,14 +799,215 @@ boardEl.addEventListener('pointercancel',function(e){
   if(dragState.ghost) dragState.ghost.remove();
   dragState=null;selected=null;render();
 });
+boardEl.addEventListener('focusin',function(e){
+  const el=e.target&&e.target.closest?e.target.closest('.sq'):null;
+  if(!el||el.dataset.sq===undefined) return;
+  const i=Number(el.dataset.sq);
+  if(!(i>=0&&i<64)) return;
+  focusIdx=i;
+  for(let k=0;k<64;k++) if(squareEls[k]) squareEls[k].setAttribute('tabindex',k===i?'0':'-1');
+});
+boardEl.addEventListener('keydown',function(e){
+  if(!state) return;
+  const vis=function(i){const r=i>>3,c=i&7;return flipped?[7-r,7-c]:[r,c];};
+  const real=function(vr,vc){return flipped?((7-vr)*8+(7-vc)):vr*8+vc;};
+  const cur=vis(focusIdx);
+  let handled=true;
+  switch(e.key){
+    case 'ArrowLeft':cur[1]--;break;
+    case 'ArrowRight':cur[1]++;break;
+    case 'ArrowUp':cur[0]--;break;
+    case 'ArrowDown':cur[0]++;break;
+    case 'Home':cur[1]=0;break;
+    case 'End':cur[1]=7;break;
+    default:handled=false;
+  }
+  if(handled){
+    e.preventDefault();
+    focusSquare(real(Math.max(0,Math.min(7,cur[0])),Math.max(0,Math.min(7,cur[1]))));
+    return;
+  }
+  if(e.key==='Escape'||e.key==='Backspace'){
+    if(selected!==null){e.preventDefault();selected=null;render();}
+    return;
+  }
+  if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){
+    e.preventDefault();
+    if(!canPlay()) return;
+    const i=focusIdx,p=state.board[i];
+    const own=!!p&&(state.turn==='w'?isWhitePiece(p):!isWhitePiece(p));
+    if(selected===null){ if(own){selected=i;render();} return; }
+    if(selected===i){ selected=null;render();return; }
+    if(!tryMove(selected,i)&&own){ selected=i;render(); }
+  }
+});
 document.getElementById('newgame').onclick=newGame;
 undoBtn.onclick=undo;
-document.getElementById('flip').onclick=function(){flipped=!flipped;buildBoard();render();};
+document.getElementById('flip').onclick=function(){flipped=!flipped;buildBoard();render();updatePanel();};
 modeSel.onchange=newGame;
 sideSel.onchange=newGame;
 levelSel.onchange=function(){level=Number(levelSel.value);};
 document.addEventListener('contextmenu',function(e){if(e.target.closest&&e.target.closest('.board')) e.preventDefault();});
 
+/* ================= 접근성 트리 / AI 플레이 API ================= */
+function squareAriaLabel(i,isTarget,isCheck){
+  const p=state.board[i];
+  let s=sqName(i)+', '+(p?pieceKo(p):'빈 칸');
+  if(isTarget) s+=p?' — 이 칸의 기물을 잡을 수 있음':' — 이동 가능';
+  if(i===selected) s+=' — 선택됨';
+  if(lastMove&&(i===lastMove.from||i===lastMove.to)) s+=' — 마지막 수';
+  if(isCheck) s+=' — 체크된 왕';
+  return s;
+}
+function boardText(){
+  const lines=[];
+  for(let r=0;r<8;r++){
+    const cells=[];
+    for(let c=0;c<8;c++){const p=state.board[r*8+c];cells.push(p||'.');}
+    lines.push((8-r)+' '+cells.join(' '));
+  }
+  lines.push('  a b c d e f g h');
+  return lines.join('\n');
+}
+function piecesList(){
+  const out=[];
+  for(let i=0;i<64;i++){
+    const p=state.board[i];
+    if(p) out.push({square:sqName(i),piece:(isWhitePiece(p)?'w':'b')+p.toLowerCase(),name:pieceKo(p)});
+  }
+  return out;
+}
+function sqToIndex(s){
+  if(typeof s==='number') return (s>=0&&s<64&&s===Math.floor(s))?s:-1;
+  if(typeof s!=='string') return -1;
+  const t=s.trim().toLowerCase();
+  if(t.length!==2) return -1;
+  const c=FILES.indexOf(t[0]),r=8-Number(t[1]);
+  if(c<0||!(r>=0&&r<8)) return -1;
+  return r*8+c;
+}
+function legalSanCached(){
+  const key=state?posKeyOf(state):'';
+  if(key===sanCacheKey) return sanCacheList;
+  sanCacheList=curLegal.map(function(m){
+    return {from:sqName(m.from),to:sqName(m.to),promotion:m.promotion||null,castle:m.castle||null,
+            enPassant:!!m.ep,captured:m.captured?PIECE_KO[m.captured.toLowerCase()]:null,
+            san:toSan(state,m,curLegal)};
+  });
+  sanCacheKey=key;
+  return sanCacheList;
+}
+function a11ySnapshot(){
+  if(!state) return {game:'chess',ready:false};
+  const legal=legalSanCached();
+  return {
+    game:'chess',
+    ready:true,
+    fen:toFen(state),
+    turn:state.turn,
+    turnKo:state.turn==='w'?'백(흰색)':'흑(검은색)',
+    status:statusText||'',
+    check:inCheck(state.board,state.turn),
+    gameOver:gameOver,
+    result:result,
+    busy:busy,
+    canMove:canPlay(),
+    mode:mode,
+    level:level,
+    humanSide:humanSide,
+    flipped:flipped,
+    selected:selected===null?null:sqName(selected),
+    lastMove:lastMove?{from:sqName(lastMove.from),to:sqName(lastMove.to)}:null,
+    legalMoves:legal,
+    legalMoveText:legal.map(function(m){return m.from+m.to+(m.promotion?m.promotion:'');}).join(' '),
+    pieces:piecesList(),
+    moves:sanList.slice(),
+    boardText:boardText()
+  };
+}
+function focusSquare(i){
+  if(!(i>=0&&i<64)) return;
+  focusIdx=i;
+  render();
+  const el=squareEls[i];
+  if(el&&el.focus) el.focus();
+}
+function refocusBoard(){
+  const el=squareEls[focusIdx];
+  if(el&&el.focus) el.focus();
+}
+function updateA11y(){
+  if(!state||!a11yStateEl) return;
+  const legal=legalSanCached();
+  const lines=[
+    '차례: '+(state.turn==='w'?'백(흰색)':'흑(검은색)'),
+    '상태: '+(statusText||''),
+    '체크: '+(inCheck(state.board,state.turn)?'예':'아니오'),
+    '게임 종료: '+(gameOver?('예'+(result?' — '+result:'')):'아니오'),
+    '지금 둘 수 있음: '+(canPlay()?'예':'아니오'),
+    'FEN: '+toFen(state),
+    '보드(a8~h1):',
+    boardText(),
+    '합법 수 '+legal.length+'개:',
+    legal.length?legal.map(function(m){return m.from+m.to+(m.promotion?m.promotion:'')+' (SAN '+m.san+')';}).join(', '):'없음',
+    '선택된 칸: '+(selected===null?'없음':sqName(selected)),
+    '마지막 수: '+(lastMove?(sqName(lastMove.from)+'-'+sqName(lastMove.to)):'없음'),
+    '기보: '+(sanList.length?sanList.join(' '):'없음')
+  ];
+  a11yStateEl.textContent=lines.join('\n');
+  if(a11yJsonEl) a11yJsonEl.textContent=JSON.stringify(a11ySnapshot());
+}
+function playMove(from,to,promotion){
+  const f=sqToIndex(from),t=sqToIndex(to);
+  if(f<0||t<0) return {ok:false,error:'잘못된 좌표입니다. "e2" 형식을 사용하세요.'};
+  if(!canPlay()) return {ok:false,error:'지금은 둘 수 없습니다. (컴퓨터 차례/대기/게임 종료)',snapshot:a11ySnapshot()};
+  const cands=curLegal.filter(function(m){return m.from===f&&m.to===t;});
+  if(!cands.length) return {ok:false,error:'불법 수입니다.',legalMoves:legalSanCached()};
+  let m=cands[0];
+  if(cands.length>1){
+    const pr=promotion?String(promotion).toLowerCase()[0]:null;
+    if(!pr) return {ok:false,needPromotion:true,options:['q','r','b','n'],error:'승진 기물을 지정하세요. 예: play("e7","e8","q")'};
+    m=cands.filter(function(x){return x.promotion===pr;})[0];
+    if(!m) return {ok:false,error:'승진 기물이 올바르지 않습니다: '+promotion};
+  }
+  const san=toSan(state,m,curLegal);
+  commit(m);
+  return {ok:true,move:san,fen:state?toFen(state):null,status:statusText||'',snapshot:a11ySnapshot()};
+}
+window.chessA11y={
+  version:'1.0.0',
+  snapshot:function(){return a11ySnapshot();},
+  text:function(){return a11yStateEl?a11yStateEl.textContent:'';},
+  json:function(){return a11yJsonEl?a11yJsonEl.textContent:'';},
+  fen:function(){return state?toFen(state):null;},
+  legalMoves:function(){return legalSanCached();},
+  select:function(sq){
+    const i=sqToIndex(sq);
+    if(i<0) return {ok:false,error:'잘못된 칸입니다: '+sq};
+    const p=state.board[i];
+    const own=!!p&&(state.turn==='w'?isWhitePiece(p):!isWhitePiece(p));
+    if(!own) return {ok:false,error:'둘 차례의 기물이 아닙니다: '+sq};
+    if(!canPlay()) return {ok:false,error:'지금은 둘 수 없습니다.',snapshot:a11ySnapshot()};
+    focusIdx=i;selected=i;render();
+    return {ok:true,selected:sqName(i),
+            targets:legalSanCached().filter(function(m){return m.from===sqName(i);}).map(function(m){return m.to+(m.promotion?m.promotion:'');})};
+  },
+  clearSelection:function(){selected=null;render();return {ok:true};},
+  play:function(from,to,promotion){return playMove(from,to,promotion);},
+  undo:function(){undo();return {ok:true,snapshot:a11ySnapshot()};},
+  newGame:function(){newGame();return {ok:true,snapshot:a11ySnapshot()};},
+  whenIdle:function(timeoutMs){
+    const limit=Number(timeoutMs)>0?Number(timeoutMs):10000;
+    const started=Date.now();
+    return new Promise(function(resolve){
+      (function poll(){
+        if(canPlay()||gameOver||(Date.now()-started)>=limit) resolve({ok:true,canMove:canPlay(),snapshot:a11ySnapshot()});
+        else setTimeout(poll,60);
+      })();
+    });
+  },
+  help:function(){return 'DOM: #board[role=grid] > div[role=row] > .sq[role=gridcell, aria-label/aria-selected]; 상태 텍스트 #a11y-state; JSON #a11y-json; API: snapshot(), legalMoves(), play("e2","e4"), select("e2"), clearSelection(), undo(), newGame(), whenIdle(ms)';}
+};
 newGame();
 })();
 </script>
