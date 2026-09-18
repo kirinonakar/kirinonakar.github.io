@@ -14,8 +14,8 @@ h1{margin:0 0 6px;font-size:20px;letter-spacing:.4px}
 .sub{margin:0 0 18px;color:var(--muted);font-size:13px}
 main{display:grid;grid-template-columns:auto 330px;gap:22px;align-items:start;justify-content:start}
 @media(max-width:880px){main{grid-template-columns:1fr}}
-.board-wrap{display:flex;flex-direction:column;gap:12px}
-.board{--sq:clamp(34px,min(10.2vw,9.6vh),74px);
+.board-wrap{display:flex;flex-direction:column;gap:12px;width:max-content;max-width:100%}
+.board{--sq:clamp(34px,min(10.2vw,9.6vh),74px);width:max-content;max-width:100%;
   display:grid;grid-template-columns:repeat(8,var(--sq));grid-template-rows:repeat(8,var(--sq));
   border-radius:12px;overflow:hidden;box-shadow:0 20px 44px rgba(0,0,0,.5),0 0 0 1px var(--line);
   font-size:calc(var(--sq)*.78);font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Arial Unicode MS',serif;
