@@ -49,6 +49,12 @@ main{display:grid;grid-template-columns:auto 330px;gap:22px;align-items:start;ju
   text-shadow:0 6px 12px rgba(0,0,0,.55)}
 .ghost.w{color:#fff}
 .ghost.b{color:#20222a}
+.piece-anim{position:fixed;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:97;line-height:1;
+  transition:left var(--anim-dur,180ms) cubic-bezier(.2,.85,.3,1),top var(--anim-dur,180ms) cubic-bezier(.2,.85,.3,1);
+  text-shadow:0 5px 10px rgba(0,0,0,.4);will-change:left,top}
+.piece-anim.w{color:#fff}
+.piece-anim.b{color:#20222a}
+@media(prefers-reduced-motion:reduce){.piece-anim{transition:none}}
 .panel{display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .field{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);flex:1;min-width:118px}
@@ -241,9 +247,33 @@ function parseFen(fen){
     full:Number(parts[5]||1)
   };
 }
+/* 앙파상 칸은 '실제 합법적인 ep 캡처가 존재할 때'만 position key에 포함한다.
+   그렇지 않으면 같은 국면이 서로 다른 키로 계산되어 3회 반복 판정을 놓칠 수 있다. */
+function epLegal(st){
+  if(st.ep<0) return false;
+  for(const m of genPseudo(st)){
+    if(!m.ep) continue;
+    const ns=applyMove(st,m);
+    if(!inCheck(ns.board,st.turn)) return true;
+  }
+  return false;
+}
 function posKeyOf(st){
   const c=st.castling;
-  return st.board.map(x=>x||'.').join('')+st.turn+(c.K?'K':'')+(c.Q?'Q':'')+(c.k?'k':'')+(c.q?'q':'')+st.ep;
+  const ep=epLegal(st)?st.ep:-1;
+  return st.board.map(x=>x||'.').join('')+st.turn+(c.K?'K':'')+(c.Q?'Q':'')+(c.k?'k':'')+(c.q?'q':'')+ep;
+}
+/* 현재 국면이 몇 번 등장했는지 센다(3회 반복 판정용).
+   되돌릴 수 없는 수(폰 이동/캡처) 이전의 국면은 다시 반복될 수 없으므로,
+   반수 카운터(state.half) 범위 안의 최근 기록만 확인하면 충분하다. */
+function repetitionCount(st,pastEntries){
+  const key=posKeyOf(st);
+  const window=Math.min(pastEntries.length,st.half);
+  let count=1;
+  for(let i=pastEntries.length-1;count<3&&i>=pastEntries.length-window;i--){
+    if(posKeyOf(pastEntries[i].state)===key) count++;
+  }
+  return count;
 }
 function toFen(st){
   const rows=[];
@@ -463,8 +493,21 @@ function orderMoves(st,moves){
   return moves;
 }
 function quiesce(st,alpha,beta,ply){
+  const inChk=inCheck(st.board,st.turn);
   const all=legalMoves(st);
-  if(!all.length) return inCheck(st.board,st.turn)?-(MATE-ply):0;
+  if(!all.length) return inChk?-(MATE-ply):0;
+  if(st.half>=100) return 0;
+  if(inChk){
+    /* 체크 상태에서는 stand-pat(패스)이 불가능하다. 잡는 수/승진만 보면 체크 회피 수를 놓치므로
+       모든 합법 수(체크 회피 수)를 탐색한다. */
+    for(const m of orderMoves(st,all)){
+      const ns=applyMove(st,m);
+      const sc=-quiesce(ns,-beta,-alpha,ply+1);
+      if(sc>=beta) return beta;
+      if(sc>alpha) alpha=sc;
+    }
+    return alpha;
+  }
   const stand=evaluate(st);
   if(stand>=beta) return beta;
   if(stand>alpha) alpha=stand;
@@ -478,10 +521,11 @@ function quiesce(st,alpha,beta,ply){
   return alpha;
 }
 function negamax(st,depth,alpha,beta,ply){
-  if(st.half>=100) return 0;
   if(depth<=0) return quiesce(st,alpha,beta,ply);
   const moves=orderMoves(st,legalMoves(st));
   if(!moves.length) return inCheck(st.board,st.turn)?-(MATE-ply):0;
+  /* 50수 규칙에 의한 무승부. 합법 수가 있는 경우에만 적용한다(체크메이트/스테일메이트가 우선). */
+  if(st.half>=100) return 0;
   for(const m of moves){
     const ns=applyMove(st,m);
     const sc=-negamax(ns,depth-1,-beta,-alpha,ply+1);
@@ -508,16 +552,22 @@ function findBestMove(st,lvl){
   return pool[Math.floor(Math.random()*pool.length)].m;
 }
 function insufficient(b){
-  const minors=[];
-  for(const p of b){
+  /* 무승부(dead position)로 확정되는 경우만 true:
+     K vs K, K+마이너(비숍/나이트) 1개 vs K,
+     그리고 서로 다른 편의 비숍 1개씩이며 두 비숍이 같은 색 칸일 때만.
+     같은 편 비숍 2개(K+B+B vs K)는 체크메이트가 가능하므로 무승부가 아니다. */
+  const w=[],bd=[];
+  for(let i=0;i<64;i++){
+    const p=b[i];
     if(!p) continue;
     const t=p.toLowerCase();
     if(t==='k') continue;
     if(t==='p'||t==='r'||t==='q') return false;
-    minors.push(t);
+    (isWhitePiece(p)?w:bd).push({t:t,light:(((i>>3)+(i&7))%2===0)});
   }
-  if(minors.length<=1) return true;
-  if(minors.length===2&&minors[0]==='b'&&minors[1]==='b') return true;
+  const n=w.length+bd.length;
+  if(n<=1) return true;
+  if(n===2&&w.length===1&&bd.length===1&&w[0].t==='b'&&bd[0].t==='b'&&w[0].light===bd[0].light) return true;
   return false;
 }
 
@@ -535,9 +585,10 @@ const a11yJsonEl=document.getElementById('a11y-json');
 
 let squareEls=new Array(64);
 let flipped=false,mode='ai',level=2,humanSide='w';
-let state=null,past=[],sanList=[],posKeys=[],curLegal=[],lastMove=null,selected=null;
+let state=null,past=[],sanList=[],curLegal=[],lastMove=null,selected=null;
 let gameOver=false,result=null,busy=false,dragState=null;
 let focusIdx=60,sanCacheKey='',sanCacheList=[],statusText='';
+let animating=false,animGhosts=[],animTimer=null;
 
 function buildBoard(){
   boardEl.innerHTML='';
@@ -630,7 +681,8 @@ function newGame(){
   level=Number(levelSel.value);
   humanSide=sideSel.value;
   state=parseFen(START_FEN);
-  past=[];sanList=[];posKeys=[posKeyOf(state)];
+  past=[];sanList=[];
+  cancelAnim();
   lastMove=null;selected=null;gameOver=false;result=null;busy=false;dragState=null;
   flipped=(mode==='ai'&&humanSide==='b');
   focusIdx=flipped?4:60;
@@ -648,14 +700,75 @@ function maybeAI(){
     if(mv&&!gameOver) commit(mv); else updatePanel();
   },120);
 }
+
+/* ===== 기물 이동 애니메이션 ===== */
+function reducedMotion(){
+  return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function cancelAnim(){
+  if(animTimer){clearTimeout(animTimer);animTimer=null;}
+  for(const g of animGhosts){ if(g.parentNode) g.remove(); }
+  animGhosts=[];animating=false;
+}
+function pieceElAt(sq){
+  const el=squareEls[sq];
+  return el?el.querySelector('.piece'):null;
+}
+function runGhost(from,to,glyph,white){
+  const aEl=squareEls[from],bEl=squareEls[to];
+  if(!glyph||!aEl||!bEl) return 0;
+  const ra=aEl.getBoundingClientRect(),rb=bEl.getBoundingClientRect();
+  const dx=rb.left-ra.left,dy=rb.top-ra.top;
+  const dur=Math.round(Math.min(280,Math.max(130,Math.sqrt(dx*dx+dy*dy)*0.9)));
+  const g=document.createElement('div');
+  g.className='piece-anim '+(white?'w':'b');
+  g.setAttribute('aria-hidden','true');
+  g.textContent=glyph;
+  const cs=getComputedStyle(aEl);
+  g.style.fontSize=cs.fontSize;
+  g.style.fontFamily=cs.fontFamily;
+  g.style.width=ra.width+'px';
+  g.style.height=ra.height+'px';
+  g.style.left=ra.left+'px';
+  g.style.top=ra.top+'px';
+  g.style.setProperty('--anim-dur',dur+'ms');
+  document.body.appendChild(g);
+  animGhosts.push(g);
+  const step=function(){g.style.left=(ra.left+dx)+'px';g.style.top=(ra.top+dy)+'px';};
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(step); else step();
+  return dur;
+}
+function animateMove(legs,cb){
+  cancelAnim();
+  const valid=(legs||[]).filter(function(l){return l&&l.glyph;});
+  if(!valid.length||!document.body||document.hidden||reducedMotion()){
+    animating=false;
+    if(cb) cb();
+    return;
+  }
+  animating=true;
+  let dur=0;
+  for(const l of valid) dur=Math.max(dur,runGhost(l.from,l.to,l.glyph,l.white));
+  let done=false;
+  function finish(){
+    if(done) return;
+    done=true;
+    cancelAnim();
+    if(cb) cb();
+  }
+  animTimer=setTimeout(finish,dur+90);
+}
 function commit(move){
   const list=legalMoves(state);
   const m=list.find(x=>x.from===move.from&&x.to===move.to&&(x.promotion||null)===(move.promotion||null));
   if(!m) return;
   const san=toSan(state,m,list);
+  const movedPiece=state.board[m.from];
+  const glyph=movedPiece?GLYPH[movedPiece.toLowerCase()]:null;
+  const white=movedPiece?isWhitePiece(movedPiece):true;
   past.push({state:state,san:san,lastMove:lastMove});
   state=applyMove(state,m);
-  lastMove=m;sanList.push(san);posKeys.push(posKeyOf(state));
+  lastMove=m;sanList.push(san);
   selected=null;curLegal=legalMoves(state);
   const opp=state.turn;
   if(!curLegal.length){
@@ -663,13 +776,28 @@ function commit(move){
     result=inCheck(state.board,opp)?((opp==='w'?'흑(검은색) 승':'백(흰색) 승')+' — 체크메이트'):'무승부 — 스테일메이트';
   } else if(state.half>=100){
     gameOver=true;result='무승부 — 50수 규칙';
-  } else if(posKeys.filter(k=>k===posKeys[posKeys.length-1]).length>=3){
+  } else if(repetitionCount(state,past)>=3){
     gameOver=true;result='무승부 — 3회 반복';
   } else if(insufficient(state.board)){
     gameOver=true;result='무승부 — 기물 부족';
   }
   render();updatePanel();
-  if(!gameOver) maybeAI();
+  if(!glyph){ if(!gameOver) maybeAI(); return; }
+  const hideSqs=[m.to];
+  const legs=[{from:m.from,to:m.to,glyph:glyph,white:white}];
+  if(m.castle){
+    const rp=m.to===62?[63,61]:(m.to===58?[56,59]:(m.to===6?[7,5]:[0,3]));
+    const rook=state.board[rp[1]];
+    if(rook){
+      legs.push({from:rp[0],to:rp[1],glyph:GLYPH[rook.toLowerCase()],white:isWhitePiece(rook)});
+      hideSqs.push(rp[1]);
+    }
+  }
+  for(const sq of hideSqs){ const e=pieceElAt(sq); if(e) e.style.opacity='0'; }
+  animateMove(legs,function(){
+    for(const sq of hideSqs){ const e=pieceElAt(sq); if(e) e.style.opacity=''; }
+    if(!gameOver) maybeAI();
+  });
 }
 function tryMove(from,to){
   const cands=curLegal.filter(m=>m.from===from&&m.to===to);
@@ -720,10 +848,11 @@ function askPromotion(cands,cb){
   if(first&&first.focus) first.focus();
 }
 function undo(){
-  if(busy||!past.length) return;
+  if(busy||animating||!past.length) return;
+  cancelAnim();
   do{
     const h=past.pop();
-    state=h.state;lastMove=h.lastMove||null;sanList.pop();posKeys.pop();
+    state=h.state;lastMove=h.lastMove||null;sanList.pop();
   } while(mode==='ai'&&past.length&&state.turn!==humanSide);
   gameOver=false;result=null;selected=null;
   curLegal=legalMoves(state);
@@ -731,7 +860,7 @@ function undo(){
   if(!gameOver) maybeAI();
 }
 function canPlay(){
-  if(busy||gameOver) return false;
+  if(busy||gameOver||animating) return false;
   if(mode==='ai'&&state.turn!==humanSide) return false;
   return true;
 }
