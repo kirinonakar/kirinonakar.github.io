@@ -87,7 +87,7 @@
   <h1>🕳 가르강튀아 시뮬레이터</h1>
   <span id="modelName">슈바르츠실트</span> 블랙홀 실시간 광선 추적 — 중력 렌즈 · 강착원반 · 도플러 비밍 · 중력 적색편이
   <span class="dim" id="modelStats"></span>
-  <span class="dim">드래그: 회전 · 휠/핀치: 줌 · Space: 정지 · R: 초기화 · S: 저장 · H: UI</span>
+  <span class="dim">드래그: 회전 · 휠/핀치: 줌 · 탭: UI 토글 · Space: 정지 · R: 초기화 · S: 저장 · H: UI</span>
 </div>
 
 <div id="panel">
@@ -744,13 +744,24 @@ void main() {
   const pointers = new Map();
   let dragging = false, lastX = 0, lastY = 0, pinchDist = 0;
 
+  const TAP_MOVE = 10;     // px — 이보다 많이 움직이면 드래그로 본다
+  const TAP_TIME = 350;    // ms — 이보다 오래 누르면 탭이 아니다
+  let tapOk = false, tapX = 0, tapY = 0, tapT = 0;
+
+  function toggleUI() { document.body.classList.toggle('ui-hidden'); }
+
   canvas.addEventListener('pointerdown', e => {
     canvas.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 1) {
       dragging = true; lastX = e.clientX; lastY = e.clientY;
       canvas.classList.add('dragging');
-    } else if (pointers.size === 2) {
+      tapOk = e.pointerType !== 'mouse' || e.button === 0;
+      tapX = e.clientX; tapY = e.clientY; tapT = performance.now();
+    } else {
+      tapOk = false;      // 멀티터치(핀치)는 탭이 아니다
+    }
+    if (pointers.size === 2) {
       const p = [...pointers.values()];
       pinchDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
     }
@@ -776,7 +787,15 @@ void main() {
     if (Math.abs(state.pitch) < 0.02) state.pitch = state.pitch < 0 ? -0.02 : 0.02;
   });
 
-  function endPointer(e) {
+  function endPointer(e, cancelled) {
+    // 짧게 톡 누르고 거의 움직이지 않았으면 = 탭 → UI 토글
+    if (!cancelled && tapOk && pointers.size === 1 &&
+        Math.hypot(e.clientX - tapX, e.clientY - tapY) <= TAP_MOVE &&
+        performance.now() - tapT <= TAP_TIME) {
+      toggleUI();
+    }
+    tapOk = false;
+
     pointers.delete(e.pointerId);
     if (pointers.size === 0) {
       dragging = false; canvas.classList.remove('dragging');
@@ -787,8 +806,8 @@ void main() {
     }
     pinchDist = 0;
   }
-  canvas.addEventListener('pointerup', endPointer);
-  canvas.addEventListener('pointercancel', endPointer);
+  canvas.addEventListener('pointerup', e => endPointer(e, false));
+  canvas.addEventListener('pointercancel', e => endPointer(e, true));
 
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
@@ -799,7 +818,7 @@ void main() {
     if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
     if (e.code === 'Space') { e.preventDefault(); setPaused(!state.paused); }
     else if (e.key === 'r' || e.key === 'R') resetAll();
-    else if (e.key === 'h' || e.key === 'H') document.body.classList.toggle('ui-hidden');
+    else if (e.key === 'h' || e.key === 'H') toggleUI();
     else if (e.key === 's' || e.key === 'S') screenshot();
   });
 
