@@ -1,0 +1,543 @@
+﻿<!DOCTYPE html>
+<html lang='ko'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>리버시 (Reversi / Othello)</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#14161a;--panel:#1e2128;--line:#2c303a;--txt:#e9ebf0;--muted:#98a0b0;--accent:#4b7dff}
+body{margin:0;font-family:'Segoe UI','Malgun Gothic',system-ui,sans-serif;color:var(--txt);
+  background:radial-gradient(1100px 520px at 18% -12%,#252b39,#111318 62%);min-height:100vh}
+.app{max-width:1000px;margin:0 auto;padding:22px 16px 48px}
+h1{margin:0 0 6px;font-size:20px;letter-spacing:.4px}
+.sub{margin:0 0 18px;color:var(--muted);font-size:13px}
+main{display:grid;grid-template-columns:auto 300px;gap:22px;align-items:start}
+@media(max-width:880px){main{grid-template-columns:1fr}}
+.board-wrap{display:flex;flex-direction:column;gap:12px;max-width:100%}
+.canvas-wrap{width:clamp(280px,min(74vw,62vh),600px);aspect-ratio:1/1;max-width:100%}
+canvas{width:100%;height:100%;display:block;border-radius:12px;cursor:pointer;touch-action:manipulation;outline:none;
+  box-shadow:0 20px 44px rgba(0,0,0,.5),0 0 0 1px var(--line)}
+canvas:focus-visible{box-shadow:0 20px 44px rgba(0,0,0,.5),0 0 0 3px var(--accent)}
+.bar{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:10px 14px}
+.ind{width:12px;height:12px;border-radius:50%;border:1px solid #000;flex:none}
+.ind.b{background:#23262e}
+.ind.w{background:#f2f2f2}
+.status{font-size:14px;font-weight:600}
+.meta{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.panel{display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:14px}
+.field{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted)}
+select,button{font:inherit;color:var(--txt);background:#262a34;border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px;cursor:pointer}
+select{width:100%}
+button:hover:not(:disabled){filter:brightness(1.15)}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:linear-gradient(#4b7dff,#2f5ad6);border-color:#3c66e0}
+.check{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none}
+.check input{accent-color:#4b7dff;width:15px;height:15px;cursor:pointer}
+.hint{font-size:12px;color:var(--muted);line-height:1.6;margin:0}
+.hint b{color:#cfd5e2;font-weight:600}
+</style>
+</head>
+<body>
+<div class='app'>
+  <h1>리버시 (Reversi)</h1>
+  <p class='sub'>8×8 · 상대 돌 뒤집기 · 마우스 / 터치 / 키보드(방향키 + Enter)</p>
+  <main>
+    <div class='board-wrap'>
+      <div class='bar'>
+        <span class='ind b' id='ind'></span>
+        <span class='status' id='status'>흑 차례</span>
+        <span class='meta' id='meta'>흑 2 · 백 2</span>
+      </div>
+      <div class='canvas-wrap'><canvas id='board' tabindex='0' aria-label='리버시 보드'></canvas></div>
+    </div>
+    <aside class='panel'>
+      <div class='field'>
+        <label for='mode'>대국 모드</label>
+        <select id='mode'>
+          <option value='pvp'>2인 대국</option>
+          <option value='ai'>컴퓨터 대전 (백)</option>
+        </select>
+      </div>
+      <div class='field'>
+        <label for='level'>컴퓨터 난이도</label>
+        <select id='level'>
+          <option value='easy'>쉬움</option>
+          <option value='normal' selected>보통</option>
+          <option value='hard'>어려움</option>
+        </select>
+      </div>
+      <label class='check'><input type='checkbox' id='hints' checked> 착수 가능 칸 표시</label>
+      <button id='undo'>무르기</button>
+      <button id='restart' class='primary'>다시 시작</button>
+      <p class='hint'>가운데 4개 돌로 시작합니다. 흑이 먼저 두고, <b>상대 돌을 가로·세로·대각으로 감싸면</b> 내 색으로 뒤집힙니다.
+        둘 곳이 없으면 자동 <b>패스</b>, 양쪽 모두 둘 수 없으면 종료 후 돌 개수로 승부.<br>
+        컴퓨터 대전에서 나는 <b>흑</b>입니다. 방향키로 이동, Enter로 착수.</p>
+    </aside>
+  </main>
+</div>
+<script>
+const N = 8, EMPTY = 0, BLACK = 1, WHITE = 2, TAU = Math.PI * 2;
+const DIRS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+/* 모서리·귀 근처 가중치 (AI 위치 평가) */
+const WFLAT = [
+  120, -30, 20, 8, 8, 20, -30, 120,
+  -30, -50, -6, -6, -6, -6, -50, -30,
+  20, -6, 12, 4, 4, 12, -6, 20,
+  8, -6, 4, 3, 3, 4, -6, 8,
+  8, -6, 4, 3, 3, 4, -6, 8,
+  20, -6, 12, 4, 4, 12, -6, 20,
+  -30, -50, -6, -6, -6, -6, -50, -30,
+  120, -30, 20, 8, 8, 20, -30, 120
+];
+
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+const elInd = document.getElementById('ind');
+const elStatus = document.getElementById('status');
+const elMeta = document.getElementById('meta');
+const elMode = document.getElementById('mode');
+const elLevel = document.getElementById('level');
+const elHints = document.getElementById('hints');
+const elUndo = document.getElementById('undo');
+
+let board, turn, history, last, passed, gameOver, legal;
+let hover = null;
+let cursor = { r: 2, c: 2 };
+let focused = false;
+let aiThinking = false;
+let mode = 'pvp', level = 'normal';
+let size = 0, cell = 0;
+
+/* ---------- 규칙 엔진 ---------- */
+function newBoard() {
+  const bd = new Int8Array(N * N);
+  bd[3 * N + 3] = WHITE; bd[4 * N + 4] = WHITE;
+  bd[3 * N + 4] = BLACK; bd[4 * N + 3] = BLACK;
+  return bd;
+}
+
+function flipsOf(bd, r, c, color) {
+  if (bd[r * N + c] !== EMPTY) return null;
+  const opp = 3 - color;
+  let out = null;
+  for (let d = 0; d < 8; d++) {
+    const dr = DIRS[d][0], dc = DIRS[d][1];
+    let i = r + dr, j = c + dc, cnt = 0;
+    while (i >= 0 && i < N && j >= 0 && j < N && bd[i * N + j] === opp) { i += dr; j += dc; cnt++; }
+    if (cnt && i >= 0 && i < N && j >= 0 && j < N && bd[i * N + j] === color) {
+      i = r + dr; j = c + dc;
+      for (let k = 0; k < cnt; k++) { (out || (out = [])).push(i * N + j); i += dr; j += dc; }
+    }
+  }
+  return out;
+}
+
+function genMoves(bd, color) {
+  const res = [];
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const f = flipsOf(bd, r, c, color);
+      if (f) res.push({ r, c, i: r * N + c, flips: f });
+    }
+  }
+  return res;
+}
+
+function applyMove(bd, mv, color) {
+  bd[mv.i] = color;
+  for (let k = 0; k < mv.flips.length; k++) bd[mv.flips[k]] = color;
+}
+
+function countOf(bd, color) {
+  let n = 0;
+  for (let i = 0; i < 64; i++) if (bd[i] === color) n++;
+  return n;
+}
+
+function canPlay() {
+  if (gameOver || aiThinking || !legal || !legal.length) return false;
+  if (mode === 'ai' && turn === WHITE) return false;
+  return true;
+}
+
+function findMove(r, c) {
+  if (!canPlay()) return null;
+  for (const mv of legal) if (mv.r === r && mv.c === c) return mv;
+  return null;
+}
+
+/* ---------- 진행 ---------- */
+function play(mv) {
+  history.push({ bd: board.slice(), turn, last, passed });
+  applyMove(board, mv, turn);
+  last = { r: mv.r, c: mv.c };
+  passed = false;
+  turn = 3 - turn;
+
+  legal = genMoves(board, turn);
+  if (!legal.length) {
+    if (!genMoves(board, 3 - turn).length) {
+      gameOver = true;          // 양쪽 모두 둘 곳 없음 → 종료
+      legal = [];
+    } else {
+      turn = 3 - turn;          // 상대 패스
+      passed = true;
+      legal = genMoves(board, turn);
+    }
+  }
+
+  updateUI();
+  draw();
+  if (!gameOver && mode === 'ai' && turn === WHITE) aiTurn();
+}
+
+function restore(st) {
+  board = st.bd;
+  turn = st.turn;
+  last = st.last;
+  passed = st.passed;
+}
+
+function undo() {
+  if (aiThinking || !history.length) return;
+  restore(history.pop());
+  if (mode === 'ai' && turn === WHITE && history.length) restore(history.pop());
+  gameOver = false;
+  legal = genMoves(board, turn);
+  updateUI();
+  draw();
+}
+
+function restart() {
+  board = newBoard();
+  turn = BLACK;
+  history = [];
+  last = null;
+  passed = false;
+  gameOver = false;
+  hover = null;
+  aiThinking = false;
+  cursor = { r: 2, c: 2 };
+  legal = genMoves(board, turn);
+  updateUI();
+  draw();
+}
+
+/* ---------- AI ---------- */
+function evaluate(bd, color) {
+  const opp = 3 - color;
+  let pos = 0, mine = 0, theirs = 0;
+  for (let i = 0; i < 64; i++) {
+    const v = bd[i];
+    if (v === color) { pos += WFLAT[i]; mine++; }
+    else if (v === opp) { pos -= WFLAT[i]; theirs++; }
+  }
+  const mob = genMoves(bd, color).length - genMoves(bd, opp).length;
+  return pos + mob * 9 + (mine - theirs) * 0.6;
+}
+
+function terminalScore(bd, color) {
+  const diff = countOf(bd, color) - countOf(bd, 3 - color);
+  if (diff > 0) return 10000 + diff;
+  if (diff < 0) return -10000 + diff;
+  return 0;
+}
+
+function orderMoves(moves) {
+  moves.sort((a, b) => (WFLAT[b.i] + b.flips.length) - (WFLAT[a.i] + a.flips.length));
+}
+
+function negamax(bd, color, depth, alpha, beta) {
+  const moves = genMoves(bd, color);
+  if (!moves.length) {
+    if (!genMoves(bd, 3 - color).length) return terminalScore(bd, color);
+    if (depth <= 0) return evaluate(bd, color);
+    return -negamax(bd, 3 - color, depth - 1, -beta, -alpha);
+  }
+  if (depth <= 0) return evaluate(bd, color);
+
+  orderMoves(moves);
+  let best = -Infinity;
+  for (const mv of moves) {
+    const nb = bd.slice();
+    applyMove(nb, mv, color);
+    const v = -negamax(nb, 3 - color, depth - 1, -beta, -alpha);
+    if (v > best) best = v;
+    if (best > alpha) alpha = best;
+    if (alpha >= beta) break;
+  }
+  return best;
+}
+
+function chooseMove(bd, color) {
+  const moves = genMoves(bd, color);
+  if (!moves.length) return null;
+
+  if (level === 'easy') {
+    let best = moves[0], bs = -Infinity;
+    for (const mv of moves) {
+      const nb = bd.slice();
+      applyMove(nb, mv, color);
+      const s = -evaluate(nb, 3 - color) + Math.random() * 90;
+      if (s > bs) { bs = s; best = mv; }
+    }
+    return best;
+  }
+
+  const depth = level === 'hard' ? 6 : 3;
+  orderMoves(moves);
+  let best = moves[0], bs = -Infinity, alpha = -Infinity;
+  for (const mv of moves) {
+    const nb = bd.slice();
+    applyMove(nb, mv, color);
+    const s = -negamax(nb, 3 - color, depth - 1, -Infinity, -alpha);
+    if (s > bs) { bs = s; best = mv; }
+    if (s > alpha) alpha = s;
+  }
+  return best;
+}
+
+function aiTurn() {
+  aiThinking = true;
+  updateUI();
+  draw();
+  setTimeout(() => {
+    const mv = chooseMove(board, WHITE);
+    aiThinking = false;
+    if (mv) play(mv);
+    else {
+      // 방어적 처리: 둘 곳이 없으면 패스
+      turn = BLACK;
+      legal = genMoves(board, turn);
+      if (!legal.length) gameOver = true;
+      updateUI();
+      draw();
+    }
+  }, level === 'hard' ? 120 : 220);
+}
+
+/* ---------- 렌더링 ---------- */
+function layout() {
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width) return;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  size = rect.width;
+  cell = size / N;
+  draw();
+}
+
+function disc(r, c, color, alpha) {
+  const x = (c + 0.5) * cell, y = (r + 0.5) * cell, rad = cell * 0.42;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  ctx.beginPath();
+  ctx.arc(x + cell * 0.03, y + cell * 0.045, rad, 0, TAU);
+  ctx.fillStyle = 'rgba(0,0,0,.30)';
+  ctx.fill();
+
+  const gr = ctx.createRadialGradient(x - rad * .35, y - rad * .4, rad * .1, x, y, rad);
+  if (color === BLACK) {
+    gr.addColorStop(0, '#717885');
+    gr.addColorStop(.45, '#22262c');
+    gr.addColorStop(1, '#05070a');
+  } else {
+    gr.addColorStop(0, '#ffffff');
+    gr.addColorStop(.6, '#f2f3f6');
+    gr.addColorStop(1, '#c2c6ce');
+  }
+  ctx.beginPath();
+  ctx.arc(x, y, rad, 0, TAU);
+  ctx.fillStyle = gr;
+  ctx.fill();
+  ctx.lineWidth = Math.max(1, cell * 0.022);
+  ctx.strokeStyle = color === BLACK ? 'rgba(0,0,0,.6)' : 'rgba(120,125,135,.75)';
+  ctx.stroke();
+  ctx.restore();
+}
+
+function draw() {
+  if (!size) return;
+  const s = size;
+
+  // 펠트
+  const g = ctx.createLinearGradient(0, 0, s, s);
+  g.addColorStop(0, '#3f9169');
+  g.addColorStop(.5, '#2f7d59');
+  g.addColorStop(1, '#23674a');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+
+  const v = ctx.createRadialGradient(s * .5, s * .45, s * .15, s * .5, s * .5, s * .85);
+  v.addColorStop(0, 'rgba(255,255,255,.10)');
+  v.addColorStop(1, 'rgba(0,0,0,.30)');
+  ctx.fillStyle = v;
+  ctx.fillRect(0, 0, s, s);
+
+  // 격자
+  ctx.strokeStyle = 'rgba(8,38,26,.55)';
+  ctx.lineWidth = Math.max(1, cell * 0.02);
+  for (let i = 0; i <= N; i++) {
+    ctx.beginPath(); ctx.moveTo(i * cell, 0); ctx.lineTo(i * cell, s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i * cell); ctx.lineTo(s, i * cell); ctx.stroke();
+  }
+
+  // 중앙 기준점
+  ctx.fillStyle = 'rgba(6,32,22,.55)';
+  for (const [r, c] of [[2, 2], [2, 6], [6, 2], [6, 6]]) {
+    ctx.beginPath();
+    ctx.arc((c + 0.5) * cell, (r + 0.5) * cell, cell * 0.055, 0, TAU);
+    ctx.fill();
+  }
+
+  // 착수 가능 표시 + 미리보기
+  if (!gameOver && !aiThinking && legal && legal.length && (elHints.checked || canPlay())) {
+    if (elHints.checked) {
+      for (const mv of legal) {
+        ctx.beginPath();
+        ctx.arc((mv.c + 0.5) * cell, (mv.r + 0.5) * cell, cell * 0.085, 0, TAU);
+        ctx.fillStyle = turn === BLACK ? 'rgba(0,0,0,.38)' : 'rgba(255,255,255,.6)';
+        ctx.fill();
+      }
+    }
+    const hov = hover && findMove(hover.r, hover.c);
+    if (hov) {
+      disc(hov.r, hov.c, turn, .45);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(130,195,255,.95)';
+      ctx.lineWidth = Math.max(1.4, cell * 0.05);
+      for (const k of hov.flips) {
+        const rr = (k / N) | 0, cc = k % N;
+        ctx.beginPath();
+        ctx.arc((cc + 0.5) * cell, (rr + 0.5) * cell, cell * 0.43, 0, TAU);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  // 돌
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const val = board[r * N + c];
+      if (val) disc(r, c, val, 1);
+    }
+  }
+
+  // 마지막 수
+  if (last) {
+    ctx.beginPath();
+    ctx.arc((last.c + 0.5) * cell, (last.r + 0.5) * cell, cell * 0.1, 0, TAU);
+    ctx.fillStyle = 'rgba(232,74,58,.95)';
+    ctx.fill();
+  }
+
+  // 키보드 커서
+  if (focused && canPlay()) {
+    ctx.strokeStyle = 'rgba(130,195,255,.95)';
+    ctx.lineWidth = Math.max(1.5, cell * 0.045);
+    ctx.beginPath();
+    ctx.arc((cursor.c + 0.5) * cell, (cursor.r + 0.5) * cell, cell * 0.45, 0, TAU);
+    ctx.stroke();
+  }
+}
+
+/* ---------- UI ---------- */
+function updateUI() {
+  const cb = countOf(board, BLACK), cw = countOf(board, WHITE);
+  elInd.className = 'ind ' + (turn === BLACK ? 'b' : 'w');
+
+  let txt;
+  if (gameOver) {
+    if (cb > cw) txt = '흑 승리!';
+    else if (cw > cb) txt = '백 승리!';
+    else txt = '무승부';
+  } else if (aiThinking) {
+    txt = '컴퓨터 생각 중…';
+  } else {
+    txt = (turn === BLACK ? '흑' : '백') + ' 차례';
+    if (mode === 'ai') txt += turn === BLACK ? ' (나)' : ' (컴퓨터)';
+    if (passed) txt += ' · 상대 패스';
+  }
+  elStatus.textContent = txt;
+  elMeta.textContent = '흑 ' + cb + ' · 백 ' + cw + (gameOver ? '' : ' · ' + legal.length + '곳');
+  elUndo.disabled = !history.length || aiThinking;
+}
+
+/* ---------- 입력 ---------- */
+function cellFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const c = Math.floor((e.clientX - rect.left) / cell);
+  const r = Math.floor((e.clientY - rect.top) / cell);
+  return (r >= 0 && r < N && c >= 0 && c < N) ? { r, c } : null;
+}
+
+canvas.addEventListener('pointermove', e => {
+  if (e.pointerType && e.pointerType !== 'mouse') return;
+  const p = cellFromEvent(e);
+  if ((p && hover && p.r === hover.r && p.c === hover.c) || (!p && !hover)) return;
+  hover = p;
+  draw();
+});
+
+canvas.addEventListener('pointerleave', () => {
+  if (hover) { hover = null; draw(); }
+});
+
+canvas.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  canvas.focus({ preventScroll: true });
+  const p = cellFromEvent(e);
+  if (!p) return;
+  cursor = p;
+  const mv = findMove(p.r, p.c);
+  if (mv) play(mv);
+  else draw();
+});
+
+canvas.addEventListener('focus', () => { focused = true; draw(); });
+canvas.addEventListener('blur', () => { focused = false; draw(); });
+
+canvas.addEventListener('keydown', e => {
+  const map = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
+  if (map[e.key]) {
+    const [dr, dc] = map[e.key];
+    cursor = {
+      r: Math.min(N - 1, Math.max(0, cursor.r + dr)),
+      c: Math.min(N - 1, Math.max(0, cursor.c + dc))
+    };
+    hover = cursor;
+    e.preventDefault();
+    draw();
+    return;
+  }
+  if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    const mv = findMove(cursor.r, cursor.c);
+    if (mv) play(mv);
+  }
+});
+
+elMode.addEventListener('change', () => { mode = elMode.value; restart(); });
+elLevel.addEventListener('change', () => { level = elLevel.value; });
+elHints.addEventListener('change', draw);
+elUndo.addEventListener('click', undo);
+document.getElementById('restart').addEventListener('click', restart);
+
+/* ---------- 시작 ---------- */
+new ResizeObserver(layout).observe(canvas.parentElement);
+window.addEventListener('resize', layout);
+mode = elMode.value;
+level = elLevel.value;
+restart();
+layout();
+</script>
+</body>
+</html>

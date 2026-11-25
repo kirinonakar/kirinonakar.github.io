@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>가르강튀아 시뮬레이터 — Gargantua</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%; overflow: hidden; background: #03040a; color: #e6edf7;
+    font-family: 'Segoe UI', 'Malgun Gothic', system-ui, sans-serif;
+  }
+  canvas#gl { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: grab; }
+  canvas#gl.dragging { cursor: grabbing; }
+
+  #info {
+    position: fixed; top: 16px; left: 16px; max-width: min(52vw, 430px);
+    font-size: 12.5px; line-height: 1.7;
+    background: rgba(4,8,16,.55); border: 1px solid rgba(120,160,220,.15);
+    padding: 12px 16px; border-radius: 10px;
+    backdrop-filter: blur(6px); pointer-events: none; user-select: none;
+  }
+  #info h1 { font-size: 16px; margin-bottom: 4px; color: #ffcf8a; letter-spacing: .02em; }
+  #info .dim { display: block; margin-top: 6px; color: #7d8ca6; font-size: 11.5px; }
+
+  #panel {
+    position: fixed; top: 16px; right: 16px; width: 272px;
+    max-height: calc(100vh - 32px); overflow-y: auto;
+    background: rgba(4,8,16,.55); border: 1px solid rgba(120,160,220,.15);
+    border-radius: 10px; padding: 12px 14px; backdrop-filter: blur(6px); font-size: 12.5px;
+  }
+  #panel::-webkit-scrollbar { width: 6px; }
+  #panel::-webkit-scrollbar-thumb { background: rgba(120,160,220,.25); border-radius: 3px; }
+  #panel .hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    color: #9fb2cc; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px;
+  }
+  #panel .hdr #fps { color: #ffcf8a; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  #panel .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  #panel .row span { flex: 0 0 96px; color: #c2cfe2; }
+  #panel .row input[type=range] { flex: 1 1 auto; min-width: 0; height: 16px; accent-color: #ffb45a; }
+  #panel .row b { flex: 0 0 38px; text-align: right; color: #ffcf8a; font-weight: 500; font-variant-numeric: tabular-nums; }
+  #panel .row2 { display: flex; gap: 6px; margin-top: 8px; }
+  #panel .row2 button {
+    flex: 1; padding: 6px 0; font-family: inherit; font-size: 12px; color: #dbe6f5;
+    border: 1px solid rgba(120,160,220,.22); border-radius: 6px;
+    background: rgba(255,255,255,.05); cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  #panel .row2 button:hover { background: rgba(255,180,90,.18); border-color: rgba(255,180,90,.45); }
+  #panel .row2 button.on { background: rgba(255,180,90,.24); border-color: rgba(255,180,90,.55); color: #fff2df; }
+  #panel label { display: flex; align-items: center; gap: 5px; color: #c2cfe2; cursor: pointer; }
+  #panel input[type=checkbox] { accent-color: #ffb45a; }
+
+  #hint {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 11.5px; color: rgba(200,215,235,.5); pointer-events: none; white-space: nowrap;
+  }
+  #hint b { color: #ffcf8a; font-weight: 500; }
+
+  #info, #panel, #hint { transition: opacity .25s ease; }
+  body.ui-hidden #info, body.ui-hidden #panel, body.ui-hidden #hint { opacity: 0; pointer-events: none; }
+
+  #fatal {
+    display: none; position: fixed; inset: 0; place-items: center; text-align: center;
+    padding: 24px; font-size: 14px; line-height: 1.8; color: #ff9c9c; background: #03040a; z-index: 9;
+  }
+  #fatal.show { display: grid; }
+  #errlog {
+    display: none; position: fixed; left: 12px; bottom: 12px; max-width: 70vw; max-height: 40vh;
+    overflow: auto; font: 11px/1.45 ui-monospace, Consolas, monospace;
+    color: #ff9c9c; white-space: pre-wrap; z-index: 9;
+  }
+  #errlog.show { display: block; }
+
+  @media (max-width: 720px) {
+    #info { max-width: 66vw; font-size: 11.5px; padding: 10px 12px; }
+    #panel { width: auto; left: 12px; right: 12px; top: auto; bottom: 12px; max-height: 44vh; }
+    #hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gl"></canvas>
+
+<div id="info">
+  <h1>🕳 가르강튀아 시뮬레이터</h1>
+  슈바르츠실트 블랙홀 실시간 광선 추적 — 중력 렌즈 · 강착원반 · 도플러 비밍 · 중력 적색편이
+  <span class="dim">드래그: 회전 · 휠/핀치: 줌 · Space: 정지 · R: 초기화 · S: 저장 · H: UI</span>
+</div>
+
+<div id="panel">
+  <div class="hdr">관측 설정 <span id="fps">-- fps</span></div>
+
+  <div class="row"><span>디스크 밝기</span><input type="range" data-key="diskBright" min="0" max="3" step="0.01" value="1"><b data-out="diskBright"></b></div>
+  <div class="row"><span>노출</span><input type="range" data-key="exposure" min="0.2" max="3" step="0.01" value="1"><b data-out="exposure"></b></div>
+  <div class="row"><span>원반 안쪽 (rs)</span><input type="range" data-key="inner" min="1.6" max="6" step="0.05" value="3"><b data-out="inner"></b></div>
+  <div class="row"><span>원반 바깥 (rs)</span><input type="range" data-key="outer" min="6" max="30" step="0.1" value="15"><b data-out="outer"></b></div>
+  <div class="row"><span>도플러 비밍</span><input type="range" data-key="doppler" min="0" max="1" step="0.01" value="0.9"><b data-out="doppler"></b></div>
+  <div class="row"><span>발광 안개</span><input type="range" data-key="haze" min="0" max="2" step="0.01" value="0.6"><b data-out="haze"></b></div>
+  <div class="row"><span>별 밝기</span><input type="range" data-key="stars" min="0" max="2" step="0.01" value="0.8"><b data-out="stars"></b></div>
+  <div class="row"><span>품질 (스텝)</span><input type="range" data-key="steps" min="80" max="480" step="10" value="240"><b data-out="steps"></b></div>
+  <div class="row"><span>화각 (°)</span><input type="range" data-key="fov" min="18" max="80" step="1" value="42"><b data-out="fov"></b></div>
+  <div class="row"><span>시간 배속</span><input type="range" data-key="timeScale" min="0" max="3" step="0.05" value="1"><b data-out="timeScale"></b></div>
+
+  <div class="row2">
+    <label><input type="checkbox" id="autoRotate" checked> 자동 회전</label>
+    <label><input type="checkbox" id="autoQuality" checked> 자동 화질</label>
+  </div>
+
+  <div class="row2">
+    <button data-preset="edge">측면</button>
+    <button data-preset="tilt">사선</button>
+    <button data-preset="top">위에서</button>
+  </div>
+
+  <div class="row2">
+    <button id="pauseBtn">⏸ 일시정지</button>
+    <button id="shotBtn">📷 저장</button>
+    <button id="resetBtn">↺ 초기화</button>
+  </div>
+</div>
+
+<div id="hint">
+  슈바르츠실트 반지름 <b>r<sub>s</sub> = 1</b> · ISCO <b>3 r<sub>s</sub></b> · 광자 구 <b>1.5 r<sub>s</sub></b> · 카메라 <b><span id="camr">17.0</span> r<sub>s</sub></b>
+</div>
+
+<div id="fatal"></div>
+<div id="errlog"></div>
+
+<script id="vs" type="x-shader/x-vertex">
+#version 300 es
+in vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+</script>
+
+<script id="fs" type="x-shader/x-fragment">
+#version 300 es
+precision highp float;
+
+out vec4 outColor;
+
+uniform vec2  uRes;
+uniform float uTime;
+uniform vec3  uCamPos;
+uniform mat3  uCamBasis;    // columns: right, up, forward
+uniform float uTanFov;
+uniform float uDiskInner;
+uniform float uDiskOuter;
+uniform float uDiskBright;
+uniform float uExposure;
+uniform float uDoppler;
+uniform float uStars;
+uniform float uHaze;
+uniform int   uSteps;
+
+const float RS       = 1.0;    // 슈바르츠실트 반지름 (단위계: rs = 1, M = 0.5)
+const float R_ESCAPE = 55.0;
+const int   MAX_STEPS = 512;
+
+/* ───────────── 해시 / 노이즈 ───────────── */
+float hash13(vec3 p3) {
+  p3 = fract(p3 * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+
+float noise3(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float n000 = hash13(i + vec3(0.0, 0.0, 0.0));
+  float n100 = hash13(i + vec3(1.0, 0.0, 0.0));
+  float n010 = hash13(i + vec3(0.0, 1.0, 0.0));
+  float n110 = hash13(i + vec3(1.0, 1.0, 0.0));
+  float n001 = hash13(i + vec3(0.0, 0.0, 1.0));
+  float n101 = hash13(i + vec3(1.0, 0.0, 1.0));
+  float n011 = hash13(i + vec3(0.0, 1.0, 1.0));
+  float n111 = hash13(i + vec3(1.0, 1.0, 1.0));
+  float nx00 = mix(n000, n100, f.x);
+  float nx10 = mix(n010, n110, f.x);
+  float nx01 = mix(n001, n101, f.x);
+  float nx11 = mix(n011, n111, f.x);
+  return mix(mix(nx00, nx10, f.y), mix(nx01, nx11, f.y), f.z);
+}
+
+float fbm3(vec3 p) {
+  float s = 0.0;
+  float a = 0.55;
+  for (int i = 0; i < 3; i++) {
+    s += a * noise3(p);
+    p = p * 2.07 + vec3(4.7, 9.3, 2.9);
+    a *= 0.5;
+  }
+  return s;
+}
+
+/* ───────────── 색 온도 램프 (차가움 → 뜨거움) ───────────── */
+vec3 tempRamp(float t) {
+  t = clamp(t, 0.0, 1.0);
+  vec3 c = mix(vec3(0.42, 0.070, 0.014), vec3(1.00, 0.34, 0.055), smoothstep(0.00, 0.30, t));
+  c = mix(c, vec3(1.00, 0.72, 0.32), smoothstep(0.25, 0.62, t));
+  c = mix(c, vec3(0.93, 0.96, 1.00), smoothstep(0.60, 1.00, t));
+  return c;
+}
+
+/* ───────────── 강착원반 복사 ───────────── */
+vec3 diskEmission(vec3 p, vec3 rd) {
+  float inner = uDiskInner;
+  float outer = max(uDiskOuter, inner * 1.5);
+  float r = length(p.xz);
+  if (r < inner || r > outer) return vec3(0.0);
+
+  float edge = smoothstep(inner, inner * 1.35, r) * (1.0 - smoothstep(outer * 0.70, outer, r));
+
+  // 온도 분포 T ∝ r^-0.85 (표준 얇은 원반은 r^-3/4)
+  float temp = pow(inner / max(r, 0.001), 0.85);
+
+  // 케플러 각속도 Ω ∝ r^-3/2 로 회전하는 난류 무늬
+  float ang   = atan(p.z, p.x);
+  float omega = 2.4 * pow(max(r, 0.001), -1.5);
+  float a2    = ang - uTime * omega;
+  vec3  q     = vec3(cos(a2), 0.0, sin(a2)) * r;
+
+  float n = fbm3(q * 0.8);
+  float density = 0.30 + 1.05 * smoothstep(0.22, 0.78, n);
+
+  // 상대론적 도플러 + 중력 적색편이
+  vec3  vhat = normalize(vec3(p.z, 0.0, -p.x));                  // 원궤도 속도 방향
+  float beta = min(0.90, sqrt(0.5 / r) / sqrt(max(0.05, 1.0 - 1.0 / r)));
+  float gam  = inversesqrt(max(0.05, 1.0 - beta * beta));
+  float mu   = dot(vhat, -normalize(rd));                        // 시선방향 성분
+  float g    = sqrt(max(0.0, 1.0 - 1.0 / r)) / (gam * (1.0 - beta * mu));
+  g = clamp(g, 0.05, 5.0);
+
+  float gEff  = mix(1.0, g, uDoppler);
+  float shift = mix(1.0, g, uDoppler * 0.85);
+
+  vec3 col = tempRamp(temp * shift);
+  return col * temp * temp * edge * density * pow(gEff, 3.0) * uDiskBright * 3.6;
+}
+
+/* ───────────── 원반 주변 발광 안개 ───────────── */
+vec3 hazeEmission(float r) {
+  float temp = pow(uDiskInner / max(r, 0.1), 0.85);
+  return tempRamp(temp) * temp * uDiskBright;
+}
+
+/* ───────────── 배경 별 (최종 광선 방향으로 샘플) ───────────── */
+vec3 starField(vec3 d) {
+  vec3 col = vec3(0.0);
+  for (int L = 0; L < 3; L++) {
+    float fl      = float(L);
+    float scale   = 45.0 * pow(2.1, fl);
+    float thresh  = 0.955 - 0.020 * fl;
+    vec3  p       = d * scale;
+    vec3  cell    = floor(p);
+    vec3  f       = fract(p) - 0.5;
+    float h       = hash13(cell + 13.7 * fl);
+    if (h > thresh) {
+      vec3  off  = vec3(hash13(cell + 1.7), hash13(cell + 3.1), hash13(cell + 5.9)) - 0.5;
+      float dist = length(f - off * 0.55);
+      float size = 0.16 * (1.0 + 0.9 * fl);
+      float b    = smoothstep(size, 0.0, dist) * (0.5 + 0.9 * hash13(cell + 7.3));
+      vec3  tint = mix(vec3(0.72, 0.82, 1.00), vec3(1.00, 0.88, 0.72), hash13(cell + 2.2));
+      col += tint * b * (1.0 - 0.30 * fl);
+    }
+  }
+  return col * 0.6;
+}
+
+/* ───────────── 측지선 가속도 ─────────────
+   슈바르츠실트 광자 궤도 방정식 u'' + u = 3M u² 를
+   직교좌표계로 옮긴 형태:  a = -1.5 h² x / r⁵   (M = 0.5, rs = 1)
+   h² = |x × v|² 는 중심력장에서 보존되므로 초기값으로 고정.          */
+vec3 accel(vec3 p, float h2) {
+  float r2 = dot(p, p);
+  return -1.5 * h2 * p / (r2 * r2 * sqrt(r2));
+}
+
+vec3 aces(vec3 x) {
+  const float a = 2.51, b = 0.03, c = 2.43, d = 0.59, e = 0.14;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
+  vec3 rd = normalize(uCamBasis * vec3(uv * 2.0 * uTanFov, 1.0));
+
+  vec3  pos = uCamPos;
+  vec3  vel = rd;
+  vec3  hvec = cross(pos, vel);
+  float h2   = dot(hvec, hvec);
+
+  vec3  accum = vec3(0.0);
+  float trans = 1.0;
+  bool  captured = false;
+  bool  escaped  = false;
+
+  for (int i = 0; i < MAX_STEPS; i++) {
+    if (i >= uSteps) break;
+
+    float r = length(pos);
+    if (r < 1.10 * RS) { captured = true; break; }
+    if (r > R_ESCAPE && dot(pos, vel) > 0.0) { escaped = true; break; }
+
+    float dt = clamp(0.045 * r, 0.004, 0.35);
+
+    // RK4 적분
+    vec3 k1x = vel;
+    vec3 k1v = accel(pos, h2);
+    vec3 k2x = vel + 0.5 * dt * k1v;
+    vec3 k2v = accel(pos + 0.5 * dt * k1x, h2);
+    vec3 k3x = vel + 0.5 * dt * k2v;
+    vec3 k3v = accel(pos + 0.5 * dt * k2x, h2);
+    vec3 k4x = vel + dt * k3v;
+    vec3 k4v = accel(pos + dt * k3x, h2);
+
+    vec3  prev = pos;
+    vec3  newVel = vel + (dt / 6.0) * (k1v + 2.0 * k2v + 2.0 * k3v + k4v);
+    pos += (dt / 6.0) * (k1x + 2.0 * k2x + 2.0 * k3x + k4x);
+
+    // 얇은 원반(y = 0 평면) 통과 검출
+    if (prev.y * pos.y < 0.0) {
+      float t   = prev.y / (prev.y - pos.y);
+      vec3  hit = mix(prev, pos, t);
+      vec3  hd  = normalize(mix(vel, newVel, t));
+      accum += diskEmission(hit, hd) * trans;
+      trans *= 0.05;
+    }
+
+    // 원반 근처 발광 안개
+    if (uHaze > 0.001 && abs(pos.y) < 0.75) {
+      float rr = length(pos.xz);
+      float inner = uDiskInner;
+      float outer = max(uDiskOuter, inner * 1.5);
+      if (rr > inner * 0.75 && rr < outer * 1.1) {
+        float dens = exp(-(pos.y * pos.y) / 0.055);
+        float win  = smoothstep(inner * 0.75, inner * 1.5, rr)
+                   * (1.0 - smoothstep(outer * 0.75, outer * 1.1, rr));
+        accum += hazeEmission(rr) * dens * win * dt * uHaze * 0.5 * trans;
+      }
+    }
+
+    vel = newVel;
+    if (trans < 0.02) break;
+  }
+
+  vec3 col = accum;
+  if (!captured) {
+    float rEnd = length(pos);
+    vec3 bg = vec3(0.004, 0.006, 0.012);
+    if ((escaped || rEnd > 6.0) && uStars > 0.001) bg += starField(normalize(vel)) * uStars;
+    col += bg * trans;
+  }
+
+  col *= uExposure;
+  col = aces(col);
+
+  // 비네트
+  vec2 q = gl_FragCoord.xy / uRes;
+  float vig = smoothstep(1.15, 0.35, length(q - 0.5) * 1.6);
+  col *= 0.55 + 0.45 * vig;
+
+  // 디더링 (밴딩 억제)
+  col += (hash13(vec3(gl_FragCoord.xy, uTime)) - 0.5) * (1.0 / 255.0);
+
+  outColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+}
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  const canvas = document.getElementById('gl');
+  const fatal = document.getElementById('fatal');
+  const errlog = document.getElementById('errlog');
+
+  const gl = canvas.getContext('webgl2', {
+    antialias: false, alpha: false, depth: false, stencil: false,
+    preserveDrawingBuffer: true, powerPreference: 'high-performance'
+  });
+  if (!gl) {
+    fatal.classList.add('show');
+    fatal.textContent = '이 브라우저는 WebGL2를 지원하지 않습니다. 최신 Chrome / Edge / Firefox / Safari에서 열어주세요.';
+    return;
+  }
+
+  /* ───────── 셰이더 컴파일 ───────── */
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src.trim());
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(s) || 'unknown shader error';
+      console.error(log);
+      errlog.textContent = log;
+      errlog.classList.add('show');
+      throw new Error(log);
+    }
+    return s;
+  }
+
+  let prog;
+  try {
+    prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, document.getElementById('vs').textContent));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, document.getElementById('fs').textContent));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+  } catch (e) {
+    fatal.classList.add('show');
+    fatal.textContent = '셰이더 컴파일 실패: ' + e.message;
+    return;
+  }
+
+  const U = {};
+  ['uRes', 'uTime', 'uCamPos', 'uCamBasis', 'uTanFov', 'uDiskInner', 'uDiskOuter',
+   'uDiskBright', 'uExposure', 'uDoppler', 'uStars', 'uHaze', 'uSteps']
+    .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+  // 풀스크린 삼각형
+  gl.bindVertexArray(gl.createVertexArray());
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  /* ───────── 상태 ───────── */
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const DEFAULTS = {
+    diskBright: 1, exposure: 1, inner: 3, outer: 15, doppler: 0.9,
+    haze: 0.6, stars: 0.8, steps: 240, fov: 42, timeScale: 1
+  };
+  const state = Object.assign({
+    yaw: 0.7, pitch: 0.10, dist: 17,
+    autoRotate: true, autoQuality: true, paused: false,
+    resScale: 0.9, maxScale: 1.0
+  }, DEFAULTS);
+
+  /* ───────── UI 바인딩 ───────── */
+  const sliders = {};
+  const outs = {};
+  document.querySelectorAll('input[data-key]').forEach(inp => {
+    const key = inp.dataset.key;
+    const out = document.querySelector(`[data-out="${key}"]`);
+    sliders[key] = inp;
+    outs[key] = out;
+    const sync = () => {
+      state[key] = parseFloat(inp.value);
+      out.textContent = (key === 'steps' || key === 'fov')
+        ? String(Math.round(state[key]))
+        : state[key].toFixed(2);
+    };
+    inp.addEventListener('input', sync);
+    sync();
+  });
+
+  const autoRotateEl = document.getElementById('autoRotate');
+  const autoQualityEl = document.getElementById('autoQuality');
+  const pauseBtn = document.getElementById('pauseBtn');
+  autoRotateEl.addEventListener('change', () => { state.autoRotate = autoRotateEl.checked; });
+  autoQualityEl.addEventListener('change', () => { state.autoQuality = autoQualityEl.checked; });
+
+  function setPaused(p) {
+    state.paused = p;
+    pauseBtn.textContent = p ? '▶ 재생' : '⏸ 일시정지';
+    pauseBtn.classList.toggle('on', p);
+  }
+  pauseBtn.addEventListener('click', () => setPaused(!state.paused));
+
+  const PRESETS = {
+    edge: { pitch: 0.055, dist: 17, fov: 42 },
+    tilt: { pitch: 0.42, dist: 20, fov: 46 },
+    top:  { pitch: 1.15, dist: 24, fov: 50 }
+  };
+  document.querySelectorAll('button[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = PRESETS[btn.dataset.preset];
+      state.pitch = p.pitch;
+      state.dist = p.dist;
+      sliders.fov.value = p.fov;
+      sliders.fov.dispatchEvent(new Event('input'));
+    });
+  });
+
+  function resetAll() {
+    state.yaw = 0.7;
+    state.pitch = 0.10;
+    state.dist = 17;
+    Object.keys(DEFAULTS).forEach(k => {
+      sliders[k].value = DEFAULTS[k];
+      sliders[k].dispatchEvent(new Event('input'));
+    });
+    autoRotateEl.checked = true;
+    autoQualityEl.checked = true;
+    state.autoRotate = true;
+    state.autoQuality = true;
+    state.resScale = 0.9;
+    setPaused(false);
+  }
+  document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+  function screenshot() {
+    const a = document.createElement('a');
+    a.download = 'gargantua_' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+  document.getElementById('shotBtn').addEventListener('click', screenshot);
+
+  /* ───────── 마우스 / 터치 ───────── */
+  const pointers = new Map();
+  let dragging = false, lastX = 0, lastY = 0, pinchDist = 0;
+
+  canvas.addEventListener('pointerdown', e => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 1) {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+      canvas.classList.add('dragging');
+    } else if (pointers.size === 2) {
+      const p = [...pointers.values()];
+      pinchDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+    }
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size === 2) {
+      const p = [...pointers.values()];
+      const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      if (pinchDist > 0 && d > 0) state.dist = clamp(state.dist * (pinchDist / d), 3.5, 60);
+      pinchDist = d;
+      return;
+    }
+    if (!dragging) return;
+
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    state.yaw -= dx * 0.005;
+    state.pitch = clamp(state.pitch + dy * 0.004, -1.45, 1.45);
+    if (Math.abs(state.pitch) < 0.02) state.pitch = state.pitch < 0 ? -0.02 : 0.02;
+  });
+
+  function endPointer(e) {
+    pointers.delete(e.pointerId);
+    if (pointers.size === 0) { dragging = false; canvas.classList.remove('dragging'); }
+    pinchDist = 0;
+  }
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    state.dist = clamp(state.dist * Math.exp(e.deltaY * 0.0012), 3.5, 60);
+  }, { passive: false });
+
+  window.addEventListener('keydown', e => {
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (e.code === 'Space') { e.preventDefault(); setPaused(!state.paused); }
+    else if (e.key === 'r' || e.key === 'R') resetAll();
+    else if (e.key === 'h' || e.key === 'H') document.body.classList.toggle('ui-hidden');
+    else if (e.key === 's' || e.key === 'S') screenshot();
+  });
+
+  /* ───────── 렌더 준비 ───────── */
+  const camrEl = document.getElementById('camr');
+  const fpsEl = document.getElementById('fps');
+  let simTime = 0;
+  let lastT = performance.now();
+  let fpsAcc = 0, fpsFrames = 0;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let s = dpr * state.resScale;
+    let w = Math.max(2, Math.round(window.innerWidth * s));
+    let h = Math.max(2, Math.round(window.innerHeight * s));
+    const maxPix = 2.2e6;                       // 약한 GPU 보호
+    if (w * h > maxPix) {
+      const f = Math.sqrt(maxPix / (w * h));
+      w = Math.max(2, Math.round(w * f));
+      h = Math.max(2, Math.round(h * f));
+    }
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+  }
+
+  const cross = (a, b) => [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0]
+  ];
+  const norm = a => {
+    const l = Math.hypot(a[0], a[1], a[2]) || 1;
+    return [a[0] / l, a[1] / l, a[2] / l];
+  };
+
+  const basis = new Float32Array(9);
+
+  function draw() {
+    gl.viewport(0, 0, canvas.width, canvas.height);
+
+    const cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
+    const cy = Math.cos(state.yaw), sy = Math.sin(state.yaw);
+    const camPos = [state.dist * cp * sy, state.dist * sp, state.dist * cp * cy];
+
+    const fwd = norm([-camPos[0], -camPos[1], -camPos[2]]);
+    const right = norm(cross(fwd, [0, 1, 0]));
+    const up = cross(right, fwd);
+
+    basis.set(right, 0); basis.set(up, 3); basis.set(fwd, 6);
+
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uTime, simTime);
+    gl.uniform3fv(U.uCamPos, camPos);
+    gl.uniformMatrix3fv(U.uCamBasis, false, basis);
+    gl.uniform1f(U.uTanFov, Math.tan(state.fov * Math.PI / 360));
+    gl.uniform1f(U.uDiskInner, state.inner);
+    gl.uniform1f(U.uDiskOuter, state.outer);
+    gl.uniform1f(U.uDiskBright, state.diskBright);
+    gl.uniform1f(U.uExposure, state.exposure);
+    gl.uniform1f(U.uDoppler, state.doppler);
+    gl.uniform1f(U.uStars, state.stars);
+    gl.uniform1f(U.uHaze, state.haze);
+    gl.uniform1i(U.uSteps, Math.round(state.steps));
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  function frame(now) {
+    const dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+
+    if (!state.paused) {
+      simTime += dt * state.timeScale;
+      if (state.autoRotate) state.yaw += dt * 0.045;
+    }
+
+    resize();
+    draw();
+
+    camrEl.textContent = state.dist.toFixed(1);
+
+    // FPS + 자동 화질
+    fpsAcc += dt; fpsFrames++;
+    if (fpsAcc > 0.5) {
+      const fps = fpsFrames / fpsAcc;
+      fpsEl.textContent = fps.toFixed(0) + ' fps';
+      if (state.autoQuality) {
+        if (fps < 34 && state.resScale > 0.45) state.resScale = Math.max(0.45, state.resScale - 0.08);
+        else if (fps > 56 && state.resScale < state.maxScale) state.resScale = Math.min(state.maxScale, state.resScale + 0.06);
+      }
+      fpsAcc = 0; fpsFrames = 0;
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
