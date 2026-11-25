@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
@@ -153,10 +153,11 @@ uniform float uDoppler;
 uniform float uStars;
 uniform float uHaze;
 uniform int   uSteps;
+uniform float uEscapeR;    // 탈출 판정 반경 (카메라 거리에 맞춰 JS에서 전달)
 
-const float RS       = 1.0;    // 슈바르츠실트 반지름 (단위계: rs = 1, M = 0.5)
-const float R_ESCAPE = 55.0;
-const int   MAX_STEPS = 512;
+const float RS         = 1.0;    // 슈바르츠실트 반지름 (단위계: rs = 1, M = 0.5)
+const int   MAX_STEPS  = 512;
+const float FLOW_PERIOD = 14.0;  // 초. 이 주기마다 원반 난류 무늬의 감김을 리셋(모아레 방지)
 
 /* ───────────── 해시 / 노이즈 ───────────── */
 float hash13(vec3 p3) {
@@ -204,6 +205,21 @@ vec3 tempRamp(float t) {
   return c;
 }
 
+/* 원반이 실제로 존재하는 영역의 커버리지(내/외곽 페이드 포함) */
+float diskCover(float r) {
+  float inner = uDiskInner;
+  float outer = max(uDiskOuter, inner * 1.5);
+  return smoothstep(inner, inner * 1.35, r) * (1.0 - smoothstep(outer * 0.70, outer, r));
+}
+
+/* 난류 무늬 한 겹. 차등회전을 r^-0.75 로 약화해 한 주기 안의 감김을 1회전 이내로 묶었다. */
+float diskTurbulence(float r, float ang, float t) {
+  float omega = 1.40 * pow(max(r, 0.35), -0.75);
+  float a2    = ang - t * omega;
+  vec3  q     = vec3(cos(a2), 0.0, sin(a2)) * r;
+  return fbm3(q * 0.8);
+}
+
 /* ───────────── 강착원반 복사 ───────────── */
 vec3 diskEmission(vec3 p, vec3 rd) {
   float inner = uDiskInner;
@@ -211,22 +227,24 @@ vec3 diskEmission(vec3 p, vec3 rd) {
   float r = length(p.xz);
   if (r < inner || r > outer) return vec3(0.0);
 
-  float edge = smoothstep(inner, inner * 1.35, r) * (1.0 - smoothstep(outer * 0.70, outer, r));
+  float edge = diskCover(r);
 
   // 온도 분포 T ∝ r^-0.85 (표준 얇은 원반은 r^-3/4)
   float temp = pow(inner / max(r, 0.001), 0.85);
 
-  // 케플러 각속도 Ω ∝ r^-3/2 로 회전하는 난류 무늬
+  // 케플러 회전(Ω ∝ r^-3/2)을 그대로 쓰면 반지름마다 각속도가 달라 무늬가 계속 감기고,
+  // 시간이 지나면 줄무늬 간격이 픽셀보다 좁아져 동심원 모아레가 된다.
+  // → 차등회전을 약화한 두 시간 레이어를, 각자의 리셋 지점에서 크로스페이드한다.
+  float phase = fract(uTime / FLOW_PERIOD);
+  float tA    = phase * FLOW_PERIOD;
+  float tB    = fract(phase + 0.5) * FLOW_PERIOD;
+  float wA    = 0.5 - 0.5 * cos(6.2831853 * phase);   // A의 리셋 지점에서 가중치 0
   float ang   = atan(p.z, p.x);
-  float omega = 2.4 * pow(max(r, 0.001), -1.5);
-  float a2    = ang - uTime * omega;
-  vec3  q     = vec3(cos(a2), 0.0, sin(a2)) * r;
-
-  float n = fbm3(q * 0.8);
+  float n     = mix(diskTurbulence(r, ang, tB), diskTurbulence(r, ang, tA), wA);
   float density = 0.30 + 1.05 * smoothstep(0.22, 0.78, n);
 
   // 상대론적 도플러 + 중력 적색편이
-  vec3  vhat = normalize(vec3(p.z, 0.0, -p.x));                  // 원궤도 속도 방향
+  vec3  vhat = normalize(vec3(-p.z, 0.0, p.x));                  // 원궤도 속도 방향 (a2 = ang - ωt 와 동일 방향)
   float beta = min(0.90, sqrt(0.5 / r) / sqrt(max(0.05, 1.0 - 1.0 / r)));
   float gam  = inversesqrt(max(0.05, 1.0 - beta * beta));
   float mu   = dot(vhat, -normalize(rd));                        // 시선방향 성분
@@ -261,7 +279,7 @@ vec3 starField(vec3 d) {
       vec3  off  = vec3(hash13(cell + 1.7), hash13(cell + 3.1), hash13(cell + 5.9)) - 0.5;
       float dist = length(f - off * 0.55);
       float size = 0.16 * (1.0 + 0.9 * fl);
-      float b    = smoothstep(size, 0.0, dist) * (0.5 + 0.9 * hash13(cell + 7.3));
+      float b    = (1.0 - smoothstep(0.0, size, dist)) * (0.5 + 0.9 * hash13(cell + 7.3));
       vec3  tint = mix(vec3(0.72, 0.82, 1.00), vec3(1.00, 0.88, 0.72), hash13(cell + 2.2));
       col += tint * b * (1.0 - 0.30 * fl);
     }
@@ -302,9 +320,10 @@ void main() {
 
     float r = length(pos);
     if (r < 1.10 * RS) { captured = true; break; }
-    if (r > R_ESCAPE && dot(pos, vel) > 0.0) { escaped = true; break; }
+    if (r > uEscapeR && dot(pos, vel) > 0.0) { escaped = true; break; }
 
-    float dt = clamp(0.045 * r, 0.004, 0.35);
+    // 원거리에서는 계단을 키워, 카메라 거리에 맞춰 넓어진 탈출 반경까지 스텝 예산을 아낀다.
+    float dt = clamp(0.045 * r, 0.004, 0.35 + 0.03 * max(0.0, r - 10.0));
 
     // RK4 적분
     vec3 k1x = vel;
@@ -322,11 +341,14 @@ void main() {
 
     // 얇은 원반(y = 0 평면) 통과 검출
     if (prev.y * pos.y < 0.0) {
-      float t   = prev.y / (prev.y - pos.y);
-      vec3  hit = mix(prev, pos, t);
-      vec3  hd  = normalize(mix(vel, newVel, t));
-      accum += diskEmission(hit, hd) * trans;
-      trans *= 0.05;
+      float t     = prev.y / (prev.y - pos.y);
+      vec3  hit   = mix(prev, pos, t);
+      float cover = diskCover(length(hit.xz));     // 원반이 있는 반경에서만 차단
+      if (cover > 0.0) {
+        vec3  hd = normalize(mix(vel, newVel, t));
+        accum += diskEmission(hit, hd) * trans;
+        trans *= mix(1.0, 0.05, cover);
+      }
     }
 
     // 원반 근처 발광 안개
@@ -359,7 +381,7 @@ void main() {
 
   // 비네트
   vec2 q = gl_FragCoord.xy / uRes;
-  float vig = smoothstep(1.15, 0.35, length(q - 0.5) * 1.6);
+  float vig = 1.0 - smoothstep(0.35, 1.15, length(q - 0.5) * 1.6);
   col *= 0.55 + 0.45 * vig;
 
   // 디더링 (밴딩 억제)
@@ -418,7 +440,7 @@ void main() {
 
   const U = {};
   ['uRes', 'uTime', 'uCamPos', 'uCamBasis', 'uTanFov', 'uDiskInner', 'uDiskOuter',
-   'uDiskBright', 'uExposure', 'uDoppler', 'uStars', 'uHaze', 'uSteps']
+   'uDiskBright', 'uExposure', 'uDoppler', 'uStars', 'uHaze', 'uSteps', 'uEscapeR']
     .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
   // 풀스크린 삼각형
@@ -572,9 +594,12 @@ void main() {
   /* ───────── 렌더 준비 ───────── */
   const camrEl = document.getElementById('camr');
   const fpsEl = document.getElementById('fps');
+  const FLOW_PERIOD = 14;          // 셰이더의 FLOW_PERIOD와 반드시 같아야 함
   let simTime = 0;
   let lastT = performance.now();
-  let fpsAcc = 0, fpsFrames = 0;
+  let fpsLast = lastT, fpsFrames = 0;
+  let lastSig = '';                 // 마지막으로 그린 상태 서명
+  let camrText = '';
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -619,7 +644,10 @@ void main() {
     basis.set(right, 0); basis.set(up, 3); basis.set(fwd, 6);
 
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    gl.uniform1f(U.uTime, simTime);
+    // uTime은 두 주기에서 감아서 전달 → 정밀도 유지(모아레 리셋과 위상 동일)
+    gl.uniform1f(U.uTime, simTime % (2 * FLOW_PERIOD));
+    // 탈출 판정 반경: 카메라 거리보다 항상 바깥 (최대 줌아웃에서도 스텝이 조기 종료되지 않음)
+    gl.uniform1f(U.uEscapeR, Math.max(55, state.dist * 1.6 + 8));
     gl.uniform3fv(U.uCamPos, camPos);
     gl.uniformMatrix3fv(U.uCamBasis, false, basis);
     gl.uniform1f(U.uTanFov, Math.tan(state.fov * Math.PI / 360));
@@ -635,9 +663,19 @@ void main() {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
+  // 화면에 영향을 주는 값들만 모은 서명 — 같으면 다시 그리지 않는다
+  function renderSig() {
+    return simTime.toFixed(5) + '|' + canvas.width + 'x' + canvas.height + '|'
+      + state.yaw.toFixed(4) + '|' + state.pitch.toFixed(4) + '|' + state.dist.toFixed(4) + '|'
+      + state.fov + '|' + state.inner + '|' + state.outer + '|' + state.diskBright + '|'
+      + state.exposure + '|' + state.doppler + '|' + state.stars + '|' + state.haze + '|'
+      + Math.round(state.steps);
+  }
+
   function frame(now) {
-    const dt = Math.min(0.05, (now - lastT) / 1000);
+    const elapsed = (now - lastT) / 1000;              // 실제 경과 시간 (FPS 측정용)
     lastT = now;
+    const dt = Math.min(0.05, Math.max(0, elapsed));   // 애니메이션용 (클램프)
 
     if (!state.paused) {
       simTime += dt * state.timeScale;
@@ -645,20 +683,30 @@ void main() {
     }
 
     resize();
-    draw();
 
-    camrEl.textContent = state.dist.toFixed(1);
+    // 일시정지 중에도 카메라/설정/해상도가 바뀌면 그때만 다시 그린다
+    const sig = renderSig();
+    if (sig !== lastSig) {
+      draw();
+      lastSig = sig;
+      fpsFrames++;
 
-    // FPS + 자동 화질
-    fpsAcc += dt; fpsFrames++;
-    if (fpsAcc > 0.5) {
-      const fps = fpsFrames / fpsAcc;
-      fpsEl.textContent = fps.toFixed(0) + ' fps';
-      if (state.autoQuality) {
+      const camrNow = state.dist.toFixed(1);
+      if (camrNow !== camrText) { camrEl.textContent = camrNow; camrText = camrNow; }
+    } else {
+      fpsLast = now;        // 그리지 않은 프레임은 FPS 집계에서 제외
+    }
+
+    // FPS + 자동 화질 (클램프되지 않은 실제 시간 기준)
+    const fpsElapsed = (now - fpsLast) / 1000;
+    if (fpsElapsed > 0.5) {
+      const fps = fpsFrames / fpsElapsed;
+      if (fpsFrames > 0) fpsEl.textContent = fps.toFixed(0) + ' fps';
+      if (state.autoQuality && fpsFrames > 0) {
         if (fps < 34 && state.resScale > 0.45) state.resScale = Math.max(0.45, state.resScale - 0.08);
         else if (fps > 56 && state.resScale < state.maxScale) state.resScale = Math.min(state.maxScale, state.resScale + 0.06);
       }
-      fpsAcc = 0; fpsFrames = 0;
+      fpsLast = now; fpsFrames = 0;
     }
 
     requestAnimationFrame(frame);
