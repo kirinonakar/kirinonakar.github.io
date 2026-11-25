@@ -85,16 +85,20 @@
 
 <div id="info">
   <h1>🕳 가르강튀아 시뮬레이터</h1>
-  슈바르츠실트 블랙홀 실시간 광선 추적 — 중력 렌즈 · 강착원반 · 도플러 비밍 · 중력 적색편이
+  <span id="modelName">슈바르츠실트</span> 블랙홀 실시간 광선 추적 — 중력 렌즈 · 강착원반 · 도플러 비밍 · 중력 적색편이
+  <span class="dim" id="modelStats"></span>
   <span class="dim">드래그: 회전 · 휠/핀치: 줌 · Space: 정지 · R: 초기화 · S: 저장 · H: UI</span>
 </div>
 
 <div id="panel">
   <div class="hdr">관측 설정 <span id="fps">-- fps</span></div>
 
+  <div class="row"><span>블랙홀 회전율</span><input aria-label="블랙홀 회전율 a/M" type="range" data-key="spin" min="0" max="0.998" step="0.001" value="0"><b data-out="spin"></b></div>
+  <div class="row2"><button id="schwarzBtn">Schwarzschild</button><button id="kerrBtn">Kerr 0.9</button></div>
+  <div class="row2"><label><input type="checkbox" id="autoISCO" checked> 원반 안쪽 ISCO 연동</label></div>
   <div class="row"><span>디스크 밝기</span><input type="range" data-key="diskBright" min="0" max="3" step="0.01" value="1"><b data-out="diskBright"></b></div>
   <div class="row"><span>노출</span><input type="range" data-key="exposure" min="0.2" max="3" step="0.01" value="1"><b data-out="exposure"></b></div>
-  <div class="row"><span>원반 안쪽 (rs)</span><input type="range" data-key="inner" min="1.6" max="6" step="0.05" value="3"><b data-out="inner"></b></div>
+  <div class="row"><span>원반 안쪽 (rs)</span><input type="range" data-key="inner" min="0.60" max="6" step="0.001" value="3"><b data-out="inner"></b></div>
   <div class="row"><span>원반 바깥 (rs)</span><input type="range" data-key="outer" min="6" max="30" step="0.1" value="15"><b data-out="outer"></b></div>
   <div class="row"><span>도플러 비밍</span><input type="range" data-key="doppler" min="0" max="1" step="0.01" value="0.9"><b data-out="doppler"></b></div>
   <div class="row"><span>발광 안개</span><input type="range" data-key="haze" min="0" max="2" step="0.01" value="0.6"><b data-out="haze"></b></div>
@@ -122,7 +126,7 @@
 </div>
 
 <div id="hint">
-  슈바르츠실트 반지름 <b>r<sub>s</sub> = 1</b> · ISCO <b>3 r<sub>s</sub></b> · 광자 구 <b>1.5 r<sub>s</sub></b> · 카메라 <b><span id="camr">17.0</span> r<sub>s</sub></b>
+  기준 <b>r<sub>s</sub> = 2M = 1</b> · 지평선 <b id="horizonText">1.000</b> · 순행 ISCO <b id="iscoText">3.000</b> · 카메라 <b><span id="camr">17.0</span> r<sub>s</sub></b>
 </div>
 
 <div id="fatal"></div>
@@ -153,6 +157,9 @@ uniform float uDoppler;
 uniform float uStars;
 uniform float uHaze;
 uniform int   uSteps;
+#ifdef KERR
+uniform float uSpin;      // a/M, positive in the x→z azimuth convention
+#endif
 uniform float uEscapeR;    // 탈출 판정 반경 (카메라 거리에 맞춰 JS에서 전달)
 
 const float RS         = 1.0;    // 슈바르츠실트 반지름 (단위계: rs = 1, M = 0.5)
@@ -205,6 +212,70 @@ vec3 tempRamp(float t) {
   return c;
 }
 
+/* Kerr: outgoing Kerr–Schild coordinates (regular for past-directed
+   captured rays), with polar axis y and azimuth atan(z,x).
+   Units: G=c=1, M=0.5, a=0.5*uSpin.  Signature (-,+,+,+).
+   g_mn = eta_mn + 2 H l_m l_n, l_t=1; g^mn = eta^mn - 2 H l^m l^n.
+   Integrate the null Hamiltonian with constant covariant p_t=E>0.
+   This is a metric geodesic, not an ad hoc swirl or lens warp. */
+#ifdef KERR
+float spinA() { return 0.5 * uSpin; }
+float horizonR() { return 0.5 * (1.0 + sqrt(max(0.0, 1.0-uSpin*uSpin))); }
+float kerrRadius(vec3 x) {
+  float a = spinA(), a2 = a*a;
+  float b = dot(x,x)-a2;
+  return sqrt(max(1e-8, 0.5*(b + sqrt(max(0.0,b*b+4.0*a2*x.y*x.y)))));
+}
+void ksMetric(vec3 x, out float r, out float H, out vec3 l) {
+  float a=spinA(), a2=a*a;
+  r=kerrRadius(x);
+  float D=r*r+a2;
+  H=0.5*r*r*r/(r*r*r*r+a2*x.y*x.y);
+  l=vec3((-r*x.x+a*x.z)/D, -x.y/r, (-r*x.z-a*x.x)/D);
+}
+// Analytic spatial derivatives of H and l·p at fixed covariant momentum.
+void kerrRhs(vec3 x, vec3 p, float E, out vec3 dx, out vec3 dp) {
+  float a=spinA(), a2=a*a;
+  float r,H; vec3 l;
+  ksMetric(x,r,H,l);
+  float r2=r*r, D=r2+a2, F=r2*r2+a2*x.y*x.y;
+  float sigma=F/r2;
+  vec3 dr=vec3(r*x.x, D*x.y/r, r*x.z)/sigma;
+  vec3 dH=H*((3.0/r-4.0*r2*r/F)*dr-vec3(0.0,2.0*a2*x.y/F,0.0));
+  float n=(-r*x.x+a*x.z)*p.x+(-r*x.z-a*x.x)*p.z;
+  float dLdr=-(x.x*p.x+x.z*p.z)/D-2.0*r*n/(D*D)+x.y*p.y/r2;
+  vec3 dL=vec3((-r*p.x-a*p.z)/D,-p.y/r,(a*p.x-r*p.z)/D)+dLdr*dr;
+  float k=dot(l,p)-E;
+  dx=p-2.0*H*k*l;
+  dp=k*k*dH+2.0*H*k*dL;
+}
+vec3 kerrVelocity(vec3 x, vec3 p, float E) {
+  float r,H; vec3 l; ksMetric(x,r,H,l);
+  return p-2.0*H*(dot(l,p)-E)*l;
+}
+// Static observer's orthonormal spatial frame. Camera stays well outside ergosphere.
+vec3 kerrInitial(vec3 x, vec3 dir, out float E) {
+  float r,H; vec3 l; ksMetric(x,r,H,l);
+  float f=max(1e-6,1.0-2.0*H);
+  float root=sqrt(f);
+  vec3 v=dir+(root-1.0)*dot(l,dir)*l;
+  float vt=-1.0/root+2.0*H*dot(l,v)/f;
+  E=root; // local photon energy is one; past-directed p_t is positive
+  return v+2.0*H*(vt+dot(l,v))*l;
+}
+float diskRadius(vec3 p) { return sqrt(max(1e-8,dot(p.xz,p.xz)-spinA()*spinA())); }
+float kerrShift(vec3 hit, float E, float pPhi) {
+  float r=diskRadius(hit), a=spinA();
+  // Prograde circular orbit: Omega = sqrt(M)/(r^(3/2)+a sqrt(M)).
+  float omega=0.70710678118/(r*sqrt(r)+a*0.70710678118);
+  float gtt=-1.0+1.0/r, gtphi=-a/r, gphiphi=r*r+a*a+a*a/r;
+  float norm2=-gtt-2.0*omega*gtphi-omega*omega*gphiphi;
+  return sqrt(max(1e-8,norm2))/max(1e-6,E+omega*pPhi);
+}
+#else
+float diskRadius(vec3 p) { return length(p.xz); }
+#endif
+
 /* 원반이 실제로 존재하는 영역의 커버리지(내/외곽 페이드 포함) */
 float diskCover(float r) {
   float inner = uDiskInner;
@@ -221,10 +292,10 @@ float diskTurbulence(float r, float ang, float t) {
 }
 
 /* ───────────── 강착원반 복사 ───────────── */
-vec3 diskEmission(vec3 p, vec3 rd) {
+vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
   float inner = uDiskInner;
   float outer = max(uDiskOuter, inner * 1.5);
-  float r = length(p.xz);
+  float r = diskRadius(p);
   if (r < inner || r > outer) return vec3(0.0);
 
   float edge = diskCover(r);
@@ -244,6 +315,9 @@ vec3 diskEmission(vec3 p, vec3 rd) {
   float density = 0.30 + 1.05 * smoothstep(0.22, 0.78, n);
 
   // 상대론적 도플러 + 중력 적색편이
+#ifdef KERR
+  float g = kerrShift(p,E,pPhi);
+#else
   vec3  vhat = normalize(vec3(-p.z, 0.0, p.x));                  // 원궤도 속도 방향 (a2 = ang - ωt 와 동일 방향)
   float beta = min(0.90, sqrt(0.5 / r) / sqrt(max(0.05, 1.0 - 1.0 / r)));
   float gam  = inversesqrt(max(0.05, 1.0 - beta * beta));
@@ -256,6 +330,7 @@ vec3 diskEmission(vec3 p, vec3 rd) {
   vec3  viewL = normalize(-(dRad / sqrt(fHit) + (rd - dRad)));
   float mu    = dot(vhat, viewL);                                // 시선방향 성분
   float g    = sqrt(max(0.0, 1.0 - 1.0 / r)) / (gam * (1.0 - beta * mu));
+#endif
   g = clamp(g, 0.05, 5.0);
 
   float gEff  = mix(1.0, g, uDoppler);
@@ -328,7 +403,7 @@ vec3 integrateHaze(vec3 a, vec3 b, float dt, float jit) {
     float t = (float(j) + jit) / float(N);
     vec3  p = mix(a, b, t);
 
-    float rr = length(p.xz);
+    float rr = diskRadius(p);
 
     // 수직 경계는 하드 컷 대신 smoothstep 으로 0까지 연속 감쇠
     float dens = exp(-p.y * p.y / 0.055)
@@ -349,6 +424,14 @@ void main() {
 
   vec3 pos = uCamPos;
 
+#ifdef KERR
+  float E;
+  vec3 mom = kerrInitial(pos,rd,E);
+  // Axisymmetry: p_phi is conserved. Use initial value for frequency shift.
+  float pPhi = pos.x*mom.z-pos.z*mom.x;
+  vec3 vel = kerrVelocity(pos,mom,E);
+#else
+  float E=1.0, pPhi=0.0;
   // 국소(정지 관측자) 좌표계 방향 → 좌표계 방향 변환.
   // 원점 기준 반지름 성분만 sqrt(f) 로 줄여야 dr/dφ 가 슈바르츠실트 측지선과 일치한다.
   // (변환 없이 rd 를 그대로 쓰면 근거리에서 그림자 각반경이 이론값보다 커진다)
@@ -358,6 +441,7 @@ void main() {
   vec3  vel    = sqrt(fCam) * vr + (rd - vr);
   vec3  hvec   = cross(pos, vel);
   float h2   = dot(hvec, hvec);
+#endif
 
   vec3  accum = vec3(0.0);
   float trans = 1.0;
@@ -370,10 +454,31 @@ void main() {
   for (int i = 0; i < MAX_STEPS; i++) {
     if (i >= uSteps) break;
 
+#ifdef KERR
+    float r = kerrRadius(pos);
+    if (r <= horizonR()+0.006) { captured=true; break; }
+#else
     float r = length(pos);
     if (r < 1.10 * RS) { captured = true; break; }
+#endif
     if (r > uEscapeR && dot(pos, vel) > 0.0) { escaped = true; break; }
 
+#ifdef KERR
+    // Affine step limited by local coordinate velocity and distance to the hole.
+    float dt=clamp(0.065*r,0.003,0.55+0.045*max(0.0,r-10.0))/max(1.0,length(vel));
+    dt=min(dt,0.30*max(0.015,r-horizonR())/max(1.0,length(vel)));
+    vec3 k1x,k1p,k2x,k2p,k3x,k3p,k4x,k4p;
+    kerrRhs(pos,mom,E,k1x,k1p);
+    kerrRhs(pos+0.5*dt*k1x,mom+0.5*dt*k1p,E,k2x,k2p);
+    kerrRhs(pos+0.5*dt*k2x,mom+0.5*dt*k2p,E,k3x,k3p);
+    kerrRhs(pos+dt*k3x,mom+dt*k3p,E,k4x,k4p);
+    vec3 prev=pos;
+    pos+=(dt/6.0)*(k1x+2.0*k2x+2.0*k3x+k4x);
+    mom+=(dt/6.0)*(k1p+2.0*k2p+2.0*k3p+k4p);
+    vec3 newVel=kerrVelocity(pos,mom,E);
+    // Haze is an artistic emissivity, integrated along coordinate path length.
+    float hazeLen=length(pos-prev);
+#else
     // 원거리에서는 계단을 키워, 카메라 거리에 맞춰 넓어진 탈출 반경까지 스텝 예산을 아낀다.
     float dt = clamp(0.045 * r, 0.004, 0.35 + 0.03 * max(0.0, r - 10.0));
 
@@ -390,33 +495,41 @@ void main() {
     vec3  prev = pos;
     vec3  newVel = vel + (dt / 6.0) * (k1v + 2.0 * k2v + 2.0 * k3v + k4v);
     pos += (dt / 6.0) * (k1x + 2.0 * k2x + 2.0 * k3x + k4x);
+    float hazeLen=dt;
+#endif
 
     // y = 0 원반면 통과 검출 + 안개 적분 구간 분리
     if (prev.y * pos.y < 0.0) {
       float t     = prev.y / (prev.y - pos.y);
       vec3  hit   = mix(prev, pos, t);
-      float cover = diskCover(length(hit.xz));    // 원반이 있는 반경에서만 차단
+      float cover = diskCover(diskRadius(hit));    // 원반이 있는 반경에서만 차단
 
       // 1) 원반 앞쪽 안개 — 충돌 전 투과율로 적분
-      accum += integrateHaze(prev, hit, dt * t, hazeJit) * trans;
+      accum += integrateHaze(prev, hit, hazeLen * t, hazeJit) * trans;
 
       // 2) 원반 충돌 및 투과율 갱신
       if (cover > 0.0) {
         vec3  hd = normalize(mix(vel, newVel, t));
-        accum += diskEmission(hit, hd) * trans;
+        accum += diskEmission(hit, hd, E, pPhi) * trans;
         trans *= mix(1.0, 0.05, cover);
       }
 
       // 3) 원반 뒤쪽 안개 — 갱신된 투과율 적용
-      accum += integrateHaze(hit, pos, dt * (1.0 - t), hazeJit) * trans;
+      accum += integrateHaze(hit, pos, hazeLen * (1.0 - t), hazeJit) * trans;
     } else {
-      accum += integrateHaze(prev, pos, dt, hazeJit) * trans;
+      accum += integrateHaze(prev, pos, hazeLen, hazeJit) * trans;
     }
 
     vel = newVel;
     if (trans < 0.02) break;
   }
 
+#ifdef KERR
+  if (kerrRadius(pos)<=horizonR()+0.006) captured=true;
+  // Unresolved rays are not treated as escaped; outgoing far rays are usable
+  // at low quality as in the original renderer.
+  if (!escaped && !(length(pos)>12.0 && dot(pos,vel)>0.0)) captured=true;
+#endif
   vec3 col = accum;
   if (!captured) {
     float rEnd = length(pos);
@@ -475,42 +588,47 @@ void main() {
     return s;
   }
 
-  let prog;
-  try {
-    prog = gl.createProgram();
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, document.getElementById('vs').textContent));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, document.getElementById('fs').textContent));
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
-    gl.useProgram(prog);
-  } catch (e) {
-    fatal.classList.add('show');
-    fatal.textContent = '셰이더 컴파일 실패: ' + e.message;
-    return;
+  const uniformNames = ['uRes','uTime','uCamPos','uCamBasis','uTanFov','uDiskInner','uDiskOuter',
+    'uDiskBright','uExposure','uDoppler','uStars','uHaze','uSteps','uEscapeR','uSpin'];
+  const programs = new Map();
+  const vs = compile(gl.VERTEX_SHADER, document.getElementById('vs').textContent);
+  const fsSource = document.getElementById('fs').textContent.trim();
+  function getProgram(kerr) {
+    if (programs.has(kerr)) return programs.get(kerr);
+    const program=gl.createProgram();
+    const fragment=compile(gl.FRAGMENT_SHADER,kerr
+      ? fsSource.replace('#version 300 es','#version 300 es\n#define KERR 1') : fsSource);
+    gl.attachShader(program,vs);
+    gl.attachShader(program,fragment);
+    gl.bindAttribLocation(program,0,'aPos');
+    gl.linkProgram(program);
+    gl.deleteShader(fragment);
+    if (!gl.getProgramParameter(program,gl.LINK_STATUS)) {
+      const log=gl.getProgramInfoLog(program); gl.deleteProgram(program); throw new Error(log);
+    }
+    const uniforms={};
+    uniformNames.forEach(n=>{uniforms[n]=gl.getUniformLocation(program,n);});
+    const entry={program,uniforms}; programs.set(kerr,entry); return entry;
   }
+  try { getProgram(false); }
+  catch(e) { fatal.classList.add('show'); fatal.textContent='셰이더 컴파일 실패: '+e.message; return; }
 
-  const U = {};
-  ['uRes', 'uTime', 'uCamPos', 'uCamBasis', 'uTanFov', 'uDiskInner', 'uDiskOuter',
-   'uDiskBright', 'uExposure', 'uDoppler', 'uStars', 'uHaze', 'uSteps', 'uEscapeR']
-    .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
-
-  // 풀스크린 삼각형
+  // 두 프로그램에서 동일한 정점 attribute location을 사용한다.
   gl.bindVertexArray(gl.createVertexArray());
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(prog, 'aPos');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
 
   /* ───────── 상태 ───────── */
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const DEFAULTS = {
-    diskBright: 1, exposure: 1, inner: 3, outer: 15, doppler: 0.9,
+    spin: 0, diskBright: 1, exposure: 1, inner: 3, outer: 15, doppler: 0.9,
     haze: 0.6, stars: 0.8, steps: 240, fov: 42, timeScale: 1
   };
   const state = Object.assign({
     yaw: 0.7, pitch: 0.10, dist: 17,
-    autoRotate: true, autoQuality: true, paused: false,
+    autoRotate: true, autoQuality: true, autoISCO: true, paused: false,
     resScale: 0.9, maxScale: 1.0
   }, DEFAULTS);
 
@@ -526,12 +644,48 @@ void main() {
       state[key] = parseFloat(inp.value);
       out.textContent = (key === 'steps' || key === 'fov')
         ? String(Math.round(state[key]))
-        : state[key].toFixed(2);
+        : state[key].toFixed(key === 'spin' || key === 'inner' ? 3 : 2);
     };
     inp.addEventListener('input', sync);
     sync();
   });
 
+  const autoISCOEl=document.getElementById('autoISCO');
+  const modelName=document.getElementById('modelName');
+  const horizonText=document.getElementById('horizonText');
+  const iscoText=document.getElementById('iscoText');
+  function isco(spin) {
+    const z1=1+Math.cbrt(1-spin*spin)*(Math.cbrt(1+spin)+Math.cbrt(1-spin));
+    const z2=Math.sqrt(3*spin*spin+z1*z1);
+    return 0.5*(3+z2-Math.sqrt(Math.max(0,(3-z1)*(3+z1+2*z2))));
+  }
+  function syncModel() {
+    const rISCO=isco(state.spin);
+    const rH=0.5*(1+Math.sqrt(1-state.spin*state.spin));
+    modelName.textContent=state.spin>0?'Kerr':'슈바르츠실트';
+    horizonText.textContent=rH.toFixed(3);
+    iscoText.textContent=rISCO.toFixed(3);
+    document.getElementById('modelStats').textContent=`a/M = ${state.spin.toFixed(3)} · 지평선 ${rH.toFixed(3)} rs · 순행 ISCO ${rISCO.toFixed(3)} rs`;
+    // Circular-orbit emitter is defined only outside the photon orbit. Keep
+    // manual values at or above ISCO so the frequency shift stays physical.
+    sliders.inner.min=(state.spin>0?Math.ceil(rISCO*1000)/1000:1.6).toFixed(3);
+    if (state.autoISCO) sliders.inner.value=Math.ceil(rISCO*1000)/1000;
+    else sliders.inner.value=Math.max(Number(sliders.inner.min),state.inner);
+    state.inner=Number(sliders.inner.value);
+    outs.inner.textContent=state.inner.toFixed(3);
+    document.getElementById('schwarzBtn').classList.toggle('on',state.spin===0);
+    document.getElementById('kerrBtn').classList.toggle('on',state.spin>0);
+  }
+  function setSpin(v) {
+    sliders.spin.value=v;
+    sliders.spin.dispatchEvent(new Event('input'));
+  }
+  sliders.spin.addEventListener('input',syncModel);
+  sliders.inner.addEventListener('input',()=>{state.autoISCO=false;autoISCOEl.checked=false;});
+  autoISCOEl.addEventListener('change',()=>{state.autoISCO=autoISCOEl.checked;syncModel();});
+  document.getElementById('schwarzBtn').addEventListener('click',()=>setSpin(0));
+  document.getElementById('kerrBtn').addEventListener('click',()=>setSpin(0.9));
+  syncModel();
   const autoRotateEl = document.getElementById('autoRotate');
   const autoQualityEl = document.getElementById('autoQuality');
   const pauseBtn = document.getElementById('pauseBtn');
@@ -573,6 +727,7 @@ void main() {
     state.autoRotate = true;
     state.autoQuality = true;
     state.resScale = 0.9;
+    state.autoISCO=true; autoISCOEl.checked=true; syncModel();
     setPaused(false);
   }
   document.getElementById('resetBtn').addEventListener('click', resetAll);
@@ -688,6 +843,16 @@ void main() {
   const basis = new Float32Array(9);
 
   function draw() {
+    let entry;
+    try { entry=getProgram(state.spin>0); }
+    catch(e) {
+      console.error(e); setSpin(0);
+      errlog.textContent='Kerr 셰이더 초기화 실패 — Schwarzschild로 복귀: '+e.message;
+      errlog.classList.add('show'); entry=getProgram(false);
+    }
+    gl.useProgram(entry.program);
+    const U=entry.uniforms;
+    if (U.uSpin!==null) gl.uniform1f(U.uSpin,state.spin);
     gl.viewport(0, 0, canvas.width, canvas.height);
 
     const cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
@@ -724,7 +889,7 @@ void main() {
   function renderSig() {
     return simTime.toFixed(5) + '|' + canvas.width + 'x' + canvas.height + '|'
       + state.yaw.toFixed(4) + '|' + state.pitch.toFixed(4) + '|' + state.dist.toFixed(4) + '|'
-      + state.fov + '|' + state.inner + '|' + state.outer + '|' + state.diskBright + '|'
+      + state.spin + '|' + state.fov + '|' + state.inner + '|' + state.outer + '|' + state.diskBright + '|'
       + state.exposure + '|' + state.doppler + '|' + state.stars + '|' + state.haze + '|'
       + Math.round(state.steps);
   }
