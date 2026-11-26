@@ -102,6 +102,7 @@
   <div class="row"><span>원반 바깥 (rs)</span><input type="range" data-key="outer" min="6" max="30" step="0.1" value="15"><b data-out="outer"></b></div>
   <div class="row"><span>도플러 비밍</span><input type="range" data-key="doppler" min="0" max="1" step="0.01" value="0.9"><b data-out="doppler"></b></div>
   <div class="row"><span>발광 안개</span><input type="range" data-key="haze" min="0" max="2" step="0.01" value="0.6"><b data-out="haze"></b></div>
+  <div class="row"><span>블룸</span><input type="range" data-key="bloom" min="0" max="1.5" step="0.05" value="0.45"><b data-out="bloom"></b></div>
   <div class="row"><span>별 밝기</span><input type="range" data-key="stars" min="0" max="2" step="0.01" value="0.8"><b data-out="stars"></b></div>
   <div class="row"><span>품질 (스텝)</span><input type="range" data-key="steps" min="80" max="480" step="10" value="240"><b data-out="steps"></b></div>
   <div class="row"><span>화각 (°)</span><input type="range" data-key="fov" min="18" max="80" step="1" value="42"><b data-out="fov"></b></div>
@@ -145,6 +146,7 @@ precision highp float;
 out vec4 outColor;
 
 uniform vec2  uRes;
+uniform vec2  uJitter;     // 서브픽셀 지터(px). 정지 상태 누적 AA 에서만 0 이 아니다.
 uniform float uTime;
 uniform vec3  uCamPos;
 uniform mat3  uCamBasis;    // columns: right, up, forward
@@ -220,57 +222,66 @@ vec3 tempRamp(float t) {
    This is a metric geodesic, not an ad hoc swirl or lens warp. */
 #ifdef KERR
 float spinA() { return 0.5 * uSpin; }
-float horizonR() { return 0.5 * (1.0 + sqrt(max(0.0, 1.0-uSpin*uSpin))); }
+float horizonR() { return 0.5 * (1.0 + sqrt(max(0.0, 1.0 - uSpin * uSpin))); }
+
 float kerrRadius(vec3 x) {
-  float a = spinA(), a2 = a*a;
-  float b = dot(x,x)-a2;
-  return sqrt(max(1e-8, 0.5*(b + sqrt(max(0.0,b*b+4.0*a2*x.y*x.y)))));
+  float a = spinA(), a2 = a * a;
+  float b = dot(x, x) - a2;
+  return sqrt(max(1e-8, 0.5 * (b + sqrt(max(0.0, b * b + 4.0 * a2 * x.y * x.y)))));
 }
+
 void ksMetric(vec3 x, out float r, out float H, out vec3 l) {
-  float a=spinA(), a2=a*a;
-  r=kerrRadius(x);
-  float D=r*r+a2;
-  H=0.5*r*r*r/(r*r*r*r+a2*x.y*x.y);
-  l=vec3((-r*x.x+a*x.z)/D, -x.y/r, (-r*x.z-a*x.x)/D);
+  float a = spinA(), a2 = a * a;
+  r = kerrRadius(x);
+  float D = r * r + a2;
+  H = 0.5 * r * r * r / (r * r * r * r + a2 * x.y * x.y);
+  l = vec3((-r * x.x + a * x.z) / D, -x.y / r, (-r * x.z - a * x.x) / D);
 }
+
 // Analytic spatial derivatives of H and l·p at fixed covariant momentum.
 void kerrRhs(vec3 x, vec3 p, float E, out vec3 dx, out vec3 dp) {
-  float a=spinA(), a2=a*a;
-  float r,H; vec3 l;
-  ksMetric(x,r,H,l);
-  float r2=r*r, D=r2+a2, F=r2*r2+a2*x.y*x.y;
-  float sigma=F/r2;
-  vec3 dr=vec3(r*x.x, D*x.y/r, r*x.z)/sigma;
-  vec3 dH=H*((3.0/r-4.0*r2*r/F)*dr-vec3(0.0,2.0*a2*x.y/F,0.0));
-  float n=(-r*x.x+a*x.z)*p.x+(-r*x.z-a*x.x)*p.z;
-  float dLdr=-(x.x*p.x+x.z*p.z)/D-2.0*r*n/(D*D)+x.y*p.y/r2;
-  vec3 dL=vec3((-r*p.x-a*p.z)/D,-p.y/r,(a*p.x-r*p.z)/D)+dLdr*dr;
-  float k=dot(l,p)-E;
-  dx=p-2.0*H*k*l;
-  dp=k*k*dH+2.0*H*k*dL;
+  float a = spinA(), a2 = a * a;
+  float r, H; vec3 l;
+  ksMetric(x, r, H, l);
+  float r2 = r * r, D = r2 + a2, F = r2 * r2 + a2 * x.y * x.y;
+  float sigma = F / r2;
+  vec3  dr = vec3(r * x.x, D * x.y / r, r * x.z) / sigma;
+  vec3  dH = H * ((3.0 / r - 4.0 * r2 * r / F) * dr - vec3(0.0, 2.0 * a2 * x.y / F, 0.0));
+  float n = (-r * x.x + a * x.z) * p.x + (-r * x.z - a * x.x) * p.z;
+  float dLdr = -(x.x * p.x + x.z * p.z) / D - 2.0 * r * n / (D * D) + x.y * p.y / r2;
+  vec3  dL = vec3((-r * p.x - a * p.z) / D, -p.y / r, (a * p.x - r * p.z) / D) + dLdr * dr;
+  float k = dot(l, p) - E;
+  dx = p - 2.0 * H * k * l;
+  dp = k * k * dH + 2.0 * H * k * dL;
 }
+
 vec3 kerrVelocity(vec3 x, vec3 p, float E) {
-  float r,H; vec3 l; ksMetric(x,r,H,l);
-  return p-2.0*H*(dot(l,p)-E)*l;
+  float r, H; vec3 l;
+  ksMetric(x, r, H, l);
+  return p - 2.0 * H * (dot(l, p) - E) * l;
 }
+
 // Static observer's orthonormal spatial frame. Camera stays well outside ergosphere.
 vec3 kerrInitial(vec3 x, vec3 dir, out float E) {
-  float r,H; vec3 l; ksMetric(x,r,H,l);
-  float f=max(1e-6,1.0-2.0*H);
-  float root=sqrt(f);
-  vec3 v=dir+(root-1.0)*dot(l,dir)*l;
-  float vt=-1.0/root+2.0*H*dot(l,v)/f;
-  E=root; // local photon energy is one; past-directed p_t is positive
-  return v+2.0*H*(vt+dot(l,v))*l;
+  float r, H; vec3 l;
+  ksMetric(x, r, H, l);
+  float f = max(1e-6, 1.0 - 2.0 * H);
+  float root = sqrt(f);
+  vec3  v = dir + (root - 1.0) * dot(l, dir) * l;
+  float vt = -1.0 / root + 2.0 * H * dot(l, v) / f;
+  E = root; // local photon energy is one; past-directed p_t is positive
+  return v + 2.0 * H * (vt + dot(l, v)) * l;
 }
-float diskRadius(vec3 p) { return sqrt(max(1e-8,dot(p.xz,p.xz)-spinA()*spinA())); }
+
+float diskRadius(vec3 p) { return sqrt(max(1e-8, dot(p.xz, p.xz) - spinA() * spinA())); }
+
 float kerrShift(vec3 hit, float E, float pPhi) {
-  float r=diskRadius(hit), a=spinA();
+  float r = diskRadius(hit), a = spinA();
   // Prograde circular orbit: Omega = sqrt(M)/(r^(3/2)+a sqrt(M)).
-  float omega=0.70710678118/(r*sqrt(r)+a*0.70710678118);
-  float gtt=-1.0+1.0/r, gtphi=-a/r, gphiphi=r*r+a*a+a*a/r;
-  float norm2=-gtt-2.0*omega*gtphi-omega*omega*gphiphi;
-  return sqrt(max(1e-8,norm2))/max(1e-6,E+omega*pPhi);
+  float omega = 0.70710678118 / (r * sqrt(r) + a * 0.70710678118);
+  float gtt = -1.0 + 1.0 / r, gtphi = -a / r, gphiphi = r * r + a * a + a * a / r;
+  float norm2 = -gtt - 2.0 * omega * gtphi - omega * omega * gphiphi;
+  return sqrt(max(1e-8, norm2)) / max(1e-6, E + omega * pPhi);
 }
 #else
 float diskRadius(vec3 p) { return length(p.xz); }
@@ -330,6 +341,12 @@ vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
   vec3  viewL = normalize(-(dRad / sqrt(fHit) + (rd - dRad)));
   float mu    = dot(vhat, viewL);                                // 시선방향 성분
   float g    = sqrt(max(0.0, 1.0 - 1.0 / r)) / (gam * (1.0 - beta * mu));
+  // 관측자 쪽 청색편이: 국소 정지 관측자의 광자 에너지 E = √f_cam 으로 나눈다.
+  // Kerr 모드는 kerrShift 가 E(= √f_cam)로 이미 같은 효과를 넣으므로, 이 항이
+  // 없으면 회전율 0 ↔ 0.001 전환에서 밝기가 툭 튄다(17 rs 에서 g 9%,
+  // 3.5 rs 에서 g 18% → g³ 기준 밝기 65% 차이).
+  float fCam = 1.0 - RS / max(length(uCamPos), RS * 1.0001);
+  g /= sqrt(max(1e-4, fCam));
 #endif
   g = clamp(g, 0.05, 5.0);
 
@@ -387,16 +404,27 @@ vec3 aces(vec3 x) {
    광선 구간 [a, b] 를 8분할 중점 샘플한다. 호출 측이 원반 충돌 지점에서
    구간을 미리 쪼개 넘기면, 원반 앞쪽 안개가 충돌 후 투과율로 곱해져
    어두워지는 오류가 사라진다(스텝마다 밝기가 튀는 = 가로 줄무늬의 주 원인).
-   jit 은 픽셀 고정 [0,1) 위상으로, 8단 양자화 오차를 공간 디더로 흩뿌린다. */
-vec3 integrateHaze(vec3 a, vec3 b, float dt, float jit) {
+   jit 은 픽셀 고정 [0,1) 위상으로, 8단 양자화 오차를 공간 디더로 흩뿌린다.
+
+   안개는 발광만 하지 않고 자체 흡수도 한다(방출-흡수 매질). 흡수가 없으면
+   광자구 근처에서 적도면 슬래브를 여러 바퀴 도는 광선이 안개를 끝없이 쌓아
+   그림자 양옆에 세로 스파이크가 생긴다(발광 안개 0 → 사라지는 그 증상).
+   광학깊이 tau 를 앞에서 뒤로 누적해 exp(-tau) 로 감쇠시키면 쌓이는 양에
+   상한(≈ 발광/흡수 비)이 자연히 생긴다. segTrans 로 구간 투과율을 돌려주므로
+   뒤쪽 원반과 별도 같은 비율로 어두워져 물리적으로 앞뒤가 맞는다. */
+const float HAZE_ABSORB = 0.7;   // 흡수 계수 / 발광 세기 비 — 클수록 빨리 포화
+vec3 integrateHaze(vec3 a, vec3 b, float dt, float jit, out float segTrans) {
+  segTrans = 1.0;
   if (uHaze <= 0.001 || dt <= 0.0) return vec3(0.0);
   // 밀도가 유효한 |y| < 0.95 슬래브를 구간 전체가 벗어나면 즉시 종료
   if (min(a.y, b.y) >= 0.95 || max(a.y, b.y) <= -0.95) return vec3(0.0);
 
   float inner = uDiskInner;
   float outer = max(uDiskOuter, inner * 1.5);
+  float ds    = dt / 8.0;
 
-  vec3 result = vec3(0.0);
+  vec3  result = vec3(0.0);
+  float tau    = 0.0;
   const int N = 8;
 
   for (int j = 0; j < N; j++) {
@@ -412,14 +440,17 @@ vec3 integrateHaze(vec3 a, vec3 b, float dt, float jit) {
     float win  = smoothstep(inner * 0.75, inner * 1.5, rr)
                * (1.0 - smoothstep(outer * 0.75, outer * 1.1, rr));
 
-    result += hazeEmission(rr) * dens * win;
+    // 앞쪽 안개가 뒤쪽 발광을 가리므로 exp(-tau) 를 곱하고, tau 는 뒤로 갱신
+    result += hazeEmission(rr) * dens * win * exp(-tau);
+    tau    += dens * win * ds * uHaze * HAZE_ABSORB;
   }
 
-  return result * (dt / float(N)) * uHaze * 0.5;
+  segTrans = exp(-tau);
+  return result * ds * uHaze * 0.5;
 }
 
 void main() {
-  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
+  vec2 uv = (gl_FragCoord.xy + uJitter - 0.5 * uRes) / uRes.y;
   vec3 rd = normalize(uCamBasis * vec3(uv * 2.0 * uTanFov, 1.0));
 
   vec3 pos = uCamPos;
@@ -465,19 +496,19 @@ void main() {
 
 #ifdef KERR
     // Affine step limited by local coordinate velocity and distance to the hole.
-    float dt=clamp(0.065*r,0.003,0.55+0.045*max(0.0,r-10.0))/max(1.0,length(vel));
-    dt=min(dt,0.30*max(0.015,r-horizonR())/max(1.0,length(vel)));
-    vec3 k1x,k1p,k2x,k2p,k3x,k3p,k4x,k4p;
-    kerrRhs(pos,mom,E,k1x,k1p);
-    kerrRhs(pos+0.5*dt*k1x,mom+0.5*dt*k1p,E,k2x,k2p);
-    kerrRhs(pos+0.5*dt*k2x,mom+0.5*dt*k2p,E,k3x,k3p);
-    kerrRhs(pos+dt*k3x,mom+dt*k3p,E,k4x,k4p);
-    vec3 prev=pos;
-    pos+=(dt/6.0)*(k1x+2.0*k2x+2.0*k3x+k4x);
-    mom+=(dt/6.0)*(k1p+2.0*k2p+2.0*k3p+k4p);
-    vec3 newVel=kerrVelocity(pos,mom,E);
-    // Haze is an artistic emissivity, integrated along coordinate path length.
-    float hazeLen=length(pos-prev);
+    float dt = clamp(0.065 * r, 0.003, 0.55 + 0.045 * max(0.0, r - 10.0)) / max(1.0, length(vel));
+    dt = min(dt, 0.30 * max(0.015, r - horizonR()) / max(1.0, length(vel)));
+    vec3 k1x, k1p, k2x, k2p, k3x, k3p, k4x, k4p;
+    kerrRhs(pos, mom, E, k1x, k1p);
+    kerrRhs(pos + 0.5 * dt * k1x, mom + 0.5 * dt * k1p, E, k2x, k2p);
+    kerrRhs(pos + 0.5 * dt * k2x, mom + 0.5 * dt * k2p, E, k3x, k3p);
+    kerrRhs(pos + dt * k3x, mom + dt * k3p, E, k4x, k4p);
+    vec3 prev = pos;
+    pos += (dt / 6.0) * (k1x + 2.0 * k2x + 2.0 * k3x + k4x);
+    mom += (dt / 6.0) * (k1p + 2.0 * k2p + 2.0 * k3p + k4p);
+    vec3 newVel = kerrVelocity(pos, mom, E);
+    // 안개는 좌표계 이동 거리로 적분한다(슈바르츠실트 모드와 동일 기준).
+    float hazeLen = length(pos - prev);
 #else
     // 원거리에서는 계단을 키워, 카메라 거리에 맞춰 넓어진 탈출 반경까지 스텝 예산을 아낀다.
     float dt = clamp(0.045 * r, 0.004, 0.35 + 0.03 * max(0.0, r - 10.0));
@@ -495,17 +526,22 @@ void main() {
     vec3  prev = pos;
     vec3  newVel = vel + (dt / 6.0) * (k1v + 2.0 * k2v + 2.0 * k3v + k4v);
     pos += (dt / 6.0) * (k1x + 2.0 * k2x + 2.0 * k3x + k4x);
-    float hazeLen=dt;
+    // 안개는 실제 이동 거리로 적분한다. 아핀 파라미터 dt 를 그대로 쓰면 |vel| 이
+    // 광자구 근처에서 커질수록 안개가 과소평가된다(Kerr 모드와 동일 기준).
+    float hazeLen = length(pos - prev);
 #endif
 
     // y = 0 원반면 통과 검출 + 안개 적분 구간 분리
+    float segT;
     if (prev.y * pos.y < 0.0) {
       float t     = prev.y / (prev.y - pos.y);
       vec3  hit   = mix(prev, pos, t);
       float cover = diskCover(diskRadius(hit));    // 원반이 있는 반경에서만 차단
 
-      // 1) 원반 앞쪽 안개 — 충돌 전 투과율로 적분
-      accum += integrateHaze(prev, hit, hazeLen * t, hazeJit) * trans;
+      // 1) 원반 앞쪽 안개 — 충돌 전 투과율로 적분 (안개 자체 흡수도 여기서 누적)
+      vec3 hz = integrateHaze(prev, hit, hazeLen * t, hazeJit, segT);
+      accum += hz * trans;
+      trans *= segT;
 
       // 2) 원반 충돌 및 투과율 갱신
       if (cover > 0.0) {
@@ -515,9 +551,13 @@ void main() {
       }
 
       // 3) 원반 뒤쪽 안개 — 갱신된 투과율 적용
-      accum += integrateHaze(hit, pos, hazeLen * (1.0 - t), hazeJit) * trans;
+      hz = integrateHaze(hit, pos, hazeLen * (1.0 - t), hazeJit, segT);
+      accum += hz * trans;
+      trans *= segT;
     } else {
-      accum += integrateHaze(prev, pos, hazeLen, hazeJit) * trans;
+      vec3 hz = integrateHaze(prev, pos, hazeLen, hazeJit, segT);
+      accum += hz * trans;
+      trans *= segT;
     }
 
     vel = newVel;
@@ -525,10 +565,9 @@ void main() {
   }
 
 #ifdef KERR
-  if (kerrRadius(pos)<=horizonR()+0.006) captured=true;
-  // Unresolved rays are not treated as escaped; outgoing far rays are usable
-  // at low quality as in the original renderer.
-  if (!escaped && !(length(pos)>12.0 && dot(pos,vel)>0.0)) captured=true;
+  if (kerrRadius(pos) <= horizonR() + 0.006) captured = true;
+  // 스텝을 다 쓴 광선을 흡수로 단정하지 않는다. 바깥으로 진행 중이면 아래 배경
+  // 로직이 별을 그려 주므로 저품질(스텝 80)에서도 별이 검게 빠지지 않는다.
 #endif
   vec3 col = accum;
   if (!captured) {
@@ -543,10 +582,7 @@ void main() {
   col *= uExposure;
   col = aces(col);
 
-  // 비네트
-  vec2 q = gl_FragCoord.xy / uRes;
-  float vig = 1.0 - smoothstep(0.35, 1.15, length(q - 0.5) * 1.6);
-  col *= 0.55 + 0.45 * vig;
+  // 비네트는 후처리 합성 패스에서 적용한다(블룸까지 함께 감싸도록).
 
   // 디더링 (밴딩 억제)
   col += (hash13(vec3(gl_FragCoord.xy, uTime)) - 0.5) * (1.0 / 255.0);
@@ -565,7 +601,7 @@ void main() {
 
   const gl = canvas.getContext('webgl2', {
     antialias: false, alpha: false, depth: false, stencil: false,
-    preserveDrawingBuffer: true, powerPreference: 'high-performance'
+    preserveDrawingBuffer: false, powerPreference: 'high-performance'
   });
   if (!gl) {
     fatal.classList.add('show');
@@ -589,7 +625,7 @@ void main() {
   }
 
   const uniformNames = ['uRes','uTime','uCamPos','uCamBasis','uTanFov','uDiskInner','uDiskOuter',
-    'uDiskBright','uExposure','uDoppler','uStars','uHaze','uSteps','uEscapeR','uSpin'];
+    'uDiskBright','uExposure','uDoppler','uStars','uHaze','uSteps','uEscapeR','uSpin','uJitter'];
   const programs = new Map();
   const vs = compile(gl.VERTEX_SHADER, document.getElementById('vs').textContent);
   const fsSource = document.getElementById('fs').textContent.trim();
@@ -620,11 +656,140 @@ void main() {
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
 
+
+  /* ───────── 후처리 (누적 AA · 다운샘플 블룸 · 합성) ───────── */
+  const postVs = compile(gl.VERTEX_SHADER, `#version 300 es
+in vec2 aPos;
+out vec2 vUv;
+void main() { vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`);
+
+  function postProgram(fsSource, names) {
+    const program = gl.createProgram();
+    const fragment = compile(gl.FRAGMENT_SHADER, fsSource);
+    gl.attachShader(program, postVs);
+    gl.attachShader(program, fragment);
+    gl.bindAttribLocation(program, 0, 'aPos');
+    gl.linkProgram(program);
+    gl.deleteShader(fragment);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      const log = gl.getProgramInfoLog(program); gl.deleteProgram(program);
+      throw new Error(log);
+    }
+    const uniforms = {};
+    names.forEach(n => { uniforms[n] = gl.getUniformLocation(program, n); });
+    return { program, uniforms };
+  }
+
+  // 1:1 복사 — 상수 알파 블렌드와 함께 쓰면 1/(n+1) 누적 평균이 된다
+  const copyProg = postProgram(`#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 fragColor;
+uniform sampler2D uSrc;
+void main() { fragColor = vec4(texture(uSrc, vUv).rgb, 1.0); }`, ['uSrc']);
+
+  // 1/4 해상도로 줄이며 밝은 부분만 추출(4탭 평균 → 뜨거운 단일 픽셀의 깜빡임 억제)
+  const brightProg = postProgram(`#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 fragColor;
+uniform sampler2D uSrc;
+uniform float uThresh;
+uniform vec2  uTexel;      // 블룸(1/4) 텍셀 크기
+void main() {
+  // 반 텍셀 오프셋 4탭 = 4x4 원본 픽셀 상자 평균. 뜨거운 단일 픽셀이
+  // 1/4 해상도에서 통째로 튀어 깜빡이는 것을 막는다.
+  vec3 c = 0.25 * (texture(uSrc, vUv + uTexel * vec2(-0.5, -0.5)).rgb
+                 + texture(uSrc, vUv + uTexel * vec2( 0.5, -0.5)).rgb
+                 + texture(uSrc, vUv + uTexel * vec2(-0.5,  0.5)).rgb
+                 + texture(uSrc, vUv + uTexel * vec2( 0.5,  0.5)).rgb);
+  float l = max(c.r, max(c.g, c.b));
+  fragColor = vec4(c * (max(l - uThresh, 0.0) / max(l, 1e-3)), 1.0);
+}`, ['uSrc', 'uThresh', 'uTexel']);
+
+  // 분리형 가우시안 — 가로/세로 패스가 같은 프로그램을 공유한다
+  const blurProg = postProgram(`#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 fragColor;
+uniform sampler2D uSrc;
+uniform vec2 uDir;         // 텍셀 단위 스텝
+void main() {
+  const float w0 = 0.227027, w1 = 0.1945946, w2 = 0.1216216, w3 = 0.054054, w4 = 0.016216;
+  vec3 c = texture(uSrc, vUv).rgb * w0;
+  c += (texture(uSrc, vUv + uDir) + texture(uSrc, vUv - uDir)).rgb * w1;
+  c += (texture(uSrc, vUv + 2.0 * uDir) + texture(uSrc, vUv - 2.0 * uDir)).rgb * w2;
+  c += (texture(uSrc, vUv + 3.0 * uDir) + texture(uSrc, vUv - 3.0 * uDir)).rgb * w3;
+  c += (texture(uSrc, vUv + 4.0 * uDir) + texture(uSrc, vUv - 4.0 * uDir)).rgb * w4;
+  fragColor = vec4(c, 1.0);
+}`, ['uSrc', 'uDir']);
+
+  // 최종 합성 — 블룸 가산 + 비네트 (비네트가 블룸까지 함께 감싼다)
+  const compProg = postProgram(`#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 fragColor;
+uniform sampler2D uScene;
+uniform sampler2D uBloom;
+uniform float uBloomStrength;
+void main() {
+  vec3 col = texture(uScene, vUv).rgb + texture(uBloom, vUv).rgb * uBloomStrength;
+  float vig = 1.0 - smoothstep(0.35, 1.15, length(vUv - 0.5) * 1.6);
+  col *= 0.55 + 0.45 * vig;
+  fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`, ['uScene', 'uBloom', 'uBloomStrength']);
+
+  function makeTarget(w, h) {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    return { tex, fbo, w, h };
+  }
+  function freeTarget(t) {
+    if (!t) return;
+    gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fbo);
+  }
+
+  let rtCache = null;                   // 캔버스 크기가 바뀔 때만 재생성
+  function ensureTargets() {
+    const w = canvas.width, h = canvas.height;
+    if (rtCache && rtCache.w === w && rtCache.h === h) return rtCache;
+    if (rtCache) {
+      freeTarget(rtCache.scene); freeTarget(rtCache.acc);
+      freeTarget(rtCache.bloomA); freeTarget(rtCache.bloomB);
+    }
+    const bw = Math.max(2, w >> 2), bh = Math.max(2, h >> 2);   // 블룸은 1/4 해상도
+    rtCache = {
+      w, h, bw, bh,
+      scene: makeTarget(w, h), acc: makeTarget(w, h),
+      bloomA: makeTarget(bw, bh), bloomB: makeTarget(bw, bh)
+    };
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return rtCache;
+  }
+
+  // Halton(2,3) 저불일치 수열 — 표본 0 은 정확히 픽셀 중심
+  function halton(i, base) {
+    let f = 1, r = 0;
+    while (i > 0) { f /= base; r += f * (i % base); i = Math.floor(i / base); }
+    return r;
+  }
+  function jitterFor(n) {
+    if (n <= 0) return [0, 0];
+    return [halton(n, 2) - 0.5, halton(n, 3) - 0.5];
+  }
   /* ───────── 상태 ───────── */
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const DEFAULTS = {
     spin: 0, diskBright: 1, exposure: 1, inner: 3, outer: 15, doppler: 0.9,
-    haze: 0.6, stars: 0.8, steps: 240, fov: 42, timeScale: 1
+    haze: 0.6, bloom: 0.45, stars: 0.8, steps: 240, fov: 42, timeScale: 1
   };
   const state = Object.assign({
     yaw: 0.7, pitch: 0.10, dist: 17,
@@ -666,8 +831,9 @@ void main() {
     horizonText.textContent=rH.toFixed(3);
     iscoText.textContent=rISCO.toFixed(3);
     document.getElementById('modelStats').textContent=`a/M = ${state.spin.toFixed(3)} · 지평선 ${rH.toFixed(3)} rs · 순행 ISCO ${rISCO.toFixed(3)} rs`;
-    // Circular-orbit emitter is defined only outside the photon orbit. Keep
-    // manual values at or above ISCO so the frequency shift stays physical.
+    // 원궤도 방출자는 광자 궤도 바깥에서만 정의된다. Schwarzschild 는 광자구가
+    // 1.5 rs 이므로 그 바로 바깥인 1.6 rs 가 하한이다(ISCO 3 rs 는 하한이 아니다).
+    // 수동 조절도 이 값 이상으로 유지해 주파수 이동이 물리적으로 유지되게 한다.
     sliders.inner.min=(state.spin>0?Math.ceil(rISCO*1000)/1000:1.6).toFixed(3);
     if (state.autoISCO) sliders.inner.value=Math.ceil(rISCO*1000)/1000;
     else sliders.inner.value=Math.max(Number(sliders.inner.min),state.inner);
@@ -732,11 +898,14 @@ void main() {
   }
   document.getElementById('resetBtn').addEventListener('click', resetAll);
 
+  // preserveDrawingBuffer:false 이므로 같은 태스크에서 그린 직후에만 읽을 수 있다.
   function screenshot() {
+    draw(-1);                     // 지터 0 으로 한 장 렌더
     const a = document.createElement('a');
     a.download = 'gargantua_' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.png';
     a.href = canvas.toDataURL('image/png');
     a.click();
+    forceDraw = true;             // 다음 프레임에서 누적을 처음부터 다시 시작
   }
   document.getElementById('shotBtn').addEventListener('click', screenshot);
 
@@ -831,6 +1000,9 @@ void main() {
   let fpsLast = lastT, fpsFrames = 0;
   let lastSig = '';                 // 마지막으로 그린 상태 서명
   let camrText = '';
+  let accumN = 0;                   // 현재 누적된 AA 표본 수
+  let forceDraw = false;            // 다음 프레임에 누적을 강제로 다시 시작
+  const AA_SAMPLES = 24;            // 정지 상태 누적 상한 (24 장 ≈ 0.4 s)
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -861,7 +1033,8 @@ void main() {
 
   const basis = new Float32Array(9);
 
-  function draw() {
+  function draw(sample) {
+    const rt = ensureTargets();
     let entry;
     try { entry=getProgram(state.spin>0); }
     catch(e) {
@@ -869,10 +1042,14 @@ void main() {
       errlog.textContent='Kerr 셰이더 초기화 실패 — Schwarzschild로 복귀: '+e.message;
       errlog.classList.add('show'); entry=getProgram(false);
     }
+
+    /* 1) 장면 → 오프스크린 텍스처 */
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.scene.fbo);
+    gl.viewport(0, 0, rt.w, rt.h);
+    gl.disable(gl.BLEND);
     gl.useProgram(entry.program);
     const U=entry.uniforms;
     if (U.uSpin!==null) gl.uniform1f(U.uSpin,state.spin);
-    gl.viewport(0, 0, canvas.width, canvas.height);
 
     const cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
     const cy = Math.cos(state.yaw), sy = Math.sin(state.yaw);
@@ -884,7 +1061,9 @@ void main() {
 
     basis.set(right, 0); basis.set(up, 3); basis.set(fwd, 6);
 
-    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    const jit = jitterFor(sample);
+    gl.uniform2f(U.uRes, rt.w, rt.h);
+    gl.uniform2f(U.uJitter, jit[0], jit[1]);
     // uTime은 두 주기에서 감아서 전달 → 정밀도 유지(모아레 리셋과 위상 동일)
     gl.uniform1f(U.uTime, simTime % (2 * FLOW_PERIOD));
     // 탈출 판정 반경: 카메라 거리보다 항상 바깥 (최대 줌아웃에서도 스텝이 조기 종료되지 않음)
@@ -902,6 +1081,55 @@ void main() {
     gl.uniform1i(U.uSteps, Math.round(state.steps));
 
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    /* 2) 누적 버퍼로 평균 (표본 0 은 가중 1 → 덮어쓰기) */
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, rt.scene.tex);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.acc.fbo);
+    gl.viewport(0, 0, rt.w, rt.h);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA);
+    gl.blendColor(0, 0, 0, sample > 0 ? 1 / (sample + 1) : 1);
+    gl.useProgram(copyProg.program);
+    gl.uniform1i(copyProg.uniforms.uSrc, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.disable(gl.BLEND);
+
+    /* 3) 블룸: 1/4 해상도 밝기 추출 → 가로/세로 블러 */
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.bloomA.fbo);
+    gl.viewport(0, 0, rt.bw, rt.bh);
+    gl.useProgram(brightProg.program);
+    gl.bindTexture(gl.TEXTURE_2D, rt.acc.tex);
+    gl.uniform1i(brightProg.uniforms.uSrc, 0);
+    gl.uniform1f(brightProg.uniforms.uThresh, 0.55);
+    gl.uniform2f(brightProg.uniforms.uTexel, 1 / rt.bw, 1 / rt.bh);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    gl.useProgram(blurProg.program);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.bloomB.fbo);
+    gl.bindTexture(gl.TEXTURE_2D, rt.bloomA.tex);
+    gl.uniform1i(blurProg.uniforms.uSrc, 0);
+    gl.uniform2f(blurProg.uniforms.uDir, 1.5 / rt.bw, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.bloomA.fbo);
+    gl.bindTexture(gl.TEXTURE_2D, rt.bloomB.tex);
+    gl.uniform2f(blurProg.uniforms.uDir, 0, 1.5 / rt.bh);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    /* 4) 합성(블룸 + 비네트) → 화면 */
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, rt.w, rt.h);
+    gl.useProgram(compProg.program);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, rt.acc.tex);
+    gl.uniform1i(compProg.uniforms.uScene, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, rt.bloomA.tex);
+    gl.uniform1i(compProg.uniforms.uBloom, 1);
+    gl.uniform1f(compProg.uniforms.uBloomStrength, state.bloom);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.activeTexture(gl.TEXTURE0);
   }
 
   // 화면에 영향을 주는 값들만 모은 서명 — 같으면 다시 그리지 않는다
@@ -910,7 +1138,7 @@ void main() {
       + state.yaw.toFixed(4) + '|' + state.pitch.toFixed(4) + '|' + state.dist.toFixed(4) + '|'
       + state.spin + '|' + state.fov + '|' + state.inner + '|' + state.outer + '|' + state.diskBright + '|'
       + state.exposure + '|' + state.doppler + '|' + state.stars + '|' + state.haze + '|'
-      + Math.round(state.steps);
+      + state.bloom + '|' + Math.round(state.steps);
   }
 
   function frame(now) {
@@ -925,11 +1153,15 @@ void main() {
 
     resize();
 
-    // 일시정지 중에도 카메라/설정/해상도가 바뀌면 그때만 다시 그린다
+    // 장면 서명이 바뀌면 누적을 처음부터 다시 시작한다. 바뀌지 않으면 픽셀 이하로
+    // 지터를 옮겨 가며 AA_SAMPLES 장까지 평균 → 자동 화질이 해상도를 낮춰도
+    // 광자 링이 점선처럼 끊기거나 별이 반짝이지 않는다(정지 상태에서만 동작).
     const sig = renderSig();
-    if (sig !== lastSig) {
-      draw();
-      lastSig = sig;
+    if (sig !== lastSig || forceDraw) { lastSig = sig; accumN = 0; forceDraw = false; }
+
+    if (accumN < AA_SAMPLES) {
+      draw(accumN);          // 표본 0 은 픽셀 중심(가중 1), 이후는 1/(n+1) 평균
+      accumN++;
       fpsFrames++;
 
       const camrNow = state.dist.toFixed(1);
@@ -956,6 +1188,9 @@ void main() {
 
     requestAnimationFrame(frame);
   }
+
+  // 탭 복귀 시 드로잉 버퍼가 비워질 수 있으므로 한 번 더 그린다
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) forceDraw = true; });
 
   requestAnimationFrame(frame);
 })();
