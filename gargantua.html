@@ -302,11 +302,14 @@ float diskTurbulence(float r, float ang, float t) {
   return fbm3(q * 0.8);
 }
 
-/* 표면 밝기 압축 — 기준 반지름(3 rs) 안쪽의 초과분만 부드럽게 누른다.
-   밝기 항이 T² 이라 Kerr 0.9(ISCO 1.16 rs)에서는 3 rs 대비 약 5배가 되어
-   넓은 영역이 흰색으로 포화되고 도플러 비대칭이 묻힌다. 자르지 않고
-   min(x,1) + K(x-1)/(x-1+K) 로 압축하면 3 rs 바깥은 정확히 그대로이고
-   (물리적으로 바뀐 것이 없으므로), 안쪽만 포화 없이 더 밝게 남는다. */
+/* 표면 밝기의 완만한 상한 — 기준 반지름(3 rs) 안쪽의 초과분만 부드럽게 누른다.
+   min(x,1) + K(x-1)/(x-1+K) 는 x = 1 에서 값과 기울기가 모두 1 이라 꺾임이 없고
+   (softBright(1) = 1, softBright'(1) = 1), x→∞ 에서 1+K 로 수렴한다.
+   3 rs 바깥은 정확히 항등이므로 Schwarzschild 기본값은 전혀 바뀌지 않는다.
+
+   주의: Kerr 흰색 포화의 주원인은 밝기가 아니라 색 램프(tempRamp 입력)였고,
+   그쪽은 diskEmission 의 tNorm 정규화가 해결한다. 이 함수의 효과는 작다
+   (측정: 흰색 포화 픽셀 1.98% → 1.89%). 안쪽 밝기 상한을 남겨 두는 용도. */
 const float BRIGHT_KNEE = 3.0;
 float softBright(float x) {
   float d = max(x - 1.0, 0.0);
@@ -366,9 +369,14 @@ vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
   float gEff  = mix(1.0, g, uDoppler);
   float shift = mix(1.0, g, uDoppler * 0.85);
 
-  vec3 col = tempRamp(temp * shift);
-  // 색은 실제 온도(shift 포함), 밝기는 압축한 T² — 고정 노출에서 안쪽이
-  // 흰 덩어리로 날아가지 않으면서 좌우 도플러 비대칭이 남는다.
+  // 색 램프 입력만 이 원반의 최고 온도(안쪽 경계)로 정규화한다.
+  // 3 rs 안쪽은 temp ≥ 1 이라 램프가 흰색으로 클램프되고, 여기에 도플러 shift
+  // 까지 곱해지면 안쪽 전체가 밝기와 무관하게 흰색으로 칠해져 비대칭이 묻힌다.
+  // "이 원반에서 가장 뜨거운 곳이 흰색"이 되도록 표시용으로 맞추는 것이며,
+  // 밝기 비율(T² × g³)은 물리적인 그대로 둔다. inner = 3 이면 나누는 값이 1.
+  float tNorm = pow(3.0 / max(inner, 0.001), 0.85);
+  vec3 col = tempRamp(temp * shift / tNorm);
+  // 밝기는 완만한 상한만 (과포화의 주원인은 위 색 정규화 쪽이다)
   float bright = softBright(temp * temp);
   return col * bright * edge * density * pow(gEff, 3.0) * uDiskBright * 3.6;
 }
@@ -378,8 +386,10 @@ vec3 hazeEmission(float r) {
   // 원반과 같은 고정 기준 반지름(3 rs)을 쓴다. inner 로 정규화하면 회전율을
   // 올려 ISCO 가 줄 때 안개까지 함께 어두워진다.
   float temp = pow(3.0 / max(r, 0.1), 0.85);
-  // 원반과 같은 압축 — ISCO 근처 안개가 흰 덩어리로 번지지 않게 한다
-  return tempRamp(temp) * softBright(temp) * uDiskBright;
+  // 원반과 같은 방식으로 색만 안쪽 경계 기준 정규화한다(밝기 비율은 그대로).
+  // 정규화하지 않으면 Kerr 의 ISCO 근처 안개가 흰색으로 칠해져 원반 색과 어긋난다.
+  float tNorm = pow(3.0 / max(uDiskInner, 0.001), 0.85);
+  return tempRamp(temp / tNorm) * softBright(temp) * uDiskBright;
 }
 
 /* ───────────── 배경 별 (최종 광선 방향으로 샘플) ───────────── */
