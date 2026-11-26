@@ -302,6 +302,17 @@ float diskTurbulence(float r, float ang, float t) {
   return fbm3(q * 0.8);
 }
 
+/* 표면 밝기 압축 — 기준 반지름(3 rs) 안쪽의 초과분만 부드럽게 누른다.
+   밝기 항이 T² 이라 Kerr 0.9(ISCO 1.16 rs)에서는 3 rs 대비 약 5배가 되어
+   넓은 영역이 흰색으로 포화되고 도플러 비대칭이 묻힌다. 자르지 않고
+   min(x,1) + K(x-1)/(x-1+K) 로 압축하면 3 rs 바깥은 정확히 그대로이고
+   (물리적으로 바뀐 것이 없으므로), 안쪽만 포화 없이 더 밝게 남는다. */
+const float BRIGHT_KNEE = 3.0;
+float softBright(float x) {
+  float d = max(x - 1.0, 0.0);
+  return min(x, 1.0) + BRIGHT_KNEE * d / (d + BRIGHT_KNEE);
+}
+
 /* ───────────── 강착원반 복사 ───────────── */
 vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
   float inner = uDiskInner;
@@ -345,8 +356,8 @@ vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
   float g    = sqrt(max(0.0, 1.0 - 1.0 / r)) / (gam * (1.0 - beta * mu));
   // 관측자 쪽 청색편이: 국소 정지 관측자의 광자 에너지 E = √f_cam 으로 나눈다.
   // Kerr 모드는 kerrShift 가 E(= √f_cam)로 이미 같은 효과를 넣으므로, 이 항이
-  // 없으면 회전율 0 ↔ 0.001 전환에서 밝기가 툭 튄다(17 rs 에서 g 9%,
-  // 3.5 rs 에서 g 18% → g³ 기준 밝기 65% 차이).
+  // 없으면 회전율 0 ↔ 0.001 전환에서 밝기가 툭 튄다(17 rs 에서 g 3%,
+  // 3.5 rs 에서 g 18% → g³ 기준 밝기는 9% / 65% 차이).
   float fCam = 1.0 - RS / max(length(uCamPos), RS * 1.0001);
   g /= sqrt(max(1e-4, fCam));
 #endif
@@ -356,7 +367,10 @@ vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
   float shift = mix(1.0, g, uDoppler * 0.85);
 
   vec3 col = tempRamp(temp * shift);
-  return col * temp * temp * edge * density * pow(gEff, 3.0) * uDiskBright * 3.6;
+  // 색은 실제 온도(shift 포함), 밝기는 압축한 T² — 고정 노출에서 안쪽이
+  // 흰 덩어리로 날아가지 않으면서 좌우 도플러 비대칭이 남는다.
+  float bright = softBright(temp * temp);
+  return col * bright * edge * density * pow(gEff, 3.0) * uDiskBright * 3.6;
 }
 
 /* ───────────── 원반 주변 발광 안개 ───────────── */
@@ -364,7 +378,8 @@ vec3 hazeEmission(float r) {
   // 원반과 같은 고정 기준 반지름(3 rs)을 쓴다. inner 로 정규화하면 회전율을
   // 올려 ISCO 가 줄 때 안개까지 함께 어두워진다.
   float temp = pow(3.0 / max(r, 0.1), 0.85);
-  return tempRamp(temp) * temp * uDiskBright;
+  // 원반과 같은 압축 — ISCO 근처 안개가 흰 덩어리로 번지지 않게 한다
+  return tempRamp(temp) * softBright(temp) * uDiskBright;
 }
 
 /* ───────────── 배경 별 (최종 광선 방향으로 샘플) ───────────── */
@@ -410,12 +425,11 @@ vec3 aces(vec3 x) {
    어두워지는 오류가 사라진다(스텝마다 밝기가 튀는 = 가로 줄무늬의 주 원인).
    jit 은 픽셀 고정 [0,1) 위상으로, 8단 양자화 오차를 공간 디더로 흩뿌린다.
 
-   안개는 발광만 하지 않고 자체 흡수도 한다(방출-흡수 매질). 흡수가 없으면
-   광자구 근처에서 적도면 슬래브를 여러 바퀴 도는 광선이 안개를 끝없이 쌓아
-   그림자 양옆에 세로 스파이크가 생긴다(발광 안개 0 → 사라지는 그 증상).
-   광학깊이 tau 를 앞에서 뒤로 누적해 exp(-tau) 로 감쇠시키면 쌓이는 양에
-   상한(≈ 발광/흡수 비)이 자연히 생긴다. segTrans 로 구간 투과율을 돌려주므로
-   뒤쪽 원반과 별도 같은 비율로 어두워져 물리적으로 앞뒤가 맞는다. */
+   안개는 발광만 하지 않고 자체 흡수도 한다(방출-흡수 매질). 광학깊이 tau 를
+   앞에서 뒤로 누적해 exp(-tau) 로 감쇠시키면 쌓이는 양에 상한(≈ 발광/흡수 비)이
+   자연히 생긴다. segTrans 로 구간 투과율을 돌려주므로 뒤쪽 원반과 별도 같은
+   비율로 어두워져 물리적으로 앞뒤가 맞는다.
+   (그림자 양옆의 세로선은 광자 링이지 안개가 아니다 — 안개와 무관하다.) */
 const float HAZE_ABSORB = 0.7;   // 흡수 계수 / 발광 세기 비 — 클수록 빨리 포화
 vec3 integrateHaze(vec3 a, vec3 b, float dt, float jit, out float segTrans) {
   segTrans = 1.0;
@@ -714,7 +728,7 @@ out vec2 vUv;
 void main() { vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`);
 
     // 누적 평균 — 1/(n+1) 가중 혼합을 셰이더에서 계산한다.
-    // (블렌드 대신 ping-pong: float 타깃이 없어도 작은 가중치가 반올림에 묻히지 않는다)
+    // (정밀도 이득은 16F 타깃에서만 유효. 8비트 폴백은 출력 단계에서 다시 반올림된다)
     accProg = postProgram(`#version 300 es
 precision highp float;
 in vec2 vUv;
@@ -787,9 +801,10 @@ vec3 aces(vec3 x) {
 void main() {
   vec3 col = texture(uScene, vUv).rgb;
   // 단계별 가중치는 합이 1 이 되도록 — 밉 단계를 늘려도 전체 광량은 유지된다
-  vec3 bloom = texture(uBloom0, vUv).rgb * 0.45
-             + texture(uBloom1, vUv).rgb * 0.33
-             + texture(uBloom2, vUv).rgb * 0.22;
+  // 가장 넓은 밉(1/16)의 비중을 낮춰 그림자 가장자리가 회색으로 번지는 것을 줄인다
+  vec3 bloom = texture(uBloom0, vUv).rgb * 0.58
+             + texture(uBloom1, vUv).rgb * 0.29
+             + texture(uBloom2, vUv).rgb * 0.13;
   col += bloom * uBloomStrength;
   col = mix(col, aces(col), uTonemap);
   float vig = 1.0 - smoothstep(0.35, 1.15, length(vUv - 0.5) * 1.6);
@@ -1087,7 +1102,9 @@ void main() {
   let accumN = 0;                   // 현재 누적된 AA 표본 수
   let forceDraw = false;            // 다음 프레임에 누적을 강제로 다시 시작
   let needComposite = false;        // 누적은 그대로 두고 블룸·합성만 다시 그린다(저장 직후)
-  const AA_SAMPLES = 24;            // 정지 상태 누적 상한 (24 장 ≈ 0.4 s)
+  // 정지 상태 누적 상한. 8비트 폴백은 mix 결과를 매번 8비트로 반올림해
+  // 뒤쪽 표본이 묻히므로 표본 수를 줄여 시간만 버리지 않게 한다.
+  const AA_SAMPLES = hdrOK ? 24 : 8;
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -1170,9 +1187,11 @@ void main() {
   }
 
   /* ───────── 2) 누적 평균 ─────────
-     1/(n+1) 가중 혼합을 셰이더에서 직접 계산한다. RGBA8 블렌드로는 작은 가중치가
-     8비트 반올림에 묻혀(n=23 이면 12/255 미만 변화는 무시) 뒤쪽 표본이 버려지고
-     평균이 앞쪽 표본으로 치우친다. ping-pong 두 장으로 float 정밀도 평균을 유지한다. */
+     1/(n+1) 가중 혼합을 셰이더에서 계산하고 ping-pong 두 장을 번갈아 쓴다.
+     블렌드 상태를 쓰지 않아 float 타깃 지원 여부와 무관하게 동작한다.
+     다만 정밀도 이득은 16F 타깃에서만 실현된다: RGBA8 폴백은 mix 결과를 매번
+     8비트로 반올림하므로 작은 가중치가 여전히 묻힌다(n=23 이면 12/255 미만 변화
+     무시). 그래서 폴백에서는 AA_SAMPLES 자체를 줄인다. */
   function accumulate(sample) {
     const rt = ensureTargets();
     const prev = rt.accs[accFront];
