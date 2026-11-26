@@ -311,8 +311,10 @@ vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
 
   float edge = diskCover(r);
 
-  // 온도 분포 T ∝ r^-0.85 (표준 얇은 원반은 r^-3/4)
-  float temp = pow(inner / max(r, 0.001), 0.85);
+  // 온도 분포 T ∝ r^-0.85 (표준 얇은 원반은 r^-3/4).
+  // 기준 반지름은 고정값 3 rs — inner 로 정규화하면 Kerr 0.9 처럼 ISCO 가 안쪽으로
+  // 줄어들 때 원반 전체가 어두워진다(실제로는 안쪽만 뜨거워져야 한다).
+  float temp = pow(3.0 / max(r, 0.001), 0.85);
 
   // 케플러 회전(Ω ∝ r^-3/2)을 그대로 쓰면 반지름마다 각속도가 달라 무늬가 계속 감기고,
   // 시간이 지나면 줄무늬 간격이 픽셀보다 좁아져 동심원 모아레가 된다.
@@ -359,7 +361,9 @@ vec3 diskEmission(vec3 p, vec3 rd, float E, float pPhi) {
 
 /* ───────────── 원반 주변 발광 안개 ───────────── */
 vec3 hazeEmission(float r) {
-  float temp = pow(uDiskInner / max(r, 0.1), 0.85);
+  // 원반과 같은 고정 기준 반지름(3 rs)을 쓴다. inner 로 정규화하면 회전율을
+  // 올려 ISCO 가 줄 때 안개까지 함께 어두워진다.
+  float temp = pow(3.0 / max(r, 0.1), 0.85);
   return tempRamp(temp) * temp * uDiskBright;
 }
 
@@ -580,14 +584,17 @@ void main() {
   }
 
   col *= uExposure;
-  col = aces(col);
 
   // 비네트는 후처리 합성 패스에서 적용한다(블룸까지 함께 감싸도록).
 
-  // 디더링 (밴딩 억제)
-  col += (hash13(vec3(gl_FragCoord.xy, uTime)) - 0.5) * (1.0 / 255.0);
-
-  outColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+#ifdef HDR
+  // HDR 경로: 블룸·톤매핑은 합성 패스에서. 여기서는 선형 값을 half float 로 넘긴다.
+  // (여기서 ACES 로 자르면 1 을 넘는 정보가 사라져 블룸 임계값이 무의미해진다)
+  outColor = vec4(clamp(col, 0.0, 60000.0), 1.0);
+#else
+  // 8비트 폴백: 누적 버퍼가 선형 HDR 을 담을 수 없으므로 여기서 톤매핑한다.
+  outColor = vec4(clamp(aces(col), 0.0, 1.0), 1.0);
+#endif
 }
 </script>
 
@@ -607,6 +614,27 @@ void main() {
     fatal.classList.add('show');
     fatal.textContent = '이 브라우저는 WebGL2를 지원하지 않습니다. 최신 Chrome / Edge / Firefox / Safari에서 열어주세요.';
     return;
+  }
+
+  /* ───────── HDR 렌더 타깃 지원 확인 ─────────
+     EXT_color_buffer_float(=RGBA16F 렌더)가 되면 HDR 파이프라인으로 간다.
+     8비트 누적 버퍼로는 1/(n+1) 가중치가 반올림에 묻혀(24장 누적 시 12/255
+     미만 변화는 무시) 뒤쪽 AA 표본이 버려지고, 블룸도 톤매핑된 LDR 에서만
+     동작해 뜨거운 핵과 그냥 밝은 부분이 구분되지 않는다. */
+  let hdrOK = false;
+  if (gl.getExtension('EXT_color_buffer_float')) {
+    const probeTex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, probeTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, 4, 4, 0, gl.RGBA, gl.HALF_FLOAT, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    const probeFbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, probeFbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, probeTex, 0);
+    hdrOK = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.deleteFramebuffer(probeFbo);
+    gl.deleteTexture(probeTex);
   }
 
   /* ───────── 셰이더 컴파일 ───────── */
@@ -630,10 +658,12 @@ void main() {
   const vs = compile(gl.VERTEX_SHADER, document.getElementById('vs').textContent);
   const fsSource = document.getElementById('fs').textContent.trim();
   function getProgram(kerr) {
-    if (programs.has(kerr)) return programs.get(kerr);
+    const key=(kerr?1:0)+(hdrOK?2:0);   // Kerr 여부 × HDR 지원 조합별로 캐시
+    if (programs.has(key)) return programs.get(key);
     const program=gl.createProgram();
-    const fragment=compile(gl.FRAGMENT_SHADER,kerr
-      ? fsSource.replace('#version 300 es','#version 300 es\n#define KERR 1') : fsSource);
+    const defines=(kerr?'#define KERR 1\n':'')+(hdrOK?'#define HDR 1\n':'');
+    const fragment=compile(gl.FRAGMENT_SHADER,
+      fsSource.replace('#version 300 es','#version 300 es\n'+defines));
     gl.attachShader(program,vs);
     gl.attachShader(program,fragment);
     gl.bindAttribLocation(program,0,'aPos');
@@ -644,7 +674,7 @@ void main() {
     }
     const uniforms={};
     uniformNames.forEach(n=>{uniforms[n]=gl.getUniformLocation(program,n);});
-    const entry={program,uniforms}; programs.set(kerr,entry); return entry;
+    const entry={program,uniforms}; programs.set(key,entry); return entry;
   }
   try { getProgram(false); }
   catch(e) { fatal.classList.add('show'); fatal.textContent='셰이더 컴파일 실패: '+e.message; return; }
@@ -657,15 +687,10 @@ void main() {
   gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
 
 
-  /* ───────── 후처리 (누적 AA · 다운샘플 블룸 · 합성) ───────── */
-  const postVs = compile(gl.VERTEX_SHADER, `#version 300 es
-in vec2 aPos;
-out vec2 vUv;
-void main() { vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`);
-
-  function postProgram(fsSource, names) {
+  /* ───────── 후처리 (HDR 누적 AA · 다단 밉 블룸 · 합성) ───────── */
+  function postProgram(fragmentSource, names) {
     const program = gl.createProgram();
-    const fragment = compile(gl.FRAGMENT_SHADER, fsSource);
+    const fragment = compile(gl.FRAGMENT_SHADER, fragmentSource);
     gl.attachShader(program, postVs);
     gl.attachShader(program, fragment);
     gl.bindAttribLocation(program, 0, 'aPos');
@@ -680,16 +705,33 @@ void main() { vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`);
     return { program, uniforms };
   }
 
-  // 1:1 복사 — 상수 알파 블렌드와 함께 쓰면 1/(n+1) 누적 평균이 된다
-  const copyProg = postProgram(`#version 300 es
+  // 후처리 셰이더도 컴파일 실패 시 오류 화면을 보여야 하므로 try 안에서 만든다.
+  let postVs, accProg, brightProg, blurProg, compProg;
+  try {
+    postVs = compile(gl.VERTEX_SHADER, `#version 300 es
+in vec2 aPos;
+out vec2 vUv;
+void main() { vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`);
+
+    // 누적 평균 — 1/(n+1) 가중 혼합을 셰이더에서 계산한다.
+    // (블렌드 대신 ping-pong: float 타깃이 없어도 작은 가중치가 반올림에 묻히지 않는다)
+    accProg = postProgram(`#version 300 es
 precision highp float;
 in vec2 vUv;
 out vec4 fragColor;
-uniform sampler2D uSrc;
-void main() { fragColor = vec4(texture(uSrc, vUv).rgb, 1.0); }`, ['uSrc']);
+uniform sampler2D uSrc;    // 새 표본
+uniform sampler2D uPrev;   // 지금까지의 평균
+uniform float uW;          // 새 표본 가중치 1/(n+1)
+void main() {
+  vec3 cur  = texture(uSrc,  vUv).rgb;
+  vec3 prev = texture(uPrev, vUv).rgb;
+  fragColor = vec4(mix(prev, cur, uW), 1.0);
+}`, ['uSrc', 'uPrev', 'uW']);
 
-  // 1/4 해상도로 줄이며 밝은 부분만 추출(4탭 평균 → 뜨거운 단일 픽셀의 깜빡임 억제)
-  const brightProg = postProgram(`#version 300 es
+    // 1/4 해상도로 줄이며 밝은 부분만 추출(4탭 평균 → 뜨거운 단일 픽셀 깜빡임 억제).
+    // 선형 HDR 기준 임계값 + 소프트 니 → 톤매핑으로 1 에 잘린 값이 아니라
+    // 실제로 노출 기준 백색을 넘는 영역만 골라낸다.
+    brightProg = postProgram(`#version 300 es
 precision highp float;
 in vec2 vUv;
 out vec4 fragColor;
@@ -697,18 +739,20 @@ uniform sampler2D uSrc;
 uniform float uThresh;
 uniform vec2  uTexel;      // 블룸(1/4) 텍셀 크기
 void main() {
-  // 반 텍셀 오프셋 4탭 = 4x4 원본 픽셀 상자 평균. 뜨거운 단일 픽셀이
-  // 1/4 해상도에서 통째로 튀어 깜빡이는 것을 막는다.
   vec3 c = 0.25 * (texture(uSrc, vUv + uTexel * vec2(-0.5, -0.5)).rgb
                  + texture(uSrc, vUv + uTexel * vec2( 0.5, -0.5)).rgb
                  + texture(uSrc, vUv + uTexel * vec2(-0.5,  0.5)).rgb
                  + texture(uSrc, vUv + uTexel * vec2( 0.5,  0.5)).rgb);
   float l = max(c.r, max(c.g, c.b));
-  fragColor = vec4(c * (max(l - uThresh, 0.0) / max(l, 1e-3)), 1.0);
+  const float knee = 0.5;
+  float soft = clamp(l - uThresh + knee, 0.0, 2.0 * knee);
+  soft = soft * soft / (4.0 * knee);
+  float contrib = max(soft, l - uThresh) / max(l, 1e-4);
+  fragColor = vec4(c * contrib, 1.0);
 }`, ['uSrc', 'uThresh', 'uTexel']);
 
-  // 분리형 가우시안 — 가로/세로 패스가 같은 프로그램을 공유한다
-  const blurProg = postProgram(`#version 300 es
+    // 분리형 가우시안 — 가로/세로 패스가 같은 프로그램을 공유한다
+    blurProg = postProgram(`#version 300 es
 precision highp float;
 in vec2 vUv;
 out vec4 fragColor;
@@ -724,25 +768,52 @@ void main() {
   fragColor = vec4(c, 1.0);
 }`, ['uSrc', 'uDir']);
 
-  // 최종 합성 — 블룸 가산 + 비네트 (비네트가 블룸까지 함께 감싼다)
-  const compProg = postProgram(`#version 300 es
+    // 최종 합성 — 다단 블룸 가산 + 톤매핑 + 비네트 + 출력 디더
+    // 톤매핑을 여기로 옮겨 블룸이 HDR(선형)에서 동작하게 한다.
+    compProg = postProgram(`#version 300 es
 precision highp float;
 in vec2 vUv;
 out vec4 fragColor;
 uniform sampler2D uScene;
-uniform sampler2D uBloom;
+uniform sampler2D uBloom0;
+uniform sampler2D uBloom1;
+uniform sampler2D uBloom2;
 uniform float uBloomStrength;
+uniform float uTonemap;     // 1 = HDR(여기서 ACES), 0 = 장면이 이미 톤매핑(8비트 폴백)
+vec3 aces(vec3 x) {
+  const float a = 2.51, b = 0.03, c = 2.43, d = 0.59, e = 0.14;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
 void main() {
-  vec3 col = texture(uScene, vUv).rgb + texture(uBloom, vUv).rgb * uBloomStrength;
+  vec3 col = texture(uScene, vUv).rgb;
+  // 단계별 가중치는 합이 1 이 되도록 — 밉 단계를 늘려도 전체 광량은 유지된다
+  vec3 bloom = texture(uBloom0, vUv).rgb * 0.45
+             + texture(uBloom1, vUv).rgb * 0.33
+             + texture(uBloom2, vUv).rgb * 0.22;
+  col += bloom * uBloomStrength;
+  col = mix(col, aces(col), uTonemap);
   float vig = 1.0 - smoothstep(0.35, 1.15, length(vUv - 0.5) * 1.6);
   col *= 0.55 + 0.45 * vig;
+  // 디더는 8비트 출력 단계에서만 (HDR 누적 버퍼에 넣으면 평균에 섞여 무의미해진다)
+  float dth = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  col += (dth - 0.5) * (1.0 / 255.0);
   fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
-}`, ['uScene', 'uBloom', 'uBloomStrength']);
+}`, ['uScene', 'uBloom0', 'uBloom1', 'uBloom2', 'uBloomStrength', 'uTonemap']);
+  } catch (e) {
+    console.error(e);
+    fatal.classList.add('show');
+    fatal.textContent = '후처리 셰이더 컴파일 실패: ' + e.message;
+    return;
+  }
 
+  // HDR 타깃 — float 렌더가 가능하면 RGBA16F. 8비트 누적 버퍼는 1/(n+1) 가중치를
+  // 표현하지 못해 뒤쪽 표본이 반올림에 묻히고 평균이 앞쪽으로 치우친다.
   function makeTarget(w, h) {
+    const internal = hdrOK ? gl.RGBA16F : gl.RGBA8;
+    const type     = hdrOK ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, internal, w, h, 0, gl.RGBA, type, null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -757,20 +828,30 @@ void main() {
     gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fbo);
   }
 
+  const BLOOM_LEVELS = 3;               // 1/4 → 1/8 → 1/16 (밉마다 반경 2배)
   let rtCache = null;                   // 캔버스 크기가 바뀔 때만 재생성
+  let accFront = 0;                     // accs[accFront] 가 현재 누적 평균
   function ensureTargets() {
     const w = canvas.width, h = canvas.height;
     if (rtCache && rtCache.w === w && rtCache.h === h) return rtCache;
     if (rtCache) {
-      freeTarget(rtCache.scene); freeTarget(rtCache.acc);
-      freeTarget(rtCache.bloomA); freeTarget(rtCache.bloomB);
+      freeTarget(rtCache.scene);
+      rtCache.accs.forEach(freeTarget);
+      rtCache.bloom.forEach(L => { freeTarget(L.a); freeTarget(L.b); });
     }
-    const bw = Math.max(2, w >> 2), bh = Math.max(2, h >> 2);   // 블룸은 1/4 해상도
+    const bloom = [];
+    let bw = Math.max(2, w >> 2), bh = Math.max(2, h >> 2);   // 블룸 시작은 1/4 해상도
+    for (let i = 0; i < BLOOM_LEVELS; i++) {
+      bloom.push({ a: makeTarget(bw, bh), b: makeTarget(bw, bh), w: bw, h: bh });
+      bw = Math.max(2, bw >> 1); bh = Math.max(2, bh >> 1);
+    }
     rtCache = {
-      w, h, bw, bh,
-      scene: makeTarget(w, h), acc: makeTarget(w, h),
-      bloomA: makeTarget(bw, bh), bloomB: makeTarget(bw, bh)
+      w, h,
+      scene: makeTarget(w, h),
+      accs: [makeTarget(w, h), makeTarget(w, h)],
+      bloom
     };
+    accFront = 0;
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     return rtCache;
   }
@@ -899,13 +980,16 @@ void main() {
   document.getElementById('resetBtn').addEventListener('click', resetAll);
 
   // preserveDrawingBuffer:false 이므로 같은 태스크에서 그린 직후에만 읽을 수 있다.
+  // 누적 버퍼에는 이미 AA 표본이 모두 평균되어 있으므로, 저장할 때는 그 버퍼를
+  // 그대로 두고 블룸·합성만 다시 실행한다(예전처럼 지터 0 으로 덮어쓰면 AA 가 사라진다).
   function screenshot() {
-    draw(-1);                     // 지터 0 으로 한 장 렌더
+    if (accumN === 0) { renderScene(0); accumulate(0); accumN = 1; }
+    postProcess();
     const a = document.createElement('a');
     a.download = 'gargantua_' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.png';
     a.href = canvas.toDataURL('image/png');
     a.click();
-    forceDraw = true;             // 다음 프레임에서 누적을 처음부터 다시 시작
+    needComposite = true;         // 다음 프레임에도 같은 화면을 유지(누적은 유지)
   }
   document.getElementById('shotBtn').addEventListener('click', screenshot);
 
@@ -1002,6 +1086,7 @@ void main() {
   let camrText = '';
   let accumN = 0;                   // 현재 누적된 AA 표본 수
   let forceDraw = false;            // 다음 프레임에 누적을 강제로 다시 시작
+  let needComposite = false;        // 누적은 그대로 두고 블룸·합성만 다시 그린다(저장 직후)
   const AA_SAMPLES = 24;            // 정지 상태 누적 상한 (24 장 ≈ 0.4 s)
 
   function resize() {
@@ -1033,7 +1118,8 @@ void main() {
 
   const basis = new Float32Array(9);
 
-  function draw(sample) {
+  /* ───────── 1) 장면 렌더 (선형 HDR) ───────── */
+  function renderScene(sample) {
     const rt = ensureTargets();
     let entry;
     try { entry=getProgram(state.spin>0); }
@@ -1043,7 +1129,7 @@ void main() {
       errlog.classList.add('show'); entry=getProgram(false);
     }
 
-    /* 1) 장면 → 오프스크린 텍스처 */
+    /* 장면 → 오프스크린 텍스처(HDR 지원 시 RGBA16F) */
     gl.bindFramebuffer(gl.FRAMEBUFFER, rt.scene.fbo);
     gl.viewport(0, 0, rt.w, rt.h);
     gl.disable(gl.BLEND);
@@ -1081,55 +1167,94 @@ void main() {
     gl.uniform1i(U.uSteps, Math.round(state.steps));
 
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
 
-    /* 2) 누적 버퍼로 평균 (표본 0 은 가중 1 → 덮어쓰기) */
+  /* ───────── 2) 누적 평균 ─────────
+     1/(n+1) 가중 혼합을 셰이더에서 직접 계산한다. RGBA8 블렌드로는 작은 가중치가
+     8비트 반올림에 묻혀(n=23 이면 12/255 미만 변화는 무시) 뒤쪽 표본이 버려지고
+     평균이 앞쪽 표본으로 치우친다. ping-pong 두 장으로 float 정밀도 평균을 유지한다. */
+  function accumulate(sample) {
+    const rt = ensureTargets();
+    const prev = rt.accs[accFront];
+    const next = rt.accs[1 - accFront];
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, next.fbo);
+    gl.viewport(0, 0, rt.w, rt.h);
+    gl.disable(gl.BLEND);
+    gl.useProgram(accProg.program);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, rt.scene.tex);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.acc.fbo);
-    gl.viewport(0, 0, rt.w, rt.h);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA);
-    gl.blendColor(0, 0, 0, sample > 0 ? 1 / (sample + 1) : 1);
-    gl.useProgram(copyProg.program);
-    gl.uniform1i(copyProg.uniforms.uSrc, 0);
+    gl.uniform1i(accProg.uniforms.uSrc, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, prev.tex);
+    gl.uniform1i(accProg.uniforms.uPrev, 1);
+    gl.uniform1f(accProg.uniforms.uW, sample > 0 ? 1 / (sample + 1) : 1.0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.disable(gl.BLEND);
+    gl.activeTexture(gl.TEXTURE0);
+    accFront = 1 - accFront;
+  }
 
-    /* 3) 블룸: 1/4 해상도 밝기 추출 → 가로/세로 블러 */
-    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.bloomA.fbo);
-    gl.viewport(0, 0, rt.bw, rt.bh);
+  /* ───────── 3) 블룸(다단 밉) + 합성 → 화면 ───────── */
+  function postProcess() {
+    const rt = ensureTargets();
+    gl.activeTexture(gl.TEXTURE0);
+
+    // 1/4 해상도로 밝은 부분만 추출(선형 HDR 이므로 노출 1.0 ≈ 백색이 임계값)
+    const L0 = rt.bloom[0];
+    gl.bindFramebuffer(gl.FRAMEBUFFER, L0.a.fbo);
+    gl.viewport(0, 0, L0.w, L0.h);
     gl.useProgram(brightProg.program);
-    gl.bindTexture(gl.TEXTURE_2D, rt.acc.tex);
+    gl.bindTexture(gl.TEXTURE_2D, rt.accs[accFront].tex);
     gl.uniform1i(brightProg.uniforms.uSrc, 0);
-    gl.uniform1f(brightProg.uniforms.uThresh, 0.55);
-    gl.uniform2f(brightProg.uniforms.uTexel, 1 / rt.bw, 1 / rt.bh);
+    gl.uniform1f(brightProg.uniforms.uThresh, hdrOK ? 1.0 : 0.55);
+    gl.uniform2f(brightProg.uniforms.uTexel, 1 / L0.w, 1 / L0.h);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
+    // 단계마다 1/2 로 줄이며 분리형 가우시안 → 밉이 내려갈수록 반경이 배로 커진다
     gl.useProgram(blurProg.program);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.bloomB.fbo);
-    gl.bindTexture(gl.TEXTURE_2D, rt.bloomA.tex);
     gl.uniform1i(blurProg.uniforms.uSrc, 0);
-    gl.uniform2f(blurProg.uniforms.uDir, 1.5 / rt.bw, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    let srcTex = L0.a.tex;
+    for (let i = 0; i < rt.bloom.length; i++) {
+      const L = rt.bloom[i];
+      gl.bindFramebuffer(gl.FRAMEBUFFER, L.b.fbo);     // 가로
+      gl.viewport(0, 0, L.w, L.h);
+      gl.bindTexture(gl.TEXTURE_2D, srcTex);
+      gl.uniform2f(blurProg.uniforms.uDir, 1.5 / L.w, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, rt.bloomA.fbo);
-    gl.bindTexture(gl.TEXTURE_2D, rt.bloomB.tex);
-    gl.uniform2f(blurProg.uniforms.uDir, 0, 1.5 / rt.bh);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, L.a.fbo);     // 세로
+      gl.bindTexture(gl.TEXTURE_2D, L.b.tex);
+      gl.uniform2f(blurProg.uniforms.uDir, 0, 1.5 / L.h);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      srcTex = L.a.tex;
+    }
 
-    /* 4) 합성(블룸 + 비네트) → 화면 */
+    /* 합성(블룸 + 톤매핑 + 비네트 + 디더) → 화면 */
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, rt.w, rt.h);
     gl.useProgram(compProg.program);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, rt.acc.tex);
+    gl.bindTexture(gl.TEXTURE_2D, rt.accs[accFront].tex);
     gl.uniform1i(compProg.uniforms.uScene, 0);
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, rt.bloomA.tex);
-    gl.uniform1i(compProg.uniforms.uBloom, 1);
+    gl.bindTexture(gl.TEXTURE_2D, rt.bloom[0].a.tex);
+    gl.uniform1i(compProg.uniforms.uBloom0, 1);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, rt.bloom[1].a.tex);
+    gl.uniform1i(compProg.uniforms.uBloom1, 2);
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, rt.bloom[2].a.tex);
+    gl.uniform1i(compProg.uniforms.uBloom2, 3);
     gl.uniform1f(compProg.uniforms.uBloomStrength, state.bloom);
+    gl.uniform1f(compProg.uniforms.uTonemap, hdrOK ? 1.0 : 0.0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.activeTexture(gl.TEXTURE0);
+  }
+
+  function draw(sample) {
+    renderScene(sample);
+    accumulate(sample);
+    postProcess();
   }
 
   // 화면에 영향을 주는 값들만 모은 서명 — 같으면 다시 그리지 않는다
@@ -1170,6 +1295,9 @@ void main() {
       fpsLast = now;        // 그리지 않은 프레임은 FPS 집계에서 제외
       fpsFrames = 0;        // 누적 방지 — 재생 재개 시 이전 프레임 수가 더해지지 않도록
     }
+
+    // 저장 직후처럼 누적 버퍼를 건드리지 않고 화면만 다시 그려야 할 때
+    if (needComposite) { postProcess(); needComposite = false; }
 
     // FPS + 자동 화질 (클램프되지 않은 실제 시간 기준)
     const fpsElapsed = (now - fpsLast) / 1000;
