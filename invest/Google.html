@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -190,12 +190,13 @@
       <div>
         <div class="badge-row">
           <span class="badge blue">NASDAQ · GOOGL Class A</span>
-          <span class="badge green">데이터 기준일: 2026-06-25</span>
+          <span class="badge green">데이터 기준일: 2026-11-28 (종가 11-27)</span>
+          <span class="badge red">고점 대비 -32%</span>
           <span class="badge yellow">EPS × PER 중심</span>
           <span class="badge red">투자 참고용</span>
         </div>
         <h1><span class="gradient-text">Alphabet / Google</span><br>투자 리서치 대시보드</h1>
-        <p>이 페이지는 Alphabet을 단순 광고 기업이 아니라 Search, YouTube, Android, Google Cloud, Gemini, Vertex AI, TPU, Waymo를 포함한 글로벌 AI 플랫폼 기업으로 분석한다. 핵심 질문은 “EPS가 어느 방향으로 움직이고, 시장이 그 EPS에 몇 배의 PER을 부여하는가?”이다.</p>
+        <p>이 페이지는 Alphabet을 단순 광고 기업이 아니라 Search, YouTube, Android, Google Cloud, Gemini, Vertex AI, TPU, Waymo를 포함한 글로벌 AI 플랫폼 기업으로 분석한다. 핵심 질문은 “EPS가 어느 방향으로 움직이고, 시장이 그 EPS에 몇 배의 PER을 부여하는가?”이다. 2026년 10월 고점($404.47) 대비 -32% 조정된 현재 국면은 “AI 버블 조정 + 검색/AI 경쟁 + 반독점·규제”라는 할인 요인과 “PER 14.2배 · 목표가 대비 +41%”라는 밸류에이션 매력이 충돌하는 구간이다.</p>
         <div class="hero-actions">
           <a class="btn" href="#valuation">EPS × PER 민감도 보기</a>
           <a class="btn" href="#scenario">목표주가 후보 보기</a>
@@ -207,9 +208,9 @@
         <div class="kicker">Market Snapshot</div>
         <h3 style="margin:8px 0 0;font-size:25px;letter-spacing:-.03em">확률가중 목표주가 후보</h3>
         <div class="metric-grid">
-          <div class="metric"><div class="label">현재 주가</div><div class="value" id="heroPrice"></div><div class="sub">GOOGL, 최신 거래 기준 <span class="source-tag">S1</span></div></div>
+          <div class="metric"><div class="label">현재 주가</div><div class="value" id="heroPrice"></div><div class="sub">GOOGL, 2026-11-27 종가 · 52주 $260.69~$404.47 <span class="source-tag">S1</span></div></div>
           <div class="metric"><div class="label">시가총액</div><div class="value" id="heroMcap"></div><div class="sub">Class A 기준 금융 데이터 <span class="source-tag">S1</span></div></div>
-          <div class="metric"><div class="label">Forward EPS / PER</div><div class="value" id="heroFwd"></div><div class="sub">FY1 EPS 컨센서스 기반 implied <span class="source-tag">S9</span></div></div>
+          <div class="metric"><div class="label">Forward EPS / PER</div><div class="value" id="heroFwd"></div><div class="sub">FY1 EPS 추정 $22.5 기반 implied <span class="source-tag">S9</span></div></div>
           <div class="metric"><div class="label">확률가중 목표가</div><div class="value" id="heroTarget"></div><div class="sub" id="heroUpside"></div></div>
         </div>
       </aside>
@@ -219,10 +220,10 @@
   <main class="wrap">
     <section class="section">
       <div class="grid grid-4">
-        <div class="card"><div class="kicker">EPS Revision</div><div class="big">상향</div><p>Q1 2026 EPS가 $5.11로 전년 $2.81 대비 급증. 다만 $2.35는 투자증권 평가이익 효과로 반복성은 낮다. <span class="source-tag">S2</span></p></div>
-        <div class="card"><div class="kicker">AI Search</div><div class="big">방어+확장</div><p>AI Mode/Overviews가 검색 사용량을 끌어올리는 긍정 신호와 광고 형식 전환 리스크가 동시에 존재한다.</p></div>
-        <div class="card"><div class="kicker">Cloud Profitability</div><div class="big">마진 확대</div><p>Google Cloud 매출 $20.0B, 영업이익 $6.6B로 Q1 EPS 상향의 가장 강한 구조적 요인. <span class="source-tag">S2</span></p></div>
-        <div class="card"><div class="kicker">Key Risk</div><div class="big">CAPEX·규제</div><p>AI 데이터센터 CAPEX와 DOJ remedy는 FCF와 밸류에이션 할인율에 직접 영향을 준다. <span class="source-tag">S7</span> <span class="source-tag">S11</span></p></div>
+        <div class="card"><div class="kicker">Price Action</div><div class="big">-32%</div><p>11/27 종가 $274.96(+0.68%), 장중 270.03~279.58. 52주 최고 $404.47에서 52주 최저 $260.69에 근접한 상태다. <span class="source-tag">S1</span></p></div>
+        <div class="card"><div class="kicker">Valuation</div><div class="big">PER 14.2x</div><p>TTM EPS $19.15 기준 PER 14.23배. 1년 목표주가 컨센서스 $389는 현재가 대비 +41%로, 조정 전 밸류에이션 프리미엄이 크게 해소됐다. <span class="source-tag">S1</span></p></div>
+        <div class="card"><div class="kicker">AI Search</div><div class="big">방어+경쟁</div><p>AI Mode/Overviews의 사용량 확대와 OpenAI·Perplexity의 상업 쿼리 잠식이 동시 진행. 광고 형식 전환 속도가 관건이다. <span class="source-tag">S5</span></p></div>
+        <div class="card"><div class="kicker">Key Risk</div><div class="big">금리·규제·CAPEX</div><p>12/8~9 FOMC 25bp 인상이 사실상 확정된 가운데, CAPEX와 DOJ remedy가 할인율·FCF를 동시에 압박한다. <span class="source-tag">S7</span> <span class="source-tag">S11</span> <span class="source-tag">S13</span></p></div>
       </div>
       <div class="grid grid-2" style="margin-top:16px">
         <div class="card">
@@ -233,11 +234,13 @@
             <li>YouTube 광고와 구독이 동반 성장하며 광고 사이클 의존도를 완화.</li>
             <li>Gemini, Vertex AI, TPU, AI Studio가 모델·칩·클라우드·배포까지 연결되는 full-stack 포지션을 형성.</li>
             <li>막대한 현금성 자산과 자사주 매입은 장기 EPS 방어 요인.</li>
+            <li>주가가 고점 대비 -32% 조정되며 PER이 14.2배까지 내려와, EPS가 훼손되지 않는다면 재평가 여지가 크다.</li>
           </ul>
         </div>
         <div class="card">
           <h3>핵심 리스크</h3>
           <ul>
+            <li>AI·반도체 버블 조정과 금리 재상승이 겹치면 EPS가 유지돼도 PER이 12배 이하로 압축될 수 있다(가치 함정 리스크).</li>
             <li>AI 검색이 검색 광고 클릭/상업 쿼리 monetization을 훼손할 가능성.</li>
             <li>Google Cloud 성장률이 CAPEX와 감가상각 증가를 충분히 흡수하지 못할 가능성.</li>
             <li>Apple 기본검색 계약·DOJ remedy·EU DMA 등 검색 유통 규제.</li>
@@ -246,13 +249,13 @@
           </ul>
         </div>
       </div>
-      <div class="note" style="margin-top:16px"><b>한 줄 결론:</b> Alphabet의 투자 판단은 “AI가 Search를 잠식하는가”보다 “AI가 Search·Cloud·구독 EPS를 얼마나 빠르게 상향시키고, CAPEX·규제가 그 PER을 얼마나 깎는가”의 함수다. Base Case에서는 FY1 EPS $14.22에 28배를 적용한 $398 부근이 중심 후보이며, 확률가중 목표주가 후보는 약 $397이다.</div>
+      <div class="note" style="margin-top:16px"><b>한 줄 결론:</b> Alphabet은 “AI 버블 조정으로 싸졌지만, 검색·AI 경쟁과 규제가 EPS를 훼손하면 가치 함정”이라는 양면 국면이다. Base Case는 FY1 EPS $22.5 × PER 16배 = $360, Bear $230($19.2 × 12배), Bull $430($23.9 × 18배)이며 확률가중 목표주가 후보는 약 $345(현재가 대비 +25.5%)다. 1년 컨센서스 $389(+41%)와의 격차는 규제·금리 리스크 할인을 얼마나 인정하느냐에서 나온다.</div>
     </section>
 
     <section id="macro" class="section">
       <div class="section-head">
         <div><div class="eyebrow">Industry & Macro</div><h2>디지털 광고·AI 검색·클라우드 업황</h2></div>
-        <p>광고 시장은 여전히 Big Tech 집중도가 높지만 Meta·Amazon·TikTok의 포맷 경쟁과 AI 검색 인터페이스 전환이 Google의 밸류에이션 할인 요인으로 작동한다.</p>
+        <p>광고 시장은 여전히 Big Tech 집중도가 높지만 Meta·Amazon·TikTok의 포맷 경쟁과 AI 검색 인터페이스 전환이 Google의 밸류에이션 할인 요인으로 작동한다. 2026년 10월 이후에는 AI·반도체 버블 조정과 금리 재상승(정책금리 3.75~4.00%, 12/8~9 FOMC 25bp 인상 확률 96~100%)이 겹쳐 업종 전체 멀티플이 압축됐다. <span class="source-tag">S13</span></p>
       </div>
       <div class="grid grid-4">
         <div class="card"><div class="kicker">Search Share</div><div class="big">90.39%</div><p>StatCounter 기준 2026년 5월 전세계 검색엔진 점유율. 절대 우위는 유지되나 Bing·AI 검색의 장기 잠식 가능성 관찰. <span class="source-tag">S5</span></p></div>
@@ -285,7 +288,7 @@
     <section id="sectors" class="section">
       <div class="section-head">
         <div><div class="eyebrow">Business Segments</div><h2>사업부 대시보드: EPS에 미치는 영향</h2></div>
-        <p>Q1 2026 기준 매출 구조는 Search가 여전히 절대 중심이지만, EPS 변동성의 방향은 Cloud 마진과 AI CAPEX가 결정하는 비중이 커지고 있다.</p>
+        <p>Q1 2026 기준 매출 구조는 Search가 여전히 절대 중심이지만, EPS 변동성의 방향은 Cloud 마진과 AI CAPEX가 결정하는 비중이 커지고 있다. 직전 실적 발표(2026-10-28)의 세부 수치는 별도 확인이 필요해, 사업부 수치는 최근 상세 공개 분기인 Q1 2026 기준으로 표시한다.</p>
       </div>
       <div class="grid grid-3" id="segmentCards"></div>
       <div class="grid grid-2" style="margin-top:16px">
@@ -303,7 +306,7 @@
     <section class="section">
       <div class="section-head">
         <div><div class="eyebrow">Financials</div><h2>핵심 재무 및 실적 추세</h2></div>
-        <p>2025년 매출은 $402.8B, 영업이익 $129.0B, 순이익 $132.2B, 희석 EPS $10.81이다. 2026년 Q1에는 Cloud와 투자증권 평가이익이 EPS를 크게 끌어올렸다.</p>
+        <p>2025년 매출은 $402.8B, 영업이익 $129.0B, 순이익 $132.2B, 희석 EPS $10.81이다. 2026년 Q1에는 Cloud와 투자증권 평가이익이 EPS를 크게 끌어올렸다. TTM EPS는 $19.15까지 상승했고, 다음 실적 발표는 2027-02-03 예상이다.</p>
       </div>
       <div class="grid grid-2">
         <div class="glass chart-card">
@@ -326,9 +329,9 @@
         <p>Alphabet의 밸류에이션은 EPS 방향성과 PER 리레이팅의 곱이다. 2022년 EPS 저점 이후 2023~2025년에는 광고 회복, Cloud 수익성, 비용 효율화, 자사주 매입이 EPS를 끌어올렸다.</p>
       </div>
       <div class="grid grid-3">
-        <div class="card"><div class="kicker">최근 5년 EPS 저점</div><div class="big">$4.56</div><p>2022년 광고 경기 둔화와 비용 증가로 EPS 저점 형성. <span class="source-tag">S4</span></p></div>
-        <div class="card"><div class="kicker">최근 5년 EPS 고점</div><div class="big">$10.81</div><p>2025년 EPS는 매출 성장, Cloud 이익, 기타수익 증가로 최고치. <span class="source-tag">S3</span></p></div>
-        <div class="card"><div class="kicker">FY1/FY2 EPS</div><div class="big">$14.22 / $14.64</div><p>ValueInvesting.io 컨센서스. EPS revision 상태는 Q1 beat 이후 상향으로 판단. <span class="source-tag">S9</span></p></div>
+        <div class="card"><div class="kicker">TTM EPS (최근 4개 분기)</div><div class="big">$19.15</div><p>2025 회계연도 $10.81 대비 큰 폭 증가. Q1 2026 EPS $5.11에는 투자증권 평가이익 $2.35가 포함돼 있다. <span class="source-tag">S1</span> <span class="source-tag">S2</span></p></div>
+        <div class="card"><div class="kicker">5년 EPS 저점</div><div class="big">$4.56</div><p>2022년 광고 경기 둔화와 비용 증가로 형성된 저점. 현재 TTM EPS는 그 4.2배 수준. <span class="source-tag">S4</span></p></div>
+        <div class="card"><div class="kicker">FY1/FY2 EPS (추정)</div><div class="big">$22.5 / $24.8</div><p>TTM EPS 대비 FY1 +17%, FY2 +10% 성장 가정. 제공처별 컨센서스 차이가 커 추정치로 표기. <span class="source-tag">S9</span></p></div>
       </div>
       <div class="grid grid-3" style="margin-top:16px">
         <div class="glass chart-card">
@@ -366,13 +369,13 @@
     <section id="valuation" class="section">
       <div class="section-head">
         <div><div class="eyebrow">Valuation</div><h2>밸류에이션: Forward EPS × PER</h2></div>
-        <p>현재가는 FY1 EPS $14.22 기준 약 24.3배 implied PER이다. 다만 데이터 제공처별 forward PE는 24배대~27배대까지 차이가 있어, EPS 기준과 회계/조정 기준을 구분해야 한다.</p>
+        <p>현재가 $274.96은 FY1 EPS 추정 $22.5 기준 약 12.2배 implied PER로, TTM PER 14.2배보다 낮다. 고점 대비 -32% 조정으로 멀티플 부담은 크게 줄었지만, 그만큼 시장이 AI 검색 경쟁·반독점·금리 재상승 리스크를 가격에 반영한 결과다.</p>
       </div>
       <div class="grid grid-4">
-        <div class="card"><div class="kicker">Trailing PE</div><div class="big">26.3x</div><p>TTM EPS $13.11 기준 <span class="source-tag">S1</span></p></div>
-        <div class="card"><div class="kicker">Implied Forward PE</div><div class="big">24.3x</div><p>현재가 ÷ FY1 EPS $14.22 <span class="source-tag">S9</span></p></div>
-        <div class="card"><div class="kicker">PBR / ROE</div><div class="big">8.74x / 38.9%</div><p>자본효율성은 높지만 밸류에이션은 이미 프리미엄 영역. <span class="source-tag">S10</span></p></div>
-        <div class="card"><div class="kicker">FCF Yield</div><div class="big" id="fcfYield"></div><p>TTM FCF $64.4B ÷ 시총. CAPEX 확대 때문에 낮은 편. <span class="source-tag">S2</span></p></div>
+        <div class="card"><div class="kicker">Trailing PE</div><div class="big">14.2x</div><p>TTM EPS $19.15 기준(제공처 표기 14.23배). 5년 평균 대비 뚜렷한 할인 구간. <span class="source-tag">S1</span></p></div>
+        <div class="card"><div class="kicker">Implied Forward PE</div><div class="big">12.2x</div><p>현재가 ÷ FY1 EPS 추정 $22.5 <span class="source-tag">S9</span></p></div>
+        <div class="card"><div class="kicker">PBR / ROE</div><div class="big">6.96x / 38.9%</div><p>주가 조정으로 PBR 부담 완화(자기자본은 2026-06 공개치 기준 추정). <span class="source-tag">S10</span></p></div>
+        <div class="card"><div class="kicker">FCF Yield</div><div class="big" id="fcfYield"></div><p>최근 공개 TTM FCF $64.4B ÷ 시총 $3.349T. CAPEX 확대 부담은 여전. <span class="source-tag">S2</span></p></div>
       </div>
       <div class="grid grid-2" style="margin-top:16px">
         <div class="glass chart-card">
@@ -385,9 +388,10 @@
         </div>
       </div>
       <div class="table-wrap" style="margin-top:16px"><table id="peerTable"></table></div>
+      <div class="mini" style="margin-top:8px">† GOOGL·NVDA는 2026-11-27 종가 기준이며, MSFT·META·AMZN·AAPL·NFLX는 2026-06-25 기준 참고값(이번 갱신 대상 아님)이다.</div>
       <div class="card" style="margin-top:16px">
         <h3>EPS × PER 민감도 매트릭스</h3>
-        <p>목표주가 = 조정 Forward EPS × 적용 PER. Base EPS는 FY1 컨센서스 $14.22를 사용했다. 초록색은 현재가 대비 높고, 붉은색은 낮은 후보값이다.</p>
+        <p>목표주가 = 조정 Forward EPS × 적용 PER. Base EPS는 FY1 추정 $22.5를 사용했고, 적용 PER 구간은 10~20배로 낮췄다. 초록색은 현재가 대비 높고, 붉은색은 낮은 후보값이다.</p>
         <div class="table-wrap"><table class="sensitivity" id="sensitivityTable"></table></div>
       </div>
     </section>
@@ -408,8 +412,8 @@
           <p id="weightedFormula"></p>
           <div class="divider"></div>
           <div class="grid grid-2">
-            <div class="metric"><div class="label">확률가중 목표주가</div><div class="value" id="weightedValue"></div><div class="sub">Bear 20% · Base 55% · Bull 25%</div></div>
-            <div class="metric"><div class="label">현재가 대비 기대수익률</div><div class="value" id="weightedReturn"></div><div class="sub">환율 참고: USD/KRW 1,543.75 <span class="source-tag">S12</span></div></div>
+            <div class="metric"><div class="label">확률가중 목표주가</div><div class="value" id="weightedValue"></div><div class="sub">Bear 25% · Base 50% · Bull 25%</div></div>
+            <div class="metric"><div class="label">현재가 대비 기대수익률</div><div class="value" id="weightedReturn"></div><div class="sub">환율 참고: USD/KRW 1,337.9 <span class="source-tag">S12</span></div></div>
           </div>
         </div>
       </div>
@@ -422,9 +426,9 @@
       </div>
       <div class="table-wrap"><table id="institutionTable"></table></div>
       <div class="grid grid-3" style="margin-top:16px">
-        <div class="card"><h3>가장 보수적</h3><p><b>UBS Neutral / $410</b>. AI와 Cloud 모멘텀을 인정하되 주가 반영도와 규제·CAPEX 부담을 크게 반영하는 쪽이다.</p></div>
-        <div class="card"><h3>중립적</h3><p><b>MarketBeat 평균 $413.13</b>, <b>ValueInvesting.io 평균 $424.53</b>. 컨센서스는 Buy 쪽이나 시나리오 평균은 현 주가 대비 20% 안팎의 상승 여력이다.</p></div>
-        <div class="card"><h3>낙관적</h3><p><b>JPMorgan/Mizuho $460, Citizens JMP $515</b>. Cloud 가속, AI 검색 수익화, TPU/Waymo 옵션 가치를 더 크게 반영한다.</p></div>
+        <div class="card"><h3>현재 컨센서스</h3><p><b>1년 목표주가 $389</b>. 11/27 종가 $274.96 대비 +41%. 주가가 -32% 조정된 뒤에도 목표가가 유지되고 있다는 점은 EPS 훼손이 아직 확인되지 않았다는 신호다. <span class="source-tag">S1</span></p></div>
+        <div class="card"><h3>조정 이전 목표가</h3><p><b>JPMorgan·Mizuho $460, Goldman $450, UBS $410, Citizens JMP $515</b>(2026년 4~6월 발표). 현재가 대비 +49~+87%로, 10월 이후 조정이 반영되기 전 값이다.</p></div>
+        <div class="card"><h3>낙관 시나리오</h3><p>AI Mode 수익화·Cloud/TPU 수요가 이어지면 <b>$430</b>(FY1 EPS $23.9 × 18배)까지 가능. 반대로 규제·금리 압력이 커지면 <b>$230</b>(× 12배)이 하단이다.</p></div>
       </div>
     </section>
 
@@ -436,12 +440,12 @@
       <div class="grid grid-3">
         <div class="card"><div class="kicker">Class A vs Class C</div><div class="big">1 vote vs 0 vote</div><p>Class A는 1주 1표, Class B는 10표, Class C는 원칙적으로 의결권 없음. 경제적 권리는 대체로 동일. <span class="source-tag">S4</span></p></div>
         <div class="card"><div class="kicker">Buyback</div><div class="big">$45.4B</div><p>2025년 Class A/C 240M주를 매입·소각. 2025년 말 $69.5B 매입 여력. <span class="source-tag">S4</span></p></div>
-        <div class="card"><div class="kicker">KRW Reference</div><div class="big">₩533,000</div><p>현재가 $345.29 × USD/KRW 1,543.75 기준 단순 환산. 실제 매수 환율·수수료·세금은 별도. <span class="source-tag">S12</span></p></div>
+        <div class="card"><div class="kicker">KRW Reference</div><div class="big">₩367,869</div><p>현재가 $274.96 × USD/KRW 1,337.9 기준 단순 환산. 원화가 연중 고점(1,555.8원) 대비 강세여서 달러 자산의 원화 평가액은 추가로 축소됐다. <span class="source-tag">S12</span></p></div>
       </div>
       <div class="card" style="margin-top:16px">
         <h3>관찰해야 할 체크포인트</h3>
         <div class="factor-list">
-          <div class="factor"><b>다음 실적 발표</b><span>2026-07-22 after market 예상. EPS revision과 Cloud backlog 업데이트 확인.</span></div>
+          <div class="factor"><b>다음 실적 발표</b><span>2027-02-03 after market 예상(직전 발표 2026-10-28). EPS revision과 Cloud backlog 업데이트 확인.</span></div>
           <div class="factor"><b>Search</b><span>Search & Other 성장률, AI Mode/Overviews monetization, CPC/paid clicks.</span></div>
           <div class="factor"><b>YouTube</b><span>YouTube Ads 성장률, Shorts monetization, Premium/Music/TV 가입자.</span></div>
           <div class="factor"><b>Cloud</b><span>Cloud 성장률, 영업이익률, backlog, Vertex AI/Gemini Enterprise 고객 증가.</span></div>
@@ -454,7 +458,7 @@
     <section id="risks" class="section">
       <div class="section-head">
         <div><div class="eyebrow">Risk Matrix</div><h2>리스크 매트릭스</h2></div>
-        <p>빅테크는 EPS 성장률, PER, 금리, 규제 리스크가 동시에 움직인다. 특히 Google의 검색 독점 규제는 밸류에이션 할인 요인이다.</p>
+        <p>빅테크는 EPS 성장률, PER, 금리, 규제 리스크가 동시에 움직인다. 지금은 연준 재긴축(12/8~9 FOMC 25bp 인상 확률 96~100%, 10년물 4.93%)과 AI 버블 조정이 겹쳐 멀티플이 먼저 압축되는 국면이며, 검색 독점 규제는 구조적 할인 요인으로 남아 있다.</p>
       </div>
       <div class="table-wrap"><table id="riskTable"></table></div>
       <div class="grid grid-2" style="margin-top:16px">
@@ -493,6 +497,8 @@
           <li>컨센서스 EPS와 목표가는 제공처별 집계 대상, 업데이트 시점, 조정 EPS/GAAP EPS 기준 차이로 서로 다를 수 있다.</li>
           <li>기관 리포트 전문이 유료·제한인 경우 공개 기사/요약에 나온 투자의견·목표가·핵심 논리만 정리했다.</li>
           <li>원화 환산은 단순 참고값이며 실제 체결 환율, 환전 수수료, 해외주식 양도세, 배당세는 반영하지 않았다.</li>
+          <li>시장 휴장(주말) 관계로 시장 수치는 모두 2026-11-27 종가 기준이며, 데이터 기준일은 2026-11-28이다.</li>
+          <li>기관 목표가(JPMorgan·Mizuho $460, Goldman $450, UBS $410, Citizens JMP $515)는 2026년 4~6월 발표치로, 10월 이후 조정 국면이 반영되기 전 값이다. 1년 컨센서스 $389와 FY1 EPS 추정 $22.5는 별도 가정임을 명시한다.</li>
         </ul>
       </div>
     </section>
@@ -503,7 +509,7 @@
   </main>
 
   <script>
-    const DATA = {"price": 345.29, "market_cap_trn": 4.1835, "current_eps_ttm": 13.11, "trailing_pe": 26.33790999237224, "forward_eps_fy1": 14.22, "forward_eps_fy2": 14.64, "forward_eps_fy3": 16.0, "forward_pe_implied": 24.28199718706048, "avg_target": 413.13, "weighted_target": 396.908, "expected_return": 0.1494917315879405, "usdkrw": 1543.75, "krw_price": 533041.4375, "pbr": 8.74, "roe": 38.88, "fcf_ttm": 64.429, "fcf_yield": 1.5400741006334409, "annual": [{"year": "2021", "revenue": 257.637, "op": 78.714, "net": 76.033, "eps": 5.61}, {"year": "2022", "revenue": 282.836, "op": 74.842, "net": 59.972, "eps": 4.56}, {"year": "2023", "revenue": 307.394, "op": 84.293, "net": 73.795, "eps": 5.8}, {"year": "2024", "revenue": 350.018, "op": 112.39, "net": 100.118, "eps": 8.04}, {"year": "2025", "revenue": 402.836, "op": 129.039, "net": 132.17, "eps": 10.81}], "quarters": [{"q": "Q2 24", "revenue": 84.742, "op": 27.425, "net": 23.619, "eps": 1.89}, {"q": "Q3 24", "revenue": 88.268, "op": 28.521, "net": 26.301, "eps": 2.12}, {"q": "Q4 24", "revenue": 96.469, "op": 30.972, "net": 26.536, "eps": 2.15}, {"q": "Q1 25", "revenue": 90.234, "op": 30.606, "net": 34.54, "eps": 2.81}, {"q": "Q2 25", "revenue": 96.428, "op": 31.271, "net": 28.196, "eps": 2.31}, {"q": "Q3 25", "revenue": 102.346, "op": 31.228, "net": 34.979, "eps": 2.87}, {"q": "Q4 25", "revenue": 113.828, "op": 35.934, "net": 34.455, "eps": 2.82}, {"q": "Q1 26", "revenue": 109.896, "op": 39.696, "net": 62.578, "eps": 5.11}], "segments": [{"name": "Google Search & Other", "value": 60.399, "status": "긍정", "growth": "+19% YoY", "eps": "최대 EPS 엔진", "note": "AI Mode·AI Overviews가 사용량 확대 요인이나 광고 형식 전환 리스크 병존"}, {"name": "YouTube Ads", "value": 9.883, "status": "긍정", "growth": "+11% YoY", "eps": "광고+구독 복합", "note": "Shorts·CTV·Premium이 성장축, TikTok/Netflix와 시간 점유 경쟁"}, {"name": "Subscriptions / Platforms / Devices", "value": 12.384, "status": "긍정", "growth": "+19% YoY", "eps": "반복매출 확대", "note": "YouTube Premium, Music, Google One, AI 요금제가 ARPU 방어"}, {"name": "Google Cloud", "value": 20.028, "status": "강한 긍정", "growth": "+63% YoY", "eps": "마진 상향 핵심", "note": "GCP·AI 인프라·Vertex AI·Workspace가 Cloud 영업이익률 개선을 견인"}, {"name": "Google Network", "value": 6.971, "status": "중립~부정", "growth": "-3.9% YoY", "eps": "TAC/네트워크 믹스", "note": "AdSense 약세와 프라이버시 변화 영향"}, {"name": "Waymo / Other Bets", "value": 0.411, "status": "옵션 가치", "growth": "매출 소규모", "eps": "단기 손실", "note": "완전자율주행 rides 확장. 단기 EPS에는 손실 확대 리스크"}], "peer_data": [{"name": "Alphabet", "ticker": "GOOGL", "price": 345.29, "mcap": "$4.18T", "pe": 26.34, "eps": 13.11, "note": "Search+Cloud+AI full-stack"}, {"name": "Microsoft", "ticker": "MSFT", "price": 365.46, "mcap": "$2.72T", "pe": 21.75, "eps": 16.8, "note": "Azure/Office/AI Copilot"}, {"name": "Meta", "ticker": "META", "price": 557.67, "mcap": "$1.43T", "pe": 20.28, "eps": 27.5, "note": "AI 광고 자동화/Reels"}, {"name": "Amazon", "ticker": "AMZN", "price": 234.27, "mcap": "$2.55T", "pe": 28.02, "eps": 8.36, "note": "AWS+Retail+Ads"}, {"name": "Apple", "ticker": "AAPL", "price": 293.08, "mcap": "$4.32T", "pe": 35.48, "eps": 8.26, "note": "기기 생태계/서비스"}, {"name": "Nvidia", "ticker": "NVDA", "price": 199.0, "mcap": "$4.85T", "pe": 30.29, "eps": 6.57, "note": "AI GPU/플랫폼"}, {"name": "Netflix", "ticker": "NFLX", "price": 71.84, "mcap": "$0.31T", "pe": 22.66, "eps": 3.17, "note": "동영상 시간점유 경쟁"}], "scenarios": [{"name": "Bear Case", "eps": 11.8, "per": 22, "prob": 20, "drivers": "검색 성장 둔화, AI 검색 전환 리스크, Cloud 마진 둔화, 반독점·Apple 기본검색 계약 불확실성", "tone": "부정", "target": 259.6}, {"name": "Base Case", "eps": 14.22, "per": 28, "prob": 55, "drivers": "Search와 YouTube 안정 성장, Cloud 영업이익률 개선, Gemini/Vertex AI의 점진적 수익화", "tone": "중립~긍정", "target": 398.16}, {"name": "Bull Case", "eps": 16.8, "per": 30, "prob": 25, "drivers": "AI Mode/Overviews가 검색 사용량을 확대하고, TPU·Cloud 수요가 EPS 상향을 견인", "tone": "긍정", "target": 504.0}], "institutions": [{"firm": "JPMorgan", "date": "2026-04-30", "rating": "Overweight / Top Pick", "target": 460, "eps": "2027E GAAP EPS $14.31", "method": "2027E EPS × 32x", "logic": "Search +19%, Cloud +63%, full-stack AI가 EPS 가시성을 높였다는 논리", "ai": "낙관", "reg": "언급/모니터링", "fcf": "CAPEX는 높지만 성장으로 흡수 가능", "src": "Investing.com / JPMorgan 요약"}, {"firm": "Goldman Sachs", "date": "2026-05-21", "rating": "Buy", "target": 450, "eps": "공개 요약 제한", "method": "실적·AI 모멘텀 기반 목표가", "logic": "Cloud 성장과 AI 제품군이 검색·클라우드 방어력을 높인다는 관점", "ai": "낙관", "reg": "중립", "fcf": "확인 필요", "src": "Yahoo Finance 보도 요약"}, {"firm": "Piper Sandler", "date": "2026-06-01", "rating": "Overweight", "target": 445, "eps": "공개 요약 제한", "method": "AI Overview/Mode citation 데이터와 검색 사용량 분석", "logic": "AI 검색 제품의 citation/share 증가가 검색 참여도 개선으로 연결될 수 있다는 논리", "ai": "낙관", "reg": "중립", "fcf": "CAPEX 부담 관찰", "src": "TheStreet"}, {"firm": "UBS", "date": "2026-04-30", "rating": "Neutral", "target": 410, "eps": "공개 표 제한", "method": "리스크 조정 목표가", "logic": "AI 광고·Cloud 모멘텀은 인정하나 이미 반영된 주가와 규제 리스크를 반영", "ai": "중립~긍정", "reg": "중요", "fcf": "CAPEX 부담 경계", "src": "UBS 공개 목표가 표"}, {"firm": "Mizuho", "date": "2026-05-09", "rating": "Outperform", "target": 460, "eps": "공개 요약 제한", "method": "실적 이후 리레이팅", "logic": "Q1 이후 Cloud·AI 모멘텀을 반영한 상향", "ai": "낙관", "reg": "중립", "fcf": "확인 필요", "src": "TIKR/보도 요약"}, {"firm": "Citizens JMP", "date": "2026-05-09", "rating": "Market Outperform", "target": 515, "eps": "공개 요약 제한", "method": "Street-high 목표가", "logic": "AI 수익화·Cloud 가속·Waymo 옵션 가치까지 반영한 낙관론", "ai": "강한 낙관", "reg": "중립", "fcf": "확인 필요", "src": "TIKR/보도 요약"}, {"firm": "MarketBeat Consensus", "date": "2026-06-25", "rating": "Moderate Buy", "target": 413.13, "eps": "컨센서스 세부 EPS 별도 확인 필요", "method": "54개 애널리스트 평균", "logic": "49 Buy, 5 Hold, 평균 목표가 $413.13", "ai": "혼합", "reg": "반영", "fcf": "혼합", "src": "MarketBeat"}, {"firm": "ValueInvesting.io Consensus", "date": "2026-06-25", "rating": "Buy", "target": 424.53, "eps": "FY1 $14.22 / FY2 $14.64", "method": "70개 애널리스트 평균 목표가", "logic": "평균 $424.53, median $433.50, high $540.75", "ai": "혼합", "reg": "혼합", "fcf": "혼합", "src": "ValueInvesting.io"}], "risks": [{"risk": "검색 광고 성장 둔화", "prob": "중", "impact": "상", "eps": "Search 성장률 5%p 하락 시 EPS 컨센서스 하향", "watch": "Search & Other 성장률, CPC/paid clicks, AI Mode monetization"}, {"risk": "AI 검색 경쟁 심화", "prob": "중", "impact": "상", "eps": "쿼리 점유율과 광고 클릭 전환율 약화", "watch": "StatCounter, ChatGPT/Perplexity 사용량, Safari 기본검색 뉴스"}, {"risk": "반독점·구조적 제재", "prob": "중", "impact": "상", "eps": "TAC·검색 유통·Chrome/Android 관련 밸류에이션 할인", "watch": "DOJ remedies, EU DMA, 앱스토어 수수료 판결"}, {"risk": "AI CAPEX 과잉", "prob": "중", "impact": "중~상", "eps": "감가상각비와 FCF yield 악화", "watch": "CAPEX 가이던스, FCF, 데이터센터 전력/서버 공급"}, {"risk": "Google Cloud 성장률 둔화", "prob": "중", "impact": "중~상", "eps": "Cloud operating margin 개선 속도 둔화", "watch": "Cloud backlog, AI infra 수주, Vertex AI 고객 수"}, {"risk": "YouTube 광고 경쟁", "prob": "중", "impact": "중", "eps": "Shorts/CTV monetization 지연", "watch": "YouTube Ads 성장률, Premium 가입자, TikTok/Meta Reels 광고 가격"}, {"risk": "SBC·희석·자사주 축소", "prob": "중", "impact": "중", "eps": "주식수 감소 효과 약화", "watch": "SBC, diluted shares, buyback 규모"}, {"risk": "환율·금리", "prob": "중", "impact": "중", "eps": "해외 매출 환산, PER 할인율 변화", "watch": "DXY, USD/KRW, 미국 10년물"}], "sensitivity_per": [15, 18, 21, 24, 27, 30], "sensitivity": [{"label": "-20%", "eps": 11.38, "targets": [170.6, 204.8, 238.9, 273.0, 307.2, 341.3]}, {"label": "-10%", "eps": 12.8, "targets": [192.0, 230.4, 268.8, 307.2, 345.5, 383.9]}, {"label": "+0%", "eps": 14.22, "targets": [213.3, 256.0, 298.6, 341.3, 383.9, 426.6]}, {"label": "+10%", "eps": 15.64, "targets": [234.6, 281.6, 328.5, 375.4, 422.3, 469.3]}, {"label": "+20%", "eps": 17.06, "targets": [256.0, 307.2, 358.3, 409.5, 460.7, 511.9]}], "sources": [{"id": "S1", "name": "웹 금융 가격 데이터", "detail": "GOOGL 현재가 $345.29, 시총 약 $4.18T, TTM EPS $13.11, PE 26.34. 기준: 2026-06-25 11:57 UTC.", "url": "web.run finance GOOGL"}, {"id": "S2", "name": "Alphabet Q1 2026 실적 발표 / SEC EX-99.1", "detail": "Q1 2026 매출 $109.896B, 영업이익 $39.696B, EPS $5.11, Search $60.399B, YouTube Ads $9.883B, Cloud $20.028B.", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000043/googexhibit991q12026.htm"}, {"id": "S3", "name": "Alphabet FY2025/Q4 2025 실적 발표 / SEC EX-99.1", "detail": "FY2025 매출 $402.836B, 영업이익 $129.039B, 순이익 $132.170B, EPS $10.81, YouTube 연간 매출 $60B+.", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000012/googexhibit991q42025.htm"}, {"id": "S4", "name": "Alphabet 2025 Form 10-K", "detail": "사업부·TAC·자사주·현금성 자산·주식 종류·리스크 팩터 기준.", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm"}, {"id": "S5", "name": "StatCounter Global Search Engine Share", "detail": "2026년 5월 Google 세계 검색 점유율 약 90.39%, Bing 약 5.03%.", "url": "https://gs.statcounter.com/search-engine-market-share"}, {"id": "S6", "name": "Reuters / eMarketer digital ad forecast", "detail": "2026년 Meta $243.46B, Google $239.54B 순광고매출 전망. Google+Meta+Amazon 62.3% 전망.", "url": "https://www.reuters.com/business/media-telecom/meta-poised-surpass-google-digital-ad-revenue-first-time-report-says-2026-04-13/"}, {"id": "S7", "name": "Reuters Q1 2026 Alphabet earnings", "detail": "Cloud +63%, TPU 직접 판매, CAPEX $180B~$190B 전망, backlog $460B 언급.", "url": "https://www.reuters.com/business/alphabets-cloud-unit-beats-quarterly-revenue-estimates-strong-ai-demand-2026-04-29/"}, {"id": "S8", "name": "MarketBeat GOOGL analyst consensus", "detail": "54명 기준 Moderate Buy, 평균 목표가 $413.13, 고가 $515, 저가 $220.", "url": "https://www.marketbeat.com/stocks/NASDAQ/GOOGL/forecast/"}, {"id": "S9", "name": "ValueInvesting.io consensus estimates", "detail": "평균 목표가 $424.53, FY1 EPS $14.22, FY2 EPS $14.64, 70명 분석가 기준.", "url": "https://valueinvesting.io/GOOGL/estimates"}, {"id": "S10", "name": "StockAnalysis valuation", "detail": "Forward PE 27.63, PB 8.74, ROE 38.88%, 다음 실적 예상일 2026-07-22.", "url": "https://stockanalysis.com/stocks/googl/statistics/"}, {"id": "S11", "name": "DOJ Google remedies release", "detail": "검색·Chrome·Gemini 앱 배포 관련 독점 계약 제한 및 데이터·신디케이션 remedy 언급.", "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google"}, {"id": "S12", "name": "Wise USD/KRW", "detail": "2026-06-25 USD/KRW 약 1,543.75원 참고 환율.", "url": "https://wise.com/gb/currency-converter/usd-to-krw-rate/history"}]};
+    const DATA = {"price": 274.96, "market_cap_trn": 3.349, "current_eps_ttm": 19.15, "trailing_pe": 14.23, "forward_eps_fy1": 22.5, "forward_eps_fy2": 24.8, "forward_eps_fy3": 27.6, "forward_pe_implied": 12.2204, "avg_target": 389, "weighted_target": 345.15, "expected_return": 0.255274, "usdkrw": 1337.9, "krw_price": 367869, "pbr": 6.96, "roe": 38.88, "fcf_ttm": 64.429, "fcf_yield": 1.9238, "annual": [{"year": "2021", "revenue": 257.637, "op": 78.714, "net": 76.033, "eps": 5.61}, {"year": "2022", "revenue": 282.836, "op": 74.842, "net": 59.972, "eps": 4.56}, {"year": "2023", "revenue": 307.394, "op": 84.293, "net": 73.795, "eps": 5.8}, {"year": "2024", "revenue": 350.018, "op": 112.39, "net": 100.118, "eps": 8.04}, {"year": "2025", "revenue": 402.836, "op": 129.039, "net": 132.17, "eps": 10.81}], "quarters": [{"q": "Q2 24", "revenue": 84.742, "op": 27.425, "net": 23.619, "eps": 1.89}, {"q": "Q3 24", "revenue": 88.268, "op": 28.521, "net": 26.301, "eps": 2.12}, {"q": "Q4 24", "revenue": 96.469, "op": 30.972, "net": 26.536, "eps": 2.15}, {"q": "Q1 25", "revenue": 90.234, "op": 30.606, "net": 34.54, "eps": 2.81}, {"q": "Q2 25", "revenue": 96.428, "op": 31.271, "net": 28.196, "eps": 2.31}, {"q": "Q3 25", "revenue": 102.346, "op": 31.228, "net": 34.979, "eps": 2.87}, {"q": "Q4 25", "revenue": 113.828, "op": 35.934, "net": 34.455, "eps": 2.82}, {"q": "Q1 26", "revenue": 109.896, "op": 39.696, "net": 62.578, "eps": 5.11}], "segments": [{"name": "Google Search & Other", "value": 60.399, "status": "긍정", "growth": "+19% YoY", "eps": "최대 EPS 엔진", "note": "AI Mode·AI Overviews가 사용량 확대 요인이나 광고 형식 전환 리스크 병존"}, {"name": "YouTube Ads", "value": 9.883, "status": "긍정", "growth": "+11% YoY", "eps": "광고+구독 복합", "note": "Shorts·CTV·Premium이 성장축, TikTok/Netflix와 시간 점유 경쟁"}, {"name": "Subscriptions / Platforms / Devices", "value": 12.384, "status": "긍정", "growth": "+19% YoY", "eps": "반복매출 확대", "note": "YouTube Premium, Music, Google One, AI 요금제가 ARPU 방어"}, {"name": "Google Cloud", "value": 20.028, "status": "강한 긍정", "growth": "+63% YoY", "eps": "마진 상향 핵심", "note": "GCP·AI 인프라·Vertex AI·Workspace가 Cloud 영업이익률 개선을 견인"}, {"name": "Google Network", "value": 6.971, "status": "중립~부정", "growth": "-3.9% YoY", "eps": "TAC/네트워크 믹스", "note": "AdSense 약세와 프라이버시 변화 영향"}, {"name": "Waymo / Other Bets", "value": 0.411, "status": "옵션 가치", "growth": "매출 소규모", "eps": "단기 손실", "note": "완전자율주행 rides 확장. 단기 EPS에는 손실 확대 리스크"}], "peer_data": [{"name": "Alphabet", "ticker": "GOOGL", "price": 274.96, "mcap": "$3.35T", "pe": 14.23, "eps": 19.15, "note": "Search+Cloud+AI full-stack, 고점 대비 -32%"}, {"name": "Microsoft", "ticker": "MSFT", "price": 365.46, "mcap": "$2.72T", "pe": 21.75, "eps": 16.8, "note": "Azure/Office/AI Copilot"}, {"name": "Meta", "ticker": "META", "price": 557.67, "mcap": "$1.43T", "pe": 20.28, "eps": 27.5, "note": "AI 광고 자동화/Reels"}, {"name": "Amazon", "ticker": "AMZN", "price": 234.27, "mcap": "$2.55T", "pe": 28.02, "eps": 8.36, "note": "AWS+Retail+Ads"}, {"name": "Apple", "ticker": "AAPL", "price": 293.08, "mcap": "$4.32T", "pe": 35.48, "eps": 8.26, "note": "기기 생태계/서비스"}, {"name": "Nvidia", "ticker": "NVDA", "price": 149.17, "mcap": "$3.61T", "pe": 16.04, "eps": 9.31, "note": "AI GPU/플랫폼, 10월 고점 대비 약 -38%"}, {"name": "Netflix", "ticker": "NFLX", "price": 71.84, "mcap": "$0.31T", "pe": 22.66, "eps": 3.17, "note": "동영상 시간점유 경쟁"}], "scenarios": [{"name": "Bear Case", "eps": 19.2, "per": 12, "prob": 25, "drivers": "AI 버블 조정이 실적으로 전이돼 검색 광고 성장이 한 자릿수로 둔화. 반독점 remedy·Apple 기본검색 계약 재협상에 금리 재상승까지 겹쳐 멀티플 12배 압축", "tone": "부정", "target": 230.4}, {"name": "Base Case", "eps": 22.5, "per": 16, "prob": 50, "drivers": "Search·YouTube 완만한 성장과 Cloud 두 자릿수 성장·마진 개선으로 EPS 방어. 금리 재상승을 감안해 5년 평균 대비 할인된 16배 적용", "tone": "중립~긍정", "target": 360.0}, {"name": "Bull Case", "eps": 23.9, "per": 18, "prob": 25, "drivers": "AI Mode/Overviews가 검색 사용량·상업 쿼리를 확대하고 Cloud·TPU 수요가 서프라이즈. 목표가 컨센서스 $389를 상회하는 재평가", "tone": "긍정", "target": 430.2}], "institutions": [{"firm": "Consensus 1Y", "date": "2026-11-27", "rating": "Buy 중심", "target": 389, "eps": "TTM $19.15 / FY1 추정 $22.5 내외", "method": "1년 목표주가 컨센서스", "logic": "고점 대비 -32% 조정 이후에도 목표가 유지. 현재가 대비 +41%", "ai": "혼합", "reg": "반영", "fcf": "CAPEX 부담", "src": "시장 컨센서스(브리프)"}, {"firm": "JPMorgan", "date": "2026-04-30", "rating": "Overweight / Top Pick", "target": 460, "eps": "2027E GAAP EPS $14.31", "method": "2027E EPS × 32x", "logic": "Search +19%, Cloud +63%, full-stack AI가 EPS 가시성을 높였다는 논리", "ai": "낙관", "reg": "언급/모니터링", "fcf": "CAPEX는 높지만 성장으로 흡수 가능", "src": "Investing.com / JPMorgan 요약"}, {"firm": "Goldman Sachs", "date": "2026-05-21", "rating": "Buy", "target": 450, "eps": "공개 요약 제한", "method": "실적·AI 모멘텀 기반 목표가", "logic": "Cloud 성장과 AI 제품군이 검색·클라우드 방어력을 높인다는 관점", "ai": "낙관", "reg": "중립", "fcf": "확인 필요", "src": "Yahoo Finance 보도 요약"}, {"firm": "Piper Sandler", "date": "2026-06-01", "rating": "Overweight", "target": 445, "eps": "공개 요약 제한", "method": "AI Overview/Mode citation 데이터와 검색 사용량 분석", "logic": "AI 검색 제품의 citation/share 증가가 검색 참여도 개선으로 연결될 수 있다는 논리", "ai": "낙관", "reg": "중립", "fcf": "CAPEX 부담 관찰", "src": "TheStreet"}, {"firm": "UBS", "date": "2026-04-30", "rating": "Neutral", "target": 410, "eps": "공개 표 제한", "method": "리스크 조정 목표가", "logic": "AI 광고·Cloud 모멘텀은 인정하나 이미 반영된 주가와 규제 리스크를 반영", "ai": "중립~긍정", "reg": "중요", "fcf": "CAPEX 부담 경계", "src": "UBS 공개 목표가 표"}, {"firm": "Mizuho", "date": "2026-05-09", "rating": "Outperform", "target": 460, "eps": "공개 요약 제한", "method": "실적 이후 리레이팅", "logic": "Q1 이후 Cloud·AI 모멘텀을 반영한 상향", "ai": "낙관", "reg": "중립", "fcf": "확인 필요", "src": "TIKR/보도 요약"}, {"firm": "Citizens JMP", "date": "2026-05-09", "rating": "Market Outperform", "target": 515, "eps": "공개 요약 제한", "method": "Street-high 목표가", "logic": "AI 수익화·Cloud 가속·Waymo 옵션 가치까지 반영한 낙관론", "ai": "강한 낙관", "reg": "중립", "fcf": "확인 필요", "src": "TIKR/보도 요약"}, {"firm": "MarketBeat Consensus", "date": "2026-06-25 (조정 이전)", "rating": "Moderate Buy", "target": 413.13, "eps": "컨센서스 세부 EPS 별도 확인 필요", "method": "54개 애널리스트 평균", "logic": "49 Buy, 5 Hold, 평균 목표가 $413.13", "ai": "혼합", "reg": "반영", "fcf": "혼합", "src": "MarketBeat"}, {"firm": "ValueInvesting.io Consensus", "date": "2026-06-25 (조정 이전)", "rating": "Buy", "target": 424.53, "eps": "FY1 $14.22 / FY2 $14.64 (2026-06 기준)", "method": "70개 애널리스트 평균 목표가", "logic": "평균 $424.53, median $433.50, high $540.75", "ai": "혼합", "reg": "혼합", "fcf": "혼합", "src": "ValueInvesting.io"}], "risks": [{"risk": "금리 재긴축·멀티플 압축", "prob": "상", "impact": "상", "eps": "EPS가 유지돼도 할인율 상승으로 PER 12배 이하 압축 가능", "watch": "12/8~9 FOMC(25bp 확률 96~100%), 미 10년물 4.93%, 근원 PCE 3.3%"}, {"risk": "AI 버블 조정·수급 이탈", "prob": "상", "impact": "상", "eps": "지수 조정 시 개별 EPS와 무관하게 멀티플 동반 하락", "watch": "S&P500 고점 대비 -6.7%, VIX 23.81, 나스닥 AI 밸류체인 조정"}, {"risk": "검색 광고 성장 둔화", "prob": "중", "impact": "상", "eps": "Search 성장률 5%p 하락 시 EPS 컨센서스 하향", "watch": "Search & Other 성장률, CPC/paid clicks, AI Mode monetization"}, {"risk": "AI 검색 경쟁 심화", "prob": "중", "impact": "상", "eps": "쿼리 점유율과 광고 클릭 전환율 약화", "watch": "StatCounter, ChatGPT/Perplexity 사용량, Safari 기본검색 뉴스"}, {"risk": "반독점·구조적 제재", "prob": "중", "impact": "상", "eps": "TAC·검색 유통·Chrome/Android 관련 밸류에이션 할인", "watch": "DOJ remedies, EU DMA, 앱스토어 수수료 판결"}, {"risk": "AI CAPEX 과잉", "prob": "중", "impact": "중~상", "eps": "감가상각비와 FCF yield 악화", "watch": "CAPEX 가이던스, FCF, 데이터센터 전력/서버 공급"}, {"risk": "Google Cloud 성장률 둔화", "prob": "중", "impact": "중~상", "eps": "Cloud operating margin 개선 속도 둔화", "watch": "Cloud backlog, AI infra 수주, Vertex AI 고객 수"}, {"risk": "YouTube 광고 경쟁", "prob": "중", "impact": "중", "eps": "Shorts/CTV monetization 지연", "watch": "YouTube Ads 성장률, Premium 가입자, TikTok/Meta Reels 광고 가격"}, {"risk": "SBC·희석·자사주 축소", "prob": "중", "impact": "중", "eps": "주식수 감소 효과 약화", "watch": "SBC, diluted shares, buyback 규모"}, {"risk": "환율·금리", "prob": "중", "impact": "중", "eps": "해외 매출 환산, PER 할인율 변화", "watch": "DXY, USD/KRW, 미국 10년물"}], "sensitivity_per": [10, 12, 14, 16, 18, 20], "sensitivity": [{"label": "-20%", "eps": 18.0, "targets": [180.0, 216.0, 252.0, 288.0, 324.0, 360.0]}, {"label": "-10%", "eps": 20.25, "targets": [202.5, 243.0, 283.5, 324.0, 364.5, 405.0]}, {"label": "+0%", "eps": 22.5, "targets": [225.0, 270.0, 315.0, 360.0, 405.0, 450.0]}, {"label": "+10%", "eps": 24.75, "targets": [247.5, 297.0, 346.5, 396.0, 445.5, 495.0]}, {"label": "+20%", "eps": 27.0, "targets": [270.0, 324.0, 378.0, 432.0, 486.0, 540.0]}], "sources": [{"id": "S1", "name": "웹 금융 가격 데이터", "detail": "GOOGL 종가 $274.96(2026-11-27, +0.68%), 장중 270.03~279.58, 52주 260.69~404.47, 50일 265.40~354.97, 시총 $3.349T, TTM EPS $19.15, PER 14.23, 1년 목표 $389, 배당 $0.88(0.32%).", "url": "web.run finance GOOGL"}, {"id": "S2", "name": "Alphabet Q1 2026 실적 발표 / SEC EX-99.1", "detail": "Q1 2026 매출 $109.896B, 영업이익 $39.696B, EPS $5.11, Search $60.399B, YouTube Ads $9.883B, Cloud $20.028B.", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000043/googexhibit991q12026.htm"}, {"id": "S3", "name": "Alphabet FY2025/Q4 2025 실적 발표 / SEC EX-99.1", "detail": "FY2025 매출 $402.836B, 영업이익 $129.039B, 순이익 $132.170B, EPS $10.81, YouTube 연간 매출 $60B+.", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000012/googexhibit991q42025.htm"}, {"id": "S4", "name": "Alphabet 2025 Form 10-K", "detail": "사업부·TAC·자사주·현금성 자산·주식 종류·리스크 팩터 기준.", "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm"}, {"id": "S5", "name": "StatCounter Global Search Engine Share", "detail": "2026년 5월 Google 세계 검색 점유율 약 90.39%, Bing 약 5.03%.", "url": "https://gs.statcounter.com/search-engine-market-share"}, {"id": "S6", "name": "Reuters / eMarketer digital ad forecast", "detail": "2026년 Meta $243.46B, Google $239.54B 순광고매출 전망. Google+Meta+Amazon 62.3% 전망.", "url": "https://www.reuters.com/business/media-telecom/meta-poised-surpass-google-digital-ad-revenue-first-time-report-says-2026-04-13/"}, {"id": "S7", "name": "Reuters Q1 2026 Alphabet earnings", "detail": "Cloud +63%, TPU 직접 판매, CAPEX $180B~$190B 전망, backlog $460B 언급.", "url": "https://www.reuters.com/business/alphabets-cloud-unit-beats-quarterly-revenue-estimates-strong-ai-demand-2026-04-29/"}, {"id": "S8", "name": "MarketBeat GOOGL analyst consensus", "detail": "(2026-06-25 기준, 조정 이전) 54명 기준 Moderate Buy, 평균 목표가 $413.13, 고가 $515, 저가 $220.", "url": "https://www.marketbeat.com/stocks/NASDAQ/GOOGL/forecast/"}, {"id": "S9", "name": "ValueInvesting.io consensus estimates", "detail": "(2026-06-25 기준, 조정 이전) 평균 목표가 $424.53, FY1 EPS $14.22, FY2 EPS $14.64, 70명 분석가 기준.", "url": "https://valueinvesting.io/GOOGL/estimates"}, {"id": "S10", "name": "StockAnalysis valuation", "detail": "PB 8.74(2026-06 기준) → 주가 조정 반영 추정 6.96배, ROE 38.88%, 직전 실적 2026-10-28, 다음 실적 예상일 2027-02-03.", "url": "https://stockanalysis.com/stocks/googl/statistics/"}, {"id": "S11", "name": "DOJ Google remedies release", "detail": "검색·Chrome·Gemini 앱 배포 관련 독점 계약 제한 및 데이터·신디케이션 remedy 언급.", "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google"}, {"id": "S12", "name": "Wise USD/KRW", "detail": "2026-11-27 USD/KRW 1,337.9원(연중 저점 1,323.1 / 고점 1,555.8).", "url": "https://wise.com/gb/currency-converter/usd-to-krw-rate/history"}, {"id": "S13", "name": "공통 데이터 브리프 (2026-11-28)", "detail": "미 정책금리 3.75~4.00%, 12/8~9 FOMC 25bp 인상 확률 96~100%, 10년물 4.93%, 10월 CPI +0.4% MoM, 근원 PCE 3.3%, S&P500 10/6 사상최고 7,818.93 이후 최대 -11.6%, 원/달러 1,337.9원.", "url": "tmp/data_brief_2026-11-28.md"}, {"id": "S14", "name": "웹 금융 가격 데이터 (NVDA)", "detail": "NVDA 11/26~27 종가 $149.17~150.01, 시총 $3.605T, PER 16.04, EPS(TTM) 9.31, 52주 124.50~243.37, 10월 고점 대비 약 -38%.", "url": "web.run finance NVDA"}]};
     const COLORS = ['#4285f4', '#ea4335', '#fbbc05', '#34a853', '#22d3ee', '#a78bfa', '#fb923c', '#94a3b8'];
     const fmtUSD = v => '$' + Number(v).toLocaleString('en-US', {maximumFractionDigits: v >= 100 ? 0 : 2});
     const fmtB = v => '$' + Number(v).toLocaleString('en-US', {maximumFractionDigits: 1}) + 'B';
